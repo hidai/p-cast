@@ -8,7 +8,10 @@ export interface SearchResult {
 	artworkUrl600: string;
 }
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+function proxyUrl(target: string): string {
+	const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+	return `http://${host}:5174/?url=${encodeURIComponent(target)}`;
+}
 
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
@@ -18,7 +21,7 @@ export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 }
 
 export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, 'isDownloaded'>[]> {
-	const res = await fetch(`${CORS_PROXY}${encodeURIComponent(feedUrl)}`);
+	const res = await fetch(proxyUrl(feedUrl));
 	const text = await res.text();
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, 'text/xml');
@@ -107,7 +110,7 @@ export async function refreshPodcast(feedUrl: string): Promise<void> {
 }
 
 export async function downloadEpisode(episode: Episode): Promise<void> {
-	const res = await fetch(`${CORS_PROXY}${encodeURIComponent(episode.audioUrl)}`);
+	const res = await fetch(proxyUrl(episode.audioUrl));
 	const blob = await res.blob();
 	await db.audioFiles.put({ episodeGuid: episode.guid, audioBlob: blob });
 	await db.episodes.update(episode.guid, { isDownloaded: true });
