@@ -8,6 +8,10 @@ node_modules
 /.svelte-kit
 /build
 
+# IDE
+.vscode
+.claude
+
 # OS
 .DS_Store
 Thumbs.db
