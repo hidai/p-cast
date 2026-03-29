@@ -16,6 +16,7 @@ export interface Episode {
 	pubDate: number;
 	duration: number;
 	audioUrl: string;
+	coverUrl: string;
 	currentTime: number;
 	isCompleted: boolean;
 	isDownloaded: boolean;
@@ -34,6 +35,11 @@ class PcastDatabase extends Dexie {
 	constructor() {
 		super('pcast');
 		this.version(1).stores({
+			podcasts: 'feedUrl, subscribedAt',
+			episodes: 'guid, podcastFeedUrl, pubDate, isDownloaded',
+			audioFiles: 'episodeGuid',
+		});
+		this.version(2).stores({
 			podcasts: 'feedUrl, subscribedAt',
 			episodes: 'guid, podcastFeedUrl, pubDate, isDownloaded',
 			audioFiles: 'episodeGuid',

@@ -79,10 +79,11 @@
 	{:else}
 		<div class="space-y-1">
 			{#each episodes as episode (episode.guid)}
+				{@const imgUrl = episode.coverUrl || episode.podcast?.coverUrl}
 				<div class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition">
-					{#if episode.podcast?.coverUrl}
+					{#if imgUrl}
 						<img
-							src={episode.podcast.coverUrl}
+							src={imgUrl}
 							alt=""
 							class="w-12 h-12 rounded-lg object-cover shrink-0"
 						/>

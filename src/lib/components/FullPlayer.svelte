@@ -36,6 +36,7 @@
 
 	let coverUrl = $derived.by(async () => {
 		if (!player.currentEpisode) return '';
+		if (player.currentEpisode.coverUrl) return player.currentEpisode.coverUrl;
 		const podcast = await db.podcasts.get(player.currentEpisode.podcastFeedUrl);
 		return podcast?.coverUrl ?? '';
 	});

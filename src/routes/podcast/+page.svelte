@@ -97,7 +97,15 @@
 	{:else}
 		<div class="space-y-1">
 			{#each episodes as episode (episode.guid)}
+				{@const imgUrl = episode.coverUrl || coverUrl}
 				<div class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition">
+					{#if imgUrl}
+						<img
+							src={imgUrl}
+							alt=""
+							class="w-12 h-12 rounded-lg object-cover shrink-0"
+						/>
+					{/if}
 					<div class="flex-1 min-w-0">
 						<p class="text-sm font-medium {episode.isCompleted ? 'text-text-secondary' : ''}">
 							{episode.title}

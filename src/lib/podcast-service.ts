@@ -37,6 +37,14 @@ export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, 'isD
 		const enclosure = item.querySelector('enclosure');
 		const audioUrl = enclosure?.getAttribute('url') ?? '';
 
+		const coverUrl =
+			item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'image')[0]
+				?.getAttribute('href') ??
+			item.querySelector('image url')?.textContent ??
+			item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]
+				?.getAttribute('url') ??
+			'';
+
 		const durationStr =
 			item.querySelector('duration')?.textContent ??
 			item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration')[0]
@@ -53,6 +61,7 @@ export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, 'isD
 			pubDate,
 			duration,
 			audioUrl,
+			coverUrl,
 			currentTime: 0,
 			isCompleted: false,
 		});
