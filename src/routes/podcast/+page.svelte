@@ -1,7 +1,7 @@
 <script lang="ts">
 import { page } from "$app/state";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
-import { type Episode, db } from "$lib/db";
+import { type Episode, type EpisodeSortOrder, db } from "$lib/db";
 import {
 	type SearchResult,
 	downloadEpisode,
@@ -21,6 +21,8 @@ let episodes: Episode[] = $state([]);
 let isLoading = $state(true);
 let isToggling = $state(false);
 let downloadingGuids = $state(new Map<string, number>());
+let sortOrder: EpisodeSortOrder = $state("newest");
+let sortMenuOpen = $state(false);
 
 $effect(() => {
 	if (!feedUrl) return;
@@ -28,10 +30,19 @@ $effect(() => {
 	const sub = liveQuery(() => db.podcasts.get(feedUrl));
 	sub.subscribe((val) => {
 		isSubscribed = !!val;
+		if (val?.episodeSortOrder) {
+			sortOrder = val.episodeSortOrder;
+		}
 	});
 
 	loadEpisodes();
 });
+
+function sortEpisodes(eps: Episode[], order: EpisodeSortOrder): Episode[] {
+	return [...eps].sort((a, b) =>
+		order === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
+	);
+}
 
 async function loadEpisodes() {
 	isLoading = true;
@@ -43,15 +54,26 @@ async function loadEpisodes() {
 				await db.episodes.put({ ...ep, isDownloaded: false });
 			}
 		}
-		episodes = await db.episodes
+		const all = await db.episodes
 			.where("podcastFeedUrl")
 			.equals(feedUrl)
-			.reverse()
-			.sortBy("pubDate");
+			.toArray();
+		episodes = sortEpisodes(all, sortOrder);
 	} catch {
 		episodes = [];
 	}
 	isLoading = false;
+}
+
+async function changeSortOrder(order: EpisodeSortOrder) {
+	sortOrder = order;
+	sortMenuOpen = false;
+	episodes = sortEpisodes(episodes, order);
+	// Persist per-podcast preference
+	const podcast = await db.podcasts.get(feedUrl);
+	if (podcast) {
+		await db.podcasts.update(feedUrl, { episodeSortOrder: order });
+	}
 }
 
 async function toggleSubscribe() {
@@ -80,11 +102,11 @@ async function handleDownload(episode: Episode) {
 		await downloadEpisode(episode, (progress) => {
 			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
 		});
-		episodes = await db.episodes
+		const all = await db.episodes
 			.where("podcastFeedUrl")
 			.equals(feedUrl)
-			.reverse()
-			.sortBy("pubDate");
+			.toArray();
+		episodes = sortEpisodes(all, sortOrder);
 	} finally {
 		const next = new Map(downloadingGuids);
 		next.delete(episode.guid);
@@ -132,9 +154,73 @@ async function handleDownload(episode: Episode) {
 	</div>
 
 	<!-- Episodes -->
-	<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-		Episodes
-	</h2>
+	<div class="flex items-center justify-between mb-3">
+		<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+			Episodes{episodes.length > 0 ? ` (${episodes.length})` : ""}
+		</h2>
+		<div class="relative">
+			<button
+				class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-bg-card text-text-secondary hover:text-text-primary transition-colors"
+				onclick={() => (sortMenuOpen = !sortMenuOpen)}
+			>
+				<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M3 4h13M3 8h9M3 12h5m4 0l4-4m0 0l4 4m-4-4v12"
+					/>
+				</svg>
+				{sortOrder === "newest" ? "新しい順" : "古い順"}
+				<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
+				</svg>
+			</button>
+			{#if sortMenuOpen}
+				<!-- backdrop to close menu -->
+				<button
+					class="fixed inset-0 z-10"
+					onclick={() => (sortMenuOpen = false)}
+					aria-label="Close menu"
+				></button>
+				<div
+					class="absolute right-0 top-full mt-1 z-20 bg-bg-card border border-border rounded-lg shadow-lg py-1 min-w-[140px]"
+				>
+					{#each [
+						{ key: "newest", label: "新しい順" },
+						{ key: "oldest", label: "古い順" },
+					] as option (option.key)}
+						<button
+							class="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors {sortOrder ===
+							option.key
+								? 'text-accent'
+								: 'text-text-primary'}"
+							onclick={() => changeSortOrder(option.key as EpisodeSortOrder)}
+						>
+							{#if sortOrder === option.key}
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M5 13l4 4L19 7"
+									/>
+								</svg>
+							{:else}
+								<span class="w-4"></span>
+							{/if}
+							{option.label}
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	</div>
 
 	{#if isLoading}
 		<div class="flex items-center justify-center gap-2 text-text-secondary py-8">

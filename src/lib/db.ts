@@ -1,5 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
 
+export type EpisodeSortOrder = "newest" | "oldest";
+
 export interface Podcast {
 	feedUrl: string;
 	title: string;
@@ -7,6 +9,7 @@ export interface Podcast {
 	coverUrl: string;
 	description: string;
 	subscribedAt: number;
+	episodeSortOrder?: EpisodeSortOrder;
 }
 
 export interface Episode {
@@ -45,6 +48,11 @@ class PcastDatabase extends Dexie {
 			audioFiles: "episodeGuid",
 		});
 		this.version(3).stores({
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate",
+			audioFiles: "episodeGuid",
+		});
+		this.version(4).stores({
 			podcasts: "feedUrl, subscribedAt",
 			episodes: "guid, podcastFeedUrl, pubDate",
 			audioFiles: "episodeGuid",
