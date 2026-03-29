@@ -9,8 +9,7 @@ export interface SearchResult {
 }
 
 function proxyUrl(target: string): string {
-	const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-	return `http://${host}:5174/?url=${encodeURIComponent(target)}`;
+	return `/api/proxy?url=${encodeURIComponent(target)}`;
 }
 
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
@@ -119,7 +118,7 @@ export async function refreshPodcast(feedUrl: string): Promise<void> {
 }
 
 export async function downloadEpisode(episode: Episode): Promise<void> {
-	const res = await fetch(proxyUrl(episode.audioUrl));
+	const res = await fetch(episode.audioUrl);
 	const blob = await res.blob();
 	await db.audioFiles.put({ episodeGuid: episode.guid, audioBlob: blob });
 	await db.episodes.update(episode.guid, { isDownloaded: true });
