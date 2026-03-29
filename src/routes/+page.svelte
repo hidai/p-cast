@@ -1,8 +1,6 @@
 <script lang="ts">
-import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { type Episode, type Podcast, db } from "$lib/db";
-import { player } from "$lib/player.svelte";
-import { downloadEpisode, formatDuration, refreshPodcast } from "$lib/podcast-service";
+import { downloadEpisode, refreshPodcast } from "$lib/podcast-service";
 import { liveQuery } from "dexie";
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);

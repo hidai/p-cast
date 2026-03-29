@@ -1,5 +1,5 @@
-import adapter from "@sveltejs/adapter-vercel";
 import { relative, sep } from "node:path";
+import adapter from "@sveltejs/adapter-vercel";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {

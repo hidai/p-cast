@@ -1,4 +1,4 @@
-import { db, type Episode } from "./db";
+import { type Episode, db } from "./db";
 
 class PlayerState {
 	currentEpisode: Episode | null = $state(null);
@@ -17,10 +17,10 @@ class PlayerState {
 		if (typeof window !== "undefined") {
 			this.audio = new Audio();
 			this.audio.addEventListener("timeupdate", () => {
-				this.currentTime = this.audio!.currentTime;
+				this.currentTime = this.audio?.currentTime;
 			});
 			this.audio.addEventListener("loadedmetadata", () => {
-				this.duration = this.audio!.duration;
+				this.duration = this.audio?.duration;
 			});
 			this.audio.addEventListener("ended", () => {
 				this.isPlaying = false;

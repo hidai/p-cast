@@ -1,4 +1,4 @@
-import { db, type Episode, type Podcast } from "./db";
+import { type Episode, type Podcast, db } from "./db";
 
 export interface SearchResult {
 	feedUrl: string;

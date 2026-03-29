@@ -1,6 +1,5 @@
 <script lang="ts">
 import { page } from "$app/state";
-import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { type Episode, type EpisodeSortOrder, db } from "$lib/db";
 import {
 	type SearchResult,
@@ -54,10 +53,7 @@ async function loadEpisodes() {
 				await db.episodes.put({ ...ep, isDownloaded: false });
 			}
 		}
-		const all = await db.episodes
-			.where("podcastFeedUrl")
-			.equals(feedUrl)
-			.toArray();
+		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
 		episodes = sortEpisodes(all, sortOrder);
 	} catch {
 		episodes = [];
@@ -102,10 +98,7 @@ async function handleDownload(episode: Episode) {
 		await downloadEpisode(episode, (progress) => {
 			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
 		});
-		const all = await db.episodes
-			.where("podcastFeedUrl")
-			.equals(feedUrl)
-			.toArray();
+		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
 		episodes = sortEpisodes(all, sortOrder);
 	} finally {
 		const next = new Map(downloadingGuids);

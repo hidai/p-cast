@@ -1,5 +1,4 @@
 <script lang="ts">
-import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { type Episode, type Podcast, db } from "$lib/db";
 import { downloadEpisode } from "$lib/podcast-service";
 import { liveQuery } from "dexie";

@@ -1,6 +1,5 @@
 <script lang="ts">
-import { player } from "$lib/player.svelte";
-import { formatDuration } from "$lib/podcast-service";
+
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->

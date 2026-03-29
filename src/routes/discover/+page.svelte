@@ -1,6 +1,6 @@
 <script lang="ts">
-import { searchPodcasts, type SearchResult } from "$lib/podcast-service";
 import { goto } from "$app/navigation";
+import { type SearchResult, searchPodcasts } from "$lib/podcast-service";
 
 let query = $state("");
 let results: SearchResult[] = $state([]);

@@ -1,8 +1,5 @@
 <script lang="ts">
 import "../app.css";
-import BottomNav from "$lib/components/BottomNav.svelte";
-import MiniPlayer from "$lib/components/MiniPlayer.svelte";
-import FullPlayer from "$lib/components/FullPlayer.svelte";
 import { player } from "$lib/player.svelte";
 
 let { children } = $props();
