@@ -12,15 +12,15 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		},
 	});
 
+	// Read the full response body to avoid streaming truncation on serverless platforms
+	const body = await res.arrayBuffer();
+
 	const headers = new Headers();
 	const contentType = res.headers.get("Content-Type");
 	if (contentType) headers.set("Content-Type", contentType);
-	const contentLength = res.headers.get("Content-Length");
-	if (contentLength) headers.set("Content-Length", contentLength);
-	const acceptRanges = res.headers.get("Accept-Ranges");
-	if (acceptRanges) headers.set("Accept-Ranges", acceptRanges);
+	headers.set("Content-Length", String(body.byteLength));
 
-	return new Response(res.body, {
+	return new Response(body, {
 		status: res.status,
 		headers,
 	});
