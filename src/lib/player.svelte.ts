@@ -1,4 +1,4 @@
-import { type Episode, db } from "./db";
+import { db, type Episode } from "./db";
 
 class PlayerState {
 	currentEpisode: Episode | null = $state(null);

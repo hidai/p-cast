@@ -1,7 +1,7 @@
 <script lang="ts">
-import { type Episode, type Podcast, db } from "$lib/db";
-import { downloadEpisode } from "$lib/podcast-service";
 import { liveQuery } from "dexie";
+import { db, type Episode, type Podcast } from "$lib/db";
+import { downloadEpisode } from "$lib/podcast-service";
 
 type Tab = "subscribed" | "downloaded" | "history";
 

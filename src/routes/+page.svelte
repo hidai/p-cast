@@ -1,7 +1,7 @@
 <script lang="ts">
-import { type Episode, type Podcast, db } from "$lib/db";
-import { downloadEpisode, refreshPodcast } from "$lib/podcast-service";
 import { liveQuery } from "dexie";
+import { db, type Episode, type Podcast } from "$lib/db";
+import { downloadEpisode, refreshPodcast } from "$lib/podcast-service";
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);

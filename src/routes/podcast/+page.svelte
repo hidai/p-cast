@@ -1,14 +1,14 @@
 <script lang="ts">
+import { liveQuery } from "dexie";
 import { page } from "$app/state";
-import { type Episode, type EpisodeSortOrder, db } from "$lib/db";
+import { db, type Episode, type EpisodeSortOrder } from "$lib/db";
 import {
-	type SearchResult,
 	downloadEpisode,
 	fetchEpisodes,
+	type SearchResult,
 	subscribePodcast,
 	unsubscribePodcast,
 } from "$lib/podcast-service";
-import { liveQuery } from "dexie";
 
 const feedUrl = $derived(page.url.searchParams.get("feedUrl") ?? "");
 const title = $derived(page.url.searchParams.get("title") ?? "");
