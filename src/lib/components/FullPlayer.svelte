@@ -1,7 +1,7 @@
 <script lang="ts">
 import { db } from "$lib/db";
 import { player } from "$lib/player.svelte";
-import { deleteDownload, downloadEpisode } from "$lib/podcast-service";
+import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
 let isDownloading = $state(false);

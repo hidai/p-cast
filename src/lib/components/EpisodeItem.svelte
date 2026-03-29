@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { Episode, Podcast } from "$lib/db";
 import { player } from "$lib/player.svelte";
+import { formatDuration } from "$lib/podcast-service";
 
 let {
 	episode,

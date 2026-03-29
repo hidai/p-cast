@@ -1,6 +1,7 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
 import { page } from "$app/state";
+import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type EpisodeSortOrder } from "$lib/db";
 import {
 	downloadEpisode,
