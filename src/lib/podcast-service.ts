@@ -1,4 +1,4 @@
-import { db, type Episode, type Podcast } from './db';
+import { db, type Episode, type Podcast } from "./db";
 
 export interface SearchResult {
 	feedUrl: string;
@@ -19,36 +19,40 @@ export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	return data.results ?? [];
 }
 
-export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, 'isDownloaded'>[]> {
+export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isDownloaded">[]> {
 	const res = await fetch(proxyUrl(feedUrl));
 	const text = await res.text();
 	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, 'text/xml');
-	const items = doc.querySelectorAll('item');
+	const doc = parser.parseFromString(text, "text/xml");
+	const items = doc.querySelectorAll("item");
 
-	const episodes: Omit<Episode, 'isDownloaded'>[] = [];
+	const episodes: Omit<Episode, "isDownloaded">[] = [];
 	for (const item of items) {
 		const guid =
-			item.querySelector('guid')?.textContent ?? item.querySelector('enclosure')?.getAttribute('url') ?? '';
-		const title = item.querySelector('title')?.textContent ?? 'Untitled';
-		const pubDateStr = item.querySelector('pubDate')?.textContent ?? '';
+			item.querySelector("guid")?.textContent ??
+			item.querySelector("enclosure")?.getAttribute("url") ??
+			"";
+		const title = item.querySelector("title")?.textContent ?? "Untitled";
+		const pubDateStr = item.querySelector("pubDate")?.textContent ?? "";
 		const pubDate = pubDateStr ? new Date(pubDateStr).getTime() : 0;
-		const enclosure = item.querySelector('enclosure');
-		const audioUrl = enclosure?.getAttribute('url') ?? '';
+		const enclosure = item.querySelector("enclosure");
+		const audioUrl = enclosure?.getAttribute("url") ?? "";
 
 		const coverUrl =
-			item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'image')[0]
-				?.getAttribute('href') ??
-			item.querySelector('image url')?.textContent ??
-			item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]
-				?.getAttribute('url') ??
-			'';
+			item
+				.getElementsByTagNameNS("http://www.itunes.com/dtds/podcast-1.0.dtd", "image")[0]
+				?.getAttribute("href") ??
+			item.querySelector("image url")?.textContent ??
+			item
+				.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "thumbnail")[0]
+				?.getAttribute("url") ??
+			"";
 
 		const durationStr =
-			item.querySelector('duration')?.textContent ??
-			item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration')[0]
+			item.querySelector("duration")?.textContent ??
+			item.getElementsByTagNameNS("http://www.itunes.com/dtds/podcast-1.0.dtd", "duration")[0]
 				?.textContent ??
-			'0';
+			"0";
 		const duration = parseDuration(durationStr);
 
 		if (!audioUrl) continue;
@@ -74,7 +78,7 @@ function parseDuration(str: string): number {
 	// Pure seconds
 	if (/^\d+$/.test(str)) return Number.parseInt(str, 10);
 	// HH:MM:SS or MM:SS
-	const parts = str.split(':').map(Number);
+	const parts = str.split(":").map(Number);
 	if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
 	if (parts.length === 2) return parts[0] * 60 + parts[1];
 	return 0;
@@ -86,17 +90,17 @@ export async function subscribePodcast(result: SearchResult): Promise<void> {
 		title: result.trackName,
 		author: result.artistName,
 		coverUrl: result.artworkUrl600 || result.artworkUrl100,
-		description: '',
+		description: "",
 		subscribedAt: Date.now(),
 	};
 	await db.podcasts.put(podcast);
 }
 
 export async function unsubscribePodcast(feedUrl: string): Promise<void> {
-	const episodes = await db.episodes.where('podcastFeedUrl').equals(feedUrl).toArray();
+	const episodes = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
 	const guids = episodes.map((e) => e.guid);
 	await db.audioFiles.bulkDelete(guids);
-	await db.episodes.where('podcastFeedUrl').equals(feedUrl).delete();
+	await db.episodes.where("podcastFeedUrl").equals(feedUrl).delete();
 	await db.podcasts.delete(feedUrl);
 }
 
@@ -130,10 +134,10 @@ export async function deleteDownload(episodeGuid: string): Promise<void> {
 }
 
 export function formatDuration(seconds: number): string {
-	if (!seconds || seconds <= 0) return '0:00';
+	if (!seconds || seconds <= 0) return "0:00";
 	const h = Math.floor(seconds / 3600);
 	const m = Math.floor((seconds % 3600) / 60);
 	const s = Math.floor(seconds % 60);
-	if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-	return `${m}:${s.toString().padStart(2, '0')}`;
+	if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+	return `${m}:${s.toString().padStart(2, "0")}`;
 }

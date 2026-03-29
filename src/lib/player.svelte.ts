@@ -1,4 +1,4 @@
-import { db, type Episode } from './db';
+import { db, type Episode } from "./db";
 
 class PlayerState {
 	currentEpisode: Episode | null = $state(null);
@@ -14,15 +14,15 @@ class PlayerState {
 	private saveInterval: ReturnType<typeof setInterval> | null = null;
 
 	constructor() {
-		if (typeof window !== 'undefined') {
+		if (typeof window !== "undefined") {
 			this.audio = new Audio();
-			this.audio.addEventListener('timeupdate', () => {
+			this.audio.addEventListener("timeupdate", () => {
 				this.currentTime = this.audio!.currentTime;
 			});
-			this.audio.addEventListener('loadedmetadata', () => {
+			this.audio.addEventListener("loadedmetadata", () => {
 				this.duration = this.audio!.duration;
 			});
-			this.audio.addEventListener('ended', () => {
+			this.audio.addEventListener("ended", () => {
 				this.isPlaying = false;
 				if (this.currentEpisode) {
 					db.episodes.update(this.currentEpisode.guid, {
@@ -31,11 +31,11 @@ class PlayerState {
 					});
 				}
 			});
-			this.audio.addEventListener('pause', () => {
+			this.audio.addEventListener("pause", () => {
 				this.isPlaying = false;
 				this.updateMediaSession();
 			});
-			this.audio.addEventListener('play', () => {
+			this.audio.addEventListener("play", () => {
 				this.isPlaying = true;
 				this.updateMediaSession();
 			});
@@ -113,23 +113,23 @@ class PlayerState {
 	}
 
 	private setupMediaSession() {
-		if (!('mediaSession' in navigator) || !this.currentEpisode) return;
+		if (!("mediaSession" in navigator) || !this.currentEpisode) return;
 
 		navigator.mediaSession.metadata = new MediaMetadata({
 			title: this.currentEpisode.title,
-			artist: '',
-			album: 'Podcast',
+			artist: "",
+			album: "Podcast",
 		});
 
-		navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
-		navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
-		navigator.mediaSession.setActionHandler('seekbackward', () => this.skip(-10));
-		navigator.mediaSession.setActionHandler('seekforward', () => this.skip(10));
+		navigator.mediaSession.setActionHandler("play", () => this.togglePlay());
+		navigator.mediaSession.setActionHandler("pause", () => this.togglePlay());
+		navigator.mediaSession.setActionHandler("seekbackward", () => this.skip(-10));
+		navigator.mediaSession.setActionHandler("seekforward", () => this.skip(10));
 	}
 
 	private updateMediaSession() {
-		if (!('mediaSession' in navigator)) return;
-		navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+		if (!("mediaSession" in navigator)) return;
+		navigator.mediaSession.playbackState = this.isPlaying ? "playing" : "paused";
 	}
 }
 

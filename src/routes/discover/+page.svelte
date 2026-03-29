@@ -1,36 +1,36 @@
 <script lang="ts">
-	import { searchPodcasts, type SearchResult } from '$lib/podcast-service';
-	import { goto } from '$app/navigation';
+import { searchPodcasts, type SearchResult } from "$lib/podcast-service";
+import { goto } from "$app/navigation";
 
-	let query = $state('');
-	let results: SearchResult[] = $state([]);
-	let isSearching = $state(false);
+let query = $state("");
+let results: SearchResult[] = $state([]);
+let isSearching = $state(false);
 
-	async function handleSearch() {
-		const q = query.trim();
-		if (!q) return;
-		isSearching = true;
-		try {
-			results = await searchPodcasts(q);
-		} catch {
-			results = [];
-		}
-		isSearching = false;
+async function handleSearch() {
+	const q = query.trim();
+	if (!q) return;
+	isSearching = true;
+	try {
+		results = await searchPodcasts(q);
+	} catch {
+		results = [];
 	}
+	isSearching = false;
+}
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') handleSearch();
-	}
+function handleKeydown(e: KeyboardEvent) {
+	if (e.key === "Enter") handleSearch();
+}
 
-	function openPodcast(result: SearchResult) {
-		const params = new URLSearchParams({
-			feedUrl: result.feedUrl,
-			title: result.trackName,
-			author: result.artistName,
-			coverUrl: result.artworkUrl600 || result.artworkUrl100,
-		});
-		goto(`/podcast?${params.toString()}`);
-	}
+function openPodcast(result: SearchResult) {
+	const params = new URLSearchParams({
+		feedUrl: result.feedUrl,
+		title: result.trackName,
+		author: result.artistName,
+		coverUrl: result.artworkUrl600 || result.artworkUrl100,
+	});
+	goto(`/podcast?${params.toString()}`);
+}
 </script>
 
 <div class="px-4 pt-4">

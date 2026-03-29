@@ -1,51 +1,51 @@
 <script lang="ts">
-	import { player } from '$lib/player.svelte';
-	import { formatDuration, downloadEpisode, deleteDownload } from '$lib/podcast-service';
-	import { db } from '$lib/db';
+import { player } from "$lib/player.svelte";
+import { formatDuration, downloadEpisode, deleteDownload } from "$lib/podcast-service";
+import { db } from "$lib/db";
 
-	const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
-	let isDownloading = $state(false);
+const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
+let isDownloading = $state(false);
 
-	let touchStartY = 0;
+let touchStartY = 0;
 
-	function handleTouchStart(e: TouchEvent) {
-		touchStartY = e.touches[0].clientY;
+function handleTouchStart(e: TouchEvent) {
+	touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchEnd(e: TouchEvent) {
+	const diff = e.changedTouches[0].clientY - touchStartY;
+	if (diff > 100) {
+		player.isFullPlayer = false;
 	}
+}
 
-	function handleTouchEnd(e: TouchEvent) {
-		const diff = e.changedTouches[0].clientY - touchStartY;
-		if (diff > 100) {
-			player.isFullPlayer = false;
+function handleSeek(e: Event) {
+	const input = e.target as HTMLInputElement;
+	player.seek(Number(input.value));
+}
+
+async function toggleDownload() {
+	if (!player.currentEpisode) return;
+	isDownloading = true;
+	try {
+		if (player.currentEpisode.isDownloaded) {
+			await deleteDownload(player.currentEpisode.guid);
+			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
+		} else {
+			await downloadEpisode(player.currentEpisode);
+			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
 		}
+	} finally {
+		isDownloading = false;
 	}
+}
 
-	function handleSeek(e: Event) {
-		const input = e.target as HTMLInputElement;
-		player.seek(Number(input.value));
-	}
-
-	async function toggleDownload() {
-		if (!player.currentEpisode) return;
-		isDownloading = true;
-		try {
-			if (player.currentEpisode.isDownloaded) {
-				await deleteDownload(player.currentEpisode.guid);
-				player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
-			} else {
-				await downloadEpisode(player.currentEpisode);
-				player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
-			}
-		} finally {
-			isDownloading = false;
-		}
-	}
-
-	let coverUrl = $derived.by(async () => {
-		if (!player.currentEpisode) return '';
-		if (player.currentEpisode.coverUrl) return player.currentEpisode.coverUrl;
-		const podcast = await db.podcasts.get(player.currentEpisode.podcastFeedUrl);
-		return podcast?.coverUrl ?? '';
-	});
+let coverUrl = $derived.by(async () => {
+	if (!player.currentEpisode) return "";
+	if (player.currentEpisode.coverUrl) return player.currentEpisode.coverUrl;
+	const podcast = await db.podcasts.get(player.currentEpisode.podcastFeedUrl);
+	return podcast?.coverUrl ?? "";
+});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

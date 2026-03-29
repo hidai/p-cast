@@ -1,88 +1,107 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { db, type Episode } from '$lib/db';
-	import { subscribePodcast, unsubscribePodcast, fetchEpisodes, downloadEpisode, formatDuration, type SearchResult } from '$lib/podcast-service';
-	import { player } from '$lib/player.svelte';
-	import { liveQuery } from 'dexie';
+import { page } from "$app/state";
+import { db, type Episode } from "$lib/db";
+import {
+	subscribePodcast,
+	unsubscribePodcast,
+	fetchEpisodes,
+	downloadEpisode,
+	formatDuration,
+	type SearchResult,
+} from "$lib/podcast-service";
+import { player } from "$lib/player.svelte";
+import { liveQuery } from "dexie";
 
-	const feedUrl = $derived(page.url.searchParams.get('feedUrl') ?? '');
-	const title = $derived(page.url.searchParams.get('title') ?? '');
-	const author = $derived(page.url.searchParams.get('author') ?? '');
-	const coverUrl = $derived(page.url.searchParams.get('coverUrl') ?? '');
+const feedUrl = $derived(page.url.searchParams.get("feedUrl") ?? "");
+const title = $derived(page.url.searchParams.get("title") ?? "");
+const author = $derived(page.url.searchParams.get("author") ?? "");
+const coverUrl = $derived(page.url.searchParams.get("coverUrl") ?? "");
 
-	let isSubscribed = $state(false);
-	let episodes: Episode[] = $state([]);
-	let isLoading = $state(true);
-	let isToggling = $state(false);
-	let downloadingGuids = $state(new Set<string>());
+let isSubscribed = $state(false);
+let episodes: Episode[] = $state([]);
+let isLoading = $state(true);
+let isToggling = $state(false);
+let downloadingGuids = $state(new Set<string>());
 
-	$effect(() => {
-		if (!feedUrl) return;
+$effect(() => {
+	if (!feedUrl) return;
 
-		// Check subscription status
-		const sub = liveQuery(() => db.podcasts.get(feedUrl));
-		sub.subscribe((val) => {
-			isSubscribed = !!val;
-		});
-
-		// Load episodes
-		loadEpisodes();
+	// Check subscription status
+	const sub = liveQuery(() => db.podcasts.get(feedUrl));
+	sub.subscribe((val) => {
+		isSubscribed = !!val;
 	});
 
-	async function loadEpisodes() {
-		isLoading = true;
-		try {
-			const raw = await fetchEpisodes(feedUrl);
-			// Store in DB and load back
-			for (const ep of raw) {
-				const existing = await db.episodes.get(ep.guid);
-				if (!existing) {
-					await db.episodes.put({ ...ep, isDownloaded: false });
-				}
+	// Load episodes
+	loadEpisodes();
+});
+
+async function loadEpisodes() {
+	isLoading = true;
+	try {
+		const raw = await fetchEpisodes(feedUrl);
+		// Store in DB and load back
+		for (const ep of raw) {
+			const existing = await db.episodes.get(ep.guid);
+			if (!existing) {
+				await db.episodes.put({ ...ep, isDownloaded: false });
 			}
-			episodes = await db.episodes.where('podcastFeedUrl').equals(feedUrl).reverse().sortBy('pubDate');
-		} catch {
-			episodes = [];
 		}
-		isLoading = false;
+		episodes = await db.episodes
+			.where("podcastFeedUrl")
+			.equals(feedUrl)
+			.reverse()
+			.sortBy("pubDate");
+	} catch {
+		episodes = [];
 	}
+	isLoading = false;
+}
 
-	async function toggleSubscribe() {
-		isToggling = true;
-		try {
-			if (isSubscribed) {
-				await unsubscribePodcast(feedUrl);
-			} else {
-				const result: SearchResult = {
-					feedUrl,
-					trackName: title,
-					artistName: author,
-					artworkUrl100: coverUrl,
-					artworkUrl600: coverUrl,
-				};
-				await subscribePodcast(result);
-			}
-		} finally {
-			isToggling = false;
+async function toggleSubscribe() {
+	isToggling = true;
+	try {
+		if (isSubscribed) {
+			await unsubscribePodcast(feedUrl);
+		} else {
+			const result: SearchResult = {
+				feedUrl,
+				trackName: title,
+				artistName: author,
+				artworkUrl100: coverUrl,
+				artworkUrl600: coverUrl,
+			};
+			await subscribePodcast(result);
 		}
+	} finally {
+		isToggling = false;
 	}
+}
 
-	async function handleDownload(episode: Episode) {
-		downloadingGuids = new Set([...downloadingGuids, episode.guid]);
-		try {
-			await downloadEpisode(episode);
-			episodes = await db.episodes.where('podcastFeedUrl').equals(feedUrl).reverse().sortBy('pubDate');
-		} finally {
-			const next = new Set(downloadingGuids);
-			next.delete(episode.guid);
-			downloadingGuids = next;
-		}
+async function handleDownload(episode: Episode) {
+	downloadingGuids = new Set([...downloadingGuids, episode.guid]);
+	try {
+		await downloadEpisode(episode);
+		episodes = await db.episodes
+			.where("podcastFeedUrl")
+			.equals(feedUrl)
+			.reverse()
+			.sortBy("pubDate");
+	} finally {
+		const next = new Set(downloadingGuids);
+		next.delete(episode.guid);
+		downloadingGuids = next;
 	}
+}
 
-	function formatDate(ts: number): string {
-		if (!ts) return '';
-		return new Date(ts).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', year: 'numeric' });
-	}
+function formatDate(ts: number): string {
+	if (!ts) return "";
+	return new Date(ts).toLocaleDateString("ja-JP", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
 </script>
 
 <div class="px-4 pt-4">

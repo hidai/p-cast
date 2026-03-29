@@ -16,7 +16,7 @@
 		}
 	},
 	"files": {
-		"ignore": [".svelte-kit", "build", "node_modules"]
+		"ignore": [".svelte-kit", ".vercel", "build", "node_modules"]
 	},
 	"overrides": [
 		{

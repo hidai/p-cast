@@ -1,23 +1,23 @@
 <script lang="ts">
-	import '../app.css';
-	import BottomNav from '$lib/components/BottomNav.svelte';
-	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
-	import FullPlayer from '$lib/components/FullPlayer.svelte';
-	import { player } from '$lib/player.svelte';
+import "../app.css";
+import BottomNav from "$lib/components/BottomNav.svelte";
+import MiniPlayer from "$lib/components/MiniPlayer.svelte";
+import FullPlayer from "$lib/components/FullPlayer.svelte";
+import { player } from "$lib/player.svelte";
 
-	let { children } = $props();
+let { children } = $props();
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-		if (e.code === 'Space') {
-			e.preventDefault();
-			player.togglePlay();
-		} else if (e.key === 'j' || e.key === 'J') {
-			player.skip(-10);
-		} else if (e.key === 'l' || e.key === 'L') {
-			player.skip(10);
-		}
+function handleKeydown(e: KeyboardEvent) {
+	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+	if (e.code === "Space") {
+		e.preventDefault();
+		player.togglePlay();
+	} else if (e.key === "j" || e.key === "J") {
+		player.skip(-10);
+	} else if (e.key === "l" || e.key === "L") {
+		player.skip(10);
 	}
+}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />

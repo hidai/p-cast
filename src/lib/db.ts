@@ -1,4 +1,4 @@
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable } from "dexie";
 
 export interface Podcast {
 	feedUrl: string;
@@ -28,21 +28,21 @@ export interface AudioFile {
 }
 
 class PcastDatabase extends Dexie {
-	podcasts!: EntityTable<Podcast, 'feedUrl'>;
-	episodes!: EntityTable<Episode, 'guid'>;
-	audioFiles!: EntityTable<AudioFile, 'episodeGuid'>;
+	podcasts!: EntityTable<Podcast, "feedUrl">;
+	episodes!: EntityTable<Episode, "guid">;
+	audioFiles!: EntityTable<AudioFile, "episodeGuid">;
 
 	constructor() {
-		super('pcast');
+		super("pcast");
 		this.version(1).stores({
-			podcasts: 'feedUrl, subscribedAt',
-			episodes: 'guid, podcastFeedUrl, pubDate, isDownloaded',
-			audioFiles: 'episodeGuid',
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate, isDownloaded",
+			audioFiles: "episodeGuid",
 		});
 		this.version(2).stores({
-			podcasts: 'feedUrl, subscribedAt',
-			episodes: 'guid, podcastFeedUrl, pubDate, isDownloaded',
-			audioFiles: 'episodeGuid',
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate, isDownloaded",
+			audioFiles: "episodeGuid",
 		});
 	}
 }

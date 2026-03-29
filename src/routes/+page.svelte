@@ -1,58 +1,58 @@
 <script lang="ts">
-	import { db, type Episode, type Podcast } from '$lib/db';
-	import { liveQuery } from 'dexie';
-	import { player } from '$lib/player.svelte';
-	import { formatDuration, downloadEpisode, refreshPodcast } from '$lib/podcast-service';
+import { db, type Episode, type Podcast } from "$lib/db";
+import { liveQuery } from "dexie";
+import { player } from "$lib/player.svelte";
+import { formatDuration, downloadEpisode, refreshPodcast } from "$lib/podcast-service";
 
-	let episodes: (Episode & { podcast?: Podcast })[] = $state([]);
-	let showDownloadedOnly = $state(false);
-	let isRefreshing = $state(false);
-	let downloadingGuids = $state(new Set<string>());
+let episodes: (Episode & { podcast?: Podcast })[] = $state([]);
+let showDownloadedOnly = $state(false);
+let isRefreshing = $state(false);
+let downloadingGuids = $state(new Set<string>());
 
-	$effect(() => {
-		const filtered = showDownloadedOnly;
-		const sub = liveQuery(async () => {
-			const podcasts = await db.podcasts.toArray();
-			if (podcasts.length === 0) return [];
+$effect(() => {
+	const filtered = showDownloadedOnly;
+	const sub = liveQuery(async () => {
+		const podcasts = await db.podcasts.toArray();
+		if (podcasts.length === 0) return [];
 
-			let allEpisodes = await db.episodes.orderBy('pubDate').reverse().toArray();
-			if (filtered) {
-				allEpisodes = allEpisodes.filter((e) => e.isDownloaded);
-			}
+		let allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
+		if (filtered) {
+			allEpisodes = allEpisodes.filter((e) => e.isDownloaded);
+		}
 
-			const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
-			return allEpisodes
-				.filter((e) => podcastMap.has(e.podcastFeedUrl))
-				.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
-		}).subscribe((val) => {
-			episodes = val ?? [];
-		});
-
-		return () => sub.unsubscribe();
+		const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
+		return allEpisodes
+			.filter((e) => podcastMap.has(e.podcastFeedUrl))
+			.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
+	}).subscribe((val) => {
+		episodes = val ?? [];
 	});
 
-	async function handleRefresh() {
-		isRefreshing = true;
-		const podcasts = await db.podcasts.toArray();
-		await Promise.all(podcasts.map((p) => refreshPodcast(p.feedUrl).catch(() => {})));
-		isRefreshing = false;
-	}
+	return () => sub.unsubscribe();
+});
 
-	async function handleDownload(episode: Episode) {
-		downloadingGuids = new Set([...downloadingGuids, episode.guid]);
-		try {
-			await downloadEpisode(episode);
-		} finally {
-			const next = new Set(downloadingGuids);
-			next.delete(episode.guid);
-			downloadingGuids = next;
-		}
-	}
+async function handleRefresh() {
+	isRefreshing = true;
+	const podcasts = await db.podcasts.toArray();
+	await Promise.all(podcasts.map((p) => refreshPodcast(p.feedUrl).catch(() => {})));
+	isRefreshing = false;
+}
 
-	function formatDate(ts: number): string {
-		if (!ts) return '';
-		return new Date(ts).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+async function handleDownload(episode: Episode) {
+	downloadingGuids = new Set([...downloadingGuids, episode.guid]);
+	try {
+		await downloadEpisode(episode);
+	} finally {
+		const next = new Set(downloadingGuids);
+		next.delete(episode.guid);
+		downloadingGuids = next;
 	}
+}
+
+function formatDate(ts: number): string {
+	if (!ts) return "";
+	return new Date(ts).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
+}
 </script>
 
 <div class="px-4 pt-4">

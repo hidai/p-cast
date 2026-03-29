@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
+import { page } from "$app/state";
 </script>
 
 <nav class="flex items-center justify-around bg-bg-secondary border-t border-border py-2 pb-[env(safe-area-inset-bottom)]">
