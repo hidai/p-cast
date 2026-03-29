@@ -44,6 +44,11 @@ class PcastDatabase extends Dexie {
 			episodes: "guid, podcastFeedUrl, pubDate, isDownloaded",
 			audioFiles: "episodeGuid",
 		});
+		this.version(3).stores({
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate",
+			audioFiles: "episodeGuid",
+		});
 	}
 }
 
