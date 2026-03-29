@@ -8,25 +8,26 @@
 	let showDownloadedOnly = $state(false);
 	let isRefreshing = $state(false);
 
-	const query = liveQuery(async () => {
-		const podcasts = await db.podcasts.toArray();
-		if (podcasts.length === 0) return [];
+	$effect(() => {
+		const filtered = showDownloadedOnly;
+		const sub = liveQuery(async () => {
+			const podcasts = await db.podcasts.toArray();
+			if (podcasts.length === 0) return [];
 
-		let allEpisodes: Episode[];
-		if (showDownloadedOnly) {
-			allEpisodes = await db.episodes.where('isDownloaded').equals(1).reverse().sortBy('pubDate');
-		} else {
-			allEpisodes = await db.episodes.orderBy('pubDate').reverse().toArray();
-		}
+			let allEpisodes = await db.episodes.orderBy('pubDate').reverse().toArray();
+			if (filtered) {
+				allEpisodes = allEpisodes.filter((e) => e.isDownloaded);
+			}
 
-		const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
-		return allEpisodes
-			.filter((e) => podcastMap.has(e.podcastFeedUrl))
-			.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
-	});
+			const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
+			return allEpisodes
+				.filter((e) => podcastMap.has(e.podcastFeedUrl))
+				.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
+		}).subscribe((val) => {
+			episodes = val ?? [];
+		});
 
-	query.subscribe((val) => {
-		episodes = val ?? [];
+		return () => sub.unsubscribe();
 	});
 
 	async function handleRefresh() {
