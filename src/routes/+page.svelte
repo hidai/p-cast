@@ -7,7 +7,7 @@ import { formatDuration, downloadEpisode, refreshPodcast } from "$lib/podcast-se
 let episodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let showDownloadedOnly = $state(false);
 let isRefreshing = $state(false);
-let downloadingGuids = $state(new Set<string>());
+let downloadingGuids = $state(new Map<string, number>());
 
 $effect(() => {
 	const filtered = showDownloadedOnly;
@@ -39,11 +39,13 @@ async function handleRefresh() {
 }
 
 async function handleDownload(episode: Episode) {
-	downloadingGuids = new Set([...downloadingGuids, episode.guid]);
+	downloadingGuids = new Map([...downloadingGuids, [episode.guid, 0]]);
 	try {
-		await downloadEpisode(episode);
+		await downloadEpisode(episode, (progress) => {
+			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
+		});
 	} finally {
-		const next = new Set(downloadingGuids);
+		const next = new Map(downloadingGuids);
 		next.delete(episode.guid);
 		downloadingGuids = next;
 	}
@@ -128,9 +130,17 @@ function formatDate(ts: number): string {
 								title="Download"
 							>
 								{#if downloadingGuids.has(episode.guid)}
-									<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+									{@const pct = Math.round((downloadingGuids.get(episode.guid) ?? 0) * 100)}
+									<svg class="w-5 h-5" viewBox="0 0 24 24">
+										<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" class="opacity-25" />
+										<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"
+											stroke-dasharray={2 * Math.PI * 10}
+											stroke-dashoffset={2 * Math.PI * 10 * (1 - (downloadingGuids.get(episode.guid) ?? 0))}
+											stroke-linecap="round"
+											transform="rotate(-90 12 12)"
+											class="text-accent transition-[stroke-dashoffset] duration-300"
+										/>
+										<text x="12" y="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" font-size="7" class="text-accent">{pct}</text>
 									</svg>
 								{:else}
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

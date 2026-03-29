@@ -121,9 +121,37 @@ export async function refreshPodcast(feedUrl: string): Promise<void> {
 	}
 }
 
-export async function downloadEpisode(episode: Episode): Promise<void> {
-	const res = await fetch(episode.audioUrl);
-	const blob = await res.blob();
+export async function downloadEpisode(
+	episode: Episode,
+	onProgress?: (fraction: number) => void,
+): Promise<void> {
+	const res = await fetch(proxyUrl(episode.audioUrl));
+	if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+
+	const contentLength = Number(res.headers.get("Content-Length") || 0);
+	if (!contentLength || !res.body) {
+		// Fallback: no streaming progress
+		const blob = await res.blob();
+		await db.audioFiles.put({ episodeGuid: episode.guid, audioBlob: blob });
+		await db.episodes.update(episode.guid, { isDownloaded: true });
+		return;
+	}
+
+	const reader = res.body.getReader();
+	const chunks: BlobPart[] = [];
+	let received = 0;
+
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		chunks.push(value);
+		received += value.length;
+		onProgress?.(received / contentLength);
+	}
+
+	const blob = new Blob(chunks, {
+		type: res.headers.get("Content-Type") || "audio/mpeg",
+	});
 	await db.audioFiles.put({ episodeGuid: episode.guid, audioBlob: blob });
 	await db.episodes.update(episode.guid, { isDownloaded: true });
 }

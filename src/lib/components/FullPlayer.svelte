@@ -5,6 +5,7 @@ import { db } from "$lib/db";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
 let isDownloading = $state(false);
+let downloadProgress = $state(0);
 
 let touchStartY = 0;
 
@@ -32,7 +33,10 @@ async function toggleDownload() {
 			await deleteDownload(player.currentEpisode.guid);
 			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
 		} else {
-			await downloadEpisode(player.currentEpisode);
+			downloadProgress = 0;
+			await downloadEpisode(player.currentEpisode, (p) => {
+				downloadProgress = p;
+			});
 			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
 		}
 	} finally {
@@ -149,9 +153,17 @@ let coverUrl = $derived.by(async () => {
 				aria-label="Toggle download"
 			>
 				{#if isDownloading}
-					<svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+					{@const pct = Math.round(downloadProgress * 100)}
+					<svg class="w-6 h-6" viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" class="opacity-25" />
+						<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"
+							stroke-dasharray={2 * Math.PI * 10}
+							stroke-dashoffset={2 * Math.PI * 10 * (1 - downloadProgress)}
+							stroke-linecap="round"
+							transform="rotate(-90 12 12)"
+							class="text-accent transition-[stroke-dashoffset] duration-300"
+						/>
+						<text x="12" y="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" font-size="7" class="text-accent">{pct}</text>
 					</svg>
 				{:else}
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
