@@ -1,0 +1,67 @@
+# P-Cast
+
+A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, subscribe, download, and listen — all in the browser with IndexedDB storage.
+
+## Features
+
+- **Podcast search** — Find podcasts via iTunes Search API
+- **Subscribe & manage** — Save your favorite shows locally
+- **Offline playback** — Download episodes for listening without internet
+- **Resume playback** — Automatically saves your position and resumes where you left off
+- **Playback speed** — Adjustable speed (1.0x, 1.2x, 1.5x, 2.0x)
+- **Media controls** — Background playback with lock screen controls via Media Session API
+- **Keyboard shortcuts** — Space (play/pause), J (-10s), L (+10s)
+- **No account required** — All data stays on your device
+
+## Tech Stack
+
+- [SvelteKit 2](https://svelte.dev/) (SPA mode) + [Svelte 5](https://svelte.dev/) (runes)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [Dexie.js](https://dexie.org/) (IndexedDB wrapper)
+- [Vite PWA](https://vite-pwa-org.netlify.app/) for offline support
+- [Biome](https://biomejs.dev/) for linting & formatting
+- Deployed on [Vercel](https://vercel.com/)
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build |
+| `npm run check` | TypeScript type checking |
+| `npm run lint` | Lint with Biome |
+| `npm run format` | Format with Biome |
+
+## Architecture
+
+All data is stored in the browser via IndexedDB (Dexie). There is no backend database — the app runs entirely client-side. A server-side proxy route handles RSS feed fetching to avoid CORS restrictions.
+
+```
+src/
+├── lib/
+│   ├── db.ts              # Dexie database schema
+│   ├── podcast-service.ts # Search, subscribe, download, feed parsing
+│   └── player.svelte.ts   # Singleton player state (Svelte 5 runes)
+├── routes/
+│   ├── +layout.svelte     # App shell, mini player, bottom nav
+│   ├── +page.svelte       # Home — latest episodes
+│   ├── discover/          # Podcast search
+│   ├── library/           # Subscriptions, downloads, history
+│   ├── podcast/           # Podcast detail & episode list
+│   └── api/proxy/         # RSS feed CORS proxy
+└── app.css                # Tailwind theme (dark mode)
+```
+
+## License
+
+[MIT](LICENSE)
