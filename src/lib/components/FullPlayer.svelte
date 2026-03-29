@@ -4,6 +4,7 @@
 	import { db } from '$lib/db';
 
 	const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
+	let isDownloading = $state(false);
 
 	let touchStartY = 0;
 
@@ -25,12 +26,17 @@
 
 	async function toggleDownload() {
 		if (!player.currentEpisode) return;
-		if (player.currentEpisode.isDownloaded) {
-			await deleteDownload(player.currentEpisode.guid);
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
-		} else {
-			await downloadEpisode(player.currentEpisode);
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
+		isDownloading = true;
+		try {
+			if (player.currentEpisode.isDownloaded) {
+				await deleteDownload(player.currentEpisode.guid);
+				player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
+			} else {
+				await downloadEpisode(player.currentEpisode);
+				player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
+			}
+		} finally {
+			isDownloading = false;
 		}
 	}
 
@@ -137,13 +143,21 @@
 				{/each}
 			</div>
 			<button
-				class="p-2 rounded-full {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
+				class="p-2 rounded-full disabled:opacity-50 {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
 				onclick={toggleDownload}
+				disabled={isDownloading}
 				aria-label="Toggle download"
 			>
-				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-				</svg>
+				{#if isDownloading}
+					<svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+					</svg>
+				{:else}
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+					</svg>
+				{/if}
 			</button>
 		</div>
 	</div>

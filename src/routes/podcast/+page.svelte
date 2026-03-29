@@ -13,6 +13,8 @@
 	let isSubscribed = $state(false);
 	let episodes: Episode[] = $state([]);
 	let isLoading = $state(true);
+	let isToggling = $state(false);
+	let downloadingGuids = $state(new Set<string>());
 
 	$effect(() => {
 		if (!feedUrl) return;
@@ -46,23 +48,35 @@
 	}
 
 	async function toggleSubscribe() {
-		if (isSubscribed) {
-			await unsubscribePodcast(feedUrl);
-		} else {
-			const result: SearchResult = {
-				feedUrl,
-				trackName: title,
-				artistName: author,
-				artworkUrl100: coverUrl,
-				artworkUrl600: coverUrl,
-			};
-			await subscribePodcast(result);
+		isToggling = true;
+		try {
+			if (isSubscribed) {
+				await unsubscribePodcast(feedUrl);
+			} else {
+				const result: SearchResult = {
+					feedUrl,
+					trackName: title,
+					artistName: author,
+					artworkUrl100: coverUrl,
+					artworkUrl600: coverUrl,
+				};
+				await subscribePodcast(result);
+			}
+		} finally {
+			isToggling = false;
 		}
 	}
 
 	async function handleDownload(episode: Episode) {
-		await downloadEpisode(episode);
-		episodes = await db.episodes.where('podcastFeedUrl').equals(feedUrl).reverse().sortBy('pubDate');
+		downloadingGuids = new Set([...downloadingGuids, episode.guid]);
+		try {
+			await downloadEpisode(episode);
+			episodes = await db.episodes.where('podcastFeedUrl').equals(feedUrl).reverse().sortBy('pubDate');
+		} finally {
+			const next = new Set(downloadingGuids);
+			next.delete(episode.guid);
+			downloadingGuids = next;
+		}
 	}
 
 	function formatDate(ts: number): string {
@@ -81,9 +95,16 @@
 			<h1 class="text-lg font-bold leading-tight">{title}</h1>
 			<p class="text-sm text-text-secondary mt-1">{author}</p>
 			<button
-				class="mt-3 px-4 py-1.5 rounded-full text-sm font-medium {isSubscribed ? 'bg-bg-card text-text-secondary border border-border' : 'bg-accent text-white'}"
+				class="mt-3 px-4 py-1.5 rounded-full text-sm font-medium inline-flex items-center gap-1.5 disabled:opacity-50 {isSubscribed ? 'bg-bg-card text-text-secondary border border-border' : 'bg-accent text-white'}"
 				onclick={toggleSubscribe}
+				disabled={isToggling}
 			>
+				{#if isToggling}
+					<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+					</svg>
+				{/if}
 				{isSubscribed ? 'Unsubscribe' : 'Subscribe'}
 			</button>
 		</div>
@@ -93,7 +114,13 @@
 	<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">Episodes</h2>
 
 	{#if isLoading}
-		<p class="text-center text-text-secondary py-8">Loading episodes...</p>
+		<div class="flex items-center justify-center gap-2 text-text-secondary py-8">
+			<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+				<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+			</svg>
+			<span>Loading episodes...</span>
+		</div>
 	{:else}
 		<div class="space-y-1">
 			{#each episodes as episode (episode.guid)}
@@ -122,13 +149,21 @@
 					<div class="flex gap-1 shrink-0">
 						{#if !episode.isDownloaded}
 							<button
-								class="p-2 text-text-secondary hover:text-accent"
+								class="p-2 text-text-secondary hover:text-accent disabled:opacity-50"
 								onclick={() => handleDownload(episode)}
+								disabled={downloadingGuids.has(episode.guid)}
 								title="Download"
 							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-								</svg>
+								{#if downloadingGuids.has(episode.guid)}
+									<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+									</svg>
+								{:else}
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+									</svg>
+								{/if}
 							</button>
 						{/if}
 						<button

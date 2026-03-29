@@ -7,6 +7,7 @@
 	let episodes: (Episode & { podcast?: Podcast })[] = $state([]);
 	let showDownloadedOnly = $state(false);
 	let isRefreshing = $state(false);
+	let downloadingGuids = $state(new Set<string>());
 
 	$effect(() => {
 		const filtered = showDownloadedOnly;
@@ -38,7 +39,14 @@
 	}
 
 	async function handleDownload(episode: Episode) {
-		await downloadEpisode(episode);
+		downloadingGuids = new Set([...downloadingGuids, episode.guid]);
+		try {
+			await downloadEpisode(episode);
+		} finally {
+			const next = new Set(downloadingGuids);
+			next.delete(episode.guid);
+			downloadingGuids = next;
+		}
 	}
 
 	function formatDate(ts: number): string {
@@ -55,7 +63,17 @@
 			onclick={handleRefresh}
 			disabled={isRefreshing}
 		>
-			{isRefreshing ? 'Refreshing...' : 'Refresh'}
+			{#if isRefreshing}
+				<span class="inline-flex items-center gap-1.5">
+					<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+					</svg>
+					Refreshing...
+				</span>
+			{:else}
+				Refresh
+			{/if}
 		</button>
 	</div>
 
@@ -104,13 +122,21 @@
 					<div class="flex gap-1 shrink-0">
 						{#if !episode.isDownloaded}
 							<button
-								class="p-2 text-text-secondary hover:text-accent"
+								class="p-2 text-text-secondary hover:text-accent disabled:opacity-50"
 								onclick={() => handleDownload(episode)}
+								disabled={downloadingGuids.has(episode.guid)}
 								title="Download"
 							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-								</svg>
+								{#if downloadingGuids.has(episode.guid)}
+									<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+									</svg>
+								{:else}
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+									</svg>
+								{/if}
 							</button>
 						{/if}
 						<button
