@@ -2,6 +2,7 @@
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
@@ -41,12 +42,7 @@ function openPodcast() {
 }
 
 function formatDate(ts: number): string {
-	if (!ts) return "";
-	return new Date(ts).toLocaleDateString("ja-JP", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
+	return i18n.formatDate(ts, { year: "numeric", month: "short", day: "numeric" });
 }
 
 // Is this episode currently loaded in the player?
@@ -116,10 +112,10 @@ async function handleDeleteDownload() {
 				<p class="text-xs text-text-secondary mt-1">
 					{formatDate(episode.pubDate)}
 					{#if episode.duration > 0} · {formatDuration(episode.duration)}{/if}
-					{#if episode.isDownloaded}<span class="text-accent"> · Downloaded</span>{/if}
+					{#if episode.isDownloaded}<span class="text-accent"> · {i18n.t("episode.downloaded")}</span>{/if}
 					{#if episode.currentTime > 0 && !episode.isCompleted}
 						<span class="text-accent">
-							· {formatDuration(episode.currentTime)} played</span
+							· {formatDuration(episode.currentTime)} {i18n.t("episode.played")}</span
 						>
 					{/if}
 				</p>
@@ -135,7 +131,7 @@ async function handleDeleteDownload() {
 				{@html sanitizeHtml(episode.description)}
 			</div>
 		{:else}
-			<p class="text-sm text-text-secondary italic">説明文はありません</p>
+			<p class="text-sm text-text-secondary italic">{i18n.t("episode.noDescription")}</p>
 		{/if}
 	</div>
 
@@ -156,7 +152,7 @@ async function handleDeleteDownload() {
 					<rect x="14" y="6" width="3" height="12" rx="1" />
 					<rect x="19.5" y="9" width="3" height="6" rx="1" />
 				</svg>
-				再生中
+				{i18n.t("episode.nowPlaying")}
 			</button>
 		{:else}
 			<button
@@ -167,9 +163,9 @@ async function handleDeleteDownload() {
 					<path d="M8 5v14l11-7z" />
 				</svg>
 				{#if episode.currentTime > 0 && !episode.isCompleted}
-					再開
+					{i18n.t("episode.resume")}
 				{:else}
-					再生
+					{i18n.t("episode.play")}
 				{/if}
 			</button>
 		{/if}
@@ -187,7 +183,7 @@ async function handleDeleteDownload() {
 						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
 					/>
 				</svg>
-				削除
+				{i18n.t("episode.delete")}
 			</button>
 		{:else}
 			<button
@@ -240,7 +236,7 @@ async function handleDeleteDownload() {
 						/>
 					</svg>
 				{/if}
-				DL
+				{i18n.t("episode.download")}
 			</button>
 		{/if}
 	</div>

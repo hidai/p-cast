@@ -3,6 +3,7 @@ import { liveQuery } from "dexie";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { overlay, type PodcastMeta } from "$lib/overlay.svelte";
 import {
 	downloadEpisode,
@@ -162,7 +163,7 @@ async function handleDownload(episode: Episode) {
 							/>
 						</svg>
 					{/if}
-					{isSubscribed ? "Unsubscribe" : "Subscribe"}
+					{isSubscribed ? i18n.t("podcast.unsubscribe") : i18n.t("podcast.subscribe")}
 				</button>
 			</div>
 		</div>
@@ -179,7 +180,7 @@ async function handleDownload(episode: Episode) {
 					class="text-xs text-accent mt-1"
 					onclick={() => (descriptionExpanded = !descriptionExpanded)}
 				>
-					{descriptionExpanded ? "閉じる" : "もっと見る"}
+					{descriptionExpanded ? i18n.t("podcast.showLess") : i18n.t("podcast.showMore")}
 				</button>
 			</div>
 		{/if}
@@ -187,7 +188,7 @@ async function handleDownload(episode: Episode) {
 		<!-- Episodes header -->
 		<div class="flex items-center justify-between mb-3">
 			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider">
-				Episodes{episodes.length > 0 ? ` (${episodes.length})` : ""}
+				{i18n.t("podcast.episodes")}{episodes.length > 0 ? ` (${episodes.length})` : ""}
 			</h2>
 			<div class="relative">
 				<button
@@ -202,7 +203,7 @@ async function handleDownload(episode: Episode) {
 							d="M3 4h13M3 8h9M3 12h5m4 0l4-4m0 0l4 4m-4-4v12"
 						/>
 					</svg>
-					{sortOrder === "newest" ? "新しい順" : "古い順"}
+					{sortOrder === "newest" ? i18n.t("podcast.newestFirst") : i18n.t("podcast.oldestFirst")}
 					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -222,8 +223,8 @@ async function handleDownload(episode: Episode) {
 						class="absolute right-0 top-full mt-1 z-20 bg-bg-card border border-border rounded-lg shadow-lg py-1 min-w-[140px]"
 					>
 						{#each [
-							{ key: "newest", label: "新しい順" },
-							{ key: "oldest", label: "古い順" },
+							{ key: "newest", label: i18n.t("podcast.newestFirst") },
+							{ key: "oldest", label: i18n.t("podcast.oldestFirst") },
 						] as option (option.key)}
 							<button
 								class="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors {sortOrder ===
@@ -269,7 +270,7 @@ async function handleDownload(episode: Episode) {
 						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
 					/>
 				</svg>
-				<span>Loading episodes...</span>
+				<span>{i18n.t("podcast.loadingEpisodes")}</span>
 			</div>
 		{:else}
 			<div class="space-y-1">

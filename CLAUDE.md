@@ -52,5 +52,5 @@ Deployed to Vercel using `@sveltejs/adapter-vercel`. PWA support via `@vite-pwa/
 - Reactive DB queries: use `liveQuery` from Dexie, subscribed via `$effect` (not Svelte stores)
 - Dark theme with custom CSS variables defined in `src/app.css` using Tailwind `@theme`
 - Biome for linting and formatting (not ESLint/Prettier) — `useConst` rule is disabled in `.svelte` files (Svelte runes require `let`)
-- Date formatting uses `ja-JP` locale
+- i18n: All UI strings go through `i18n.t(key)` from `$lib/i18n`. Translations live in `src/lib/i18n/translations/{ja,en}.ts`. Add keys to `keys.ts`, then both translation files. Date formatting uses `i18n.formatDate()` instead of hardcoded locale.
 - SSR and prerendering are disabled globally in `+layout.ts` — this is a fully client-side SPA

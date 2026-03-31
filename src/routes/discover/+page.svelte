@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import {
 	fetchTopPodcasts,
@@ -103,12 +104,12 @@ async function openTopPodcast(podcast: TopPodcast) {
 </script>
 
 <div class="px-4 pt-4">
-	<h1 class="text-xl font-bold mb-4">Discover</h1>
+	<h1 class="text-xl font-bold mb-4">{i18n.t("discover.title")}</h1>
 
 	<div class="flex gap-2 mb-4">
 		<input
 			type="search"
-			placeholder="Search podcasts..."
+			placeholder={i18n.t("discover.searchPlaceholder")}
 			bind:value={query}
 			onkeydown={handleKeydown}
 			oninput={handleInput}
@@ -125,7 +126,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
 					</svg>
 				{:else}
-					Search
+					{i18n.t("discover.search")}
 				{/if}
 		</button>
 	</div>
@@ -133,7 +134,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 	{#if showTopPodcasts}
 		<div>
 			<h2 class="text-sm font-semibold uppercase tracking-wider text-text-secondary mb-3">
-				人気のポッドキャスト
+				{i18n.t("discover.popularPodcasts")}
 			</h2>
 			{#if isLoadingTop}
 				<div class="flex justify-center py-8">

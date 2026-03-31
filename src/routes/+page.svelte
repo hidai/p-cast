@@ -3,6 +3,7 @@ import { liveQuery } from "dexie";
 import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import {
@@ -136,7 +137,7 @@ async function handleDownload(episode: Episode) {
 
 <div class="px-4 pt-4">
 	<div class="flex items-center justify-between mb-4">
-		<h1 class="text-xl font-bold">Home</h1>
+		<h1 class="text-xl font-bold">{i18n.t("home.title")}</h1>
 		<button
 			class="text-sm text-accent disabled:opacity-50"
 			onclick={handleRefresh}
@@ -159,10 +160,10 @@ async function handleDownload(episode: Episode) {
 							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
 						/>
 					</svg>
-					Refreshing...
+					{i18n.t("home.refreshing")}
 				</span>
 			{:else}
-				Refresh
+				{i18n.t("home.refresh")}
 			{/if}
 		</button>
 	</div>
@@ -171,7 +172,7 @@ async function handleDownload(episode: Episode) {
 	{#if continueEpisodes.length > 0}
 		<section class="mb-6">
 			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-				Continue Listening
+				{i18n.t("home.continueListening")}
 			</h2>
 			<div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
 				{#each continueEpisodes as episode (episode.guid)}
@@ -232,7 +233,7 @@ async function handleDownload(episode: Episode) {
 	{#if nextUpEpisodes.length > 0}
 		<section class="mb-6">
 			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-				Next Up
+				{i18n.t("home.nextUp")}
 			</h2>
 			<div class="space-y-1">
 				{#each nextUpEpisodes as episode (episode.guid)}
@@ -255,7 +256,7 @@ async function handleDownload(episode: Episode) {
 	{#if latestEpisodes.length > 0}
 		<section class="mb-6">
 			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-				Latest Episodes
+				{i18n.t("home.latestEpisodes")}
 			</h2>
 			<div class="space-y-1">
 				{#each latestEpisodes as episode (episode.guid)}
@@ -289,8 +290,8 @@ async function handleDownload(episode: Episode) {
 					d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
 				/>
 			</svg>
-			<p>No episodes yet</p>
-			<p class="text-sm mt-1">Search and subscribe to podcasts in Discover</p>
+			<p>{i18n.t("home.emptyTitle")}</p>
+			<p class="text-sm mt-1">{i18n.t("home.emptySubtitle")}</p>
 		</div>
 	{/if}
 </div>

@@ -2,6 +2,7 @@
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import { db } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
@@ -80,7 +81,7 @@ $effect(() => {
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
 		</button>
-		<span class="text-sm text-text-secondary">Now Playing</span>
+		<span class="text-sm text-text-secondary">{i18n.t("player.nowPlaying")}</span>
 		<div class="w-6"></div>
 	</div>
 
@@ -109,7 +110,7 @@ $effect(() => {
 					}
 				}}
 			>
-				詳細
+				{i18n.t("player.details")}
 			</button>
 		</div>
 

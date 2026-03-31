@@ -2,6 +2,7 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { deleteDownload, downloadEpisode } from "$lib/podcast-service";
 
@@ -68,14 +69,14 @@ async function handleDownload(episode: Episode) {
 </script>
 
 <div class="px-4 pt-4">
-	<h1 class="text-xl font-bold mb-4">Library</h1>
+	<h1 class="text-xl font-bold mb-4">{i18n.t("library.title")}</h1>
 
 	<!-- Tab bar -->
 	<div class="flex gap-2 mb-4">
 		{#each [
-			{ key: "subscribed", label: "Subscribed" },
-			{ key: "downloaded", label: "Downloaded" },
-			{ key: "history", label: "History" },
+			{ key: "subscribed", label: i18n.t("library.subscribed") },
+			{ key: "downloaded", label: i18n.t("library.downloaded") },
+			{ key: "history", label: i18n.t("library.history") },
 		] as tab (tab.key)}
 			<button
 				class="px-3 py-1.5 text-sm rounded-full {activeTab === tab.key
@@ -92,8 +93,8 @@ async function handleDownload(episode: Episode) {
 	{#if activeTab === "subscribed"}
 		{#if podcasts.length === 0}
 			<div class="text-center text-text-secondary mt-16">
-				<p>No subscriptions yet</p>
-				<p class="text-sm mt-1">Discover and subscribe to podcasts</p>
+				<p>{i18n.t("library.noSubscriptions")}</p>
+				<p class="text-sm mt-1">{i18n.t("library.noSubscriptionsSub")}</p>
 			</div>
 		{:else}
 			<div class="grid grid-cols-3 gap-3">
@@ -140,8 +141,8 @@ async function handleDownload(episode: Episode) {
 	{#if activeTab === "downloaded"}
 		{#if downloadedEpisodes.length === 0}
 			<div class="text-center text-text-secondary mt-16">
-				<p>No downloaded episodes</p>
-				<p class="text-sm mt-1">Download episodes for offline listening</p>
+				<p>{i18n.t("library.noDownloads")}</p>
+				<p class="text-sm mt-1">{i18n.t("library.noDownloadsSub")}</p>
 			</div>
 		{:else}
 			<div class="space-y-1">
@@ -156,8 +157,8 @@ async function handleDownload(episode: Episode) {
 	{#if activeTab === "history"}
 		{#if historyEpisodes.length === 0}
 			<div class="text-center text-text-secondary mt-16">
-				<p>No listening history</p>
-				<p class="text-sm mt-1">Episodes you finish will appear here</p>
+				<p>{i18n.t("library.noHistory")}</p>
+				<p class="text-sm mt-1">{i18n.t("library.noHistorySub")}</p>
 			</div>
 		{:else}
 			<div class="space-y-1">

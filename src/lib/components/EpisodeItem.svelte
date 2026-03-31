@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Episode, Podcast } from "$lib/db";
+import { i18n } from "$lib/i18n";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
 
@@ -22,8 +23,7 @@ let {
 } = $props();
 
 function formatDate(ts: number): string {
-	if (!ts) return "";
-	return new Date(ts).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
+	return i18n.formatDate(ts, { month: "short", day: "numeric" });
 }
 
 const imgUrl = $derived(episode.coverUrl || podcast?.coverUrl);
@@ -54,9 +54,9 @@ function handlePlay() {
 			<p class="text-xs text-text-secondary">
 				{formatDate(episode.pubDate)}
 				{#if episode.duration > 0} · {formatDuration(episode.duration)}{/if}
-				{#if episode.isDownloaded}<span class="text-accent"> · Downloaded</span>{/if}
+				{#if episode.isDownloaded}<span class="text-accent"> · {i18n.t("episode.downloaded")}</span>{/if}
 				{#if episode.currentTime > 0 && !episode.isCompleted}
-					<span class="text-accent"> · {formatDuration(episode.currentTime)} played</span>
+					<span class="text-accent"> · {formatDuration(episode.currentTime)} {i18n.t("episode.played")}</span>
 				{/if}
 			</p>
 		</div>
