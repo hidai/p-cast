@@ -11,37 +11,88 @@ import {
 } from "$lib/podcast-service";
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
+let nextUpEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let isRefreshing = $state(false);
 let downloadingGuids = $state(new Map<string, number>());
 
-// Continue listening: in-progress episodes regardless of subscription
-$effect(() => {
-	const sub = liveQuery(async () => {
-		const allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
-		const inProgress = allEpisodes.filter((e) => !e.isCompleted && e.currentTime > 0);
-		const podcasts = await db.podcasts.toArray();
-		const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
-		return inProgress.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
-	}).subscribe((val) => {
-		continueEpisodes = val ?? [];
-	});
-	return () => sub.unsubscribe();
-});
-
-// Latest episodes: unread episodes from subscribed podcasts
+// All three sections computed from a single reactive query
 $effect(() => {
 	const sub = liveQuery(async () => {
 		const podcasts = await db.podcasts.toArray();
-		if (podcasts.length === 0) return [];
-
 		const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
 		const allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
-		return allEpisodes
-			.filter((e) => podcastMap.has(e.podcastFeedUrl) && !e.isCompleted)
-			.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
+
+		// 1. Continue Listening: in-progress episodes
+		const continueGuids = new Set<string>();
+		const continueList = allEpisodes
+			.filter((e) => !e.isCompleted && e.currentTime > 0)
+			.map((e) => {
+				continueGuids.add(e.guid);
+				return { ...e, podcast: podcastMap.get(e.podcastFeedUrl) };
+			});
+
+		// Group episodes by podcast for Next Up and Latest
+		const episodesByPodcast = new Map<string, Episode[]>();
+		for (const e of allEpisodes) {
+			if (!podcastMap.has(e.podcastFeedUrl)) continue;
+			let list = episodesByPodcast.get(e.podcastFeedUrl);
+			if (!list) {
+				list = [];
+				episodesByPodcast.set(e.podcastFeedUrl, list);
+			}
+			list.push(e);
+		}
+
+		// 2. Next Up: for each podcast, find the episode after the last played one
+		const nextUpGuids = new Set<string>();
+		const nextUpList: (Episode & { podcast?: Podcast })[] = [];
+		for (const [feedUrl, episodes] of episodesByPodcast) {
+			// Find the most recently played episode (highest lastPlayedAt)
+			let lastPlayed: Episode | null = null;
+			for (const e of episodes) {
+				if (e.lastPlayedAt && (!lastPlayed || e.lastPlayedAt > (lastPlayed.lastPlayedAt ?? 0))) {
+					lastPlayed = e;
+				}
+			}
+			if (!lastPlayed) continue; // Never played → skip, will appear in Latest
+
+			// Episodes are sorted by pubDate descending; find the one right after lastPlayed
+			// "right after" = smallest pubDate that is greater than lastPlayed's pubDate
+			let nextEp: Episode | null = null;
+			for (const e of episodes) {
+				if (e.pubDate > lastPlayed.pubDate) {
+					if (!nextEp || e.pubDate < nextEp.pubDate) {
+						nextEp = e;
+					}
+				}
+			}
+			if (nextEp && !continueGuids.has(nextEp.guid)) {
+				nextUpGuids.add(nextEp.guid);
+				nextUpList.push({ ...nextEp, podcast: podcastMap.get(feedUrl) });
+			}
+		}
+		nextUpList.sort((a, b) => b.pubDate - a.pubDate);
+
+		// 3. Latest Episodes: newest unread episode per podcast (excluding continue & next up)
+		const excludedGuids = new Set([...continueGuids, ...nextUpGuids]);
+		const latestList: (Episode & { podcast?: Podcast })[] = [];
+		for (const [feedUrl, episodes] of episodesByPodcast) {
+			// episodes are already sorted by pubDate descending
+			const newest = episodes.find((e) => !e.isCompleted && !excludedGuids.has(e.guid));
+			if (newest) {
+				latestList.push({ ...newest, podcast: podcastMap.get(feedUrl) });
+			}
+		}
+		latestList.sort((a, b) => b.pubDate - a.pubDate);
+
+		return { continueList, nextUpList, latestList };
 	}).subscribe((val) => {
-		latestEpisodes = val ?? [];
+		if (val) {
+			continueEpisodes = val.continueList;
+			nextUpEpisodes = val.nextUpList;
+			latestEpisodes = val.latestList;
+		}
 	});
 	return () => sub.unsubscribe();
 });
@@ -161,31 +212,34 @@ async function handleDownload(episode: Episode) {
 		</section>
 	{/if}
 
-	<!-- Latest Episodes -->
-	<section>
-		<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-			Latest Episodes
-		</h2>
-
-		{#if latestEpisodes.length === 0 && continueEpisodes.length === 0}
-			<div class="text-center text-text-secondary mt-16">
-				<svg
-					class="w-16 h-16 mx-auto mb-4"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1"
-						d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+	<!-- Next Up -->
+	{#if nextUpEpisodes.length > 0}
+		<section class="mb-6">
+			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+				Next Up
+			</h2>
+			<div class="space-y-1">
+				{#each nextUpEpisodes as episode (episode.guid)}
+					<EpisodeItem
+						{episode}
+						podcast={episode.podcast}
+						downloadingProgress={downloadingGuids.has(episode.guid)
+							? downloadingGuids.get(episode.guid) ?? 0
+							: null}
+						ondownload={handleDownload}
+						ondelete={(e) => deleteDownload(e.guid)}
 					/>
-				</svg>
-				<p>No episodes yet</p>
-				<p class="text-sm mt-1">Search and subscribe to podcasts in Discover</p>
+				{/each}
 			</div>
-		{:else}
+		</section>
+	{/if}
+
+	<!-- Latest Episodes -->
+	{#if latestEpisodes.length > 0}
+		<section class="mb-6">
+			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+				Latest Episodes
+			</h2>
 			<div class="space-y-1">
 				{#each latestEpisodes as episode (episode.guid)}
 					<EpisodeItem
@@ -199,6 +253,26 @@ async function handleDownload(episode: Episode) {
 					/>
 				{/each}
 			</div>
-		{/if}
-	</section>
+		</section>
+	{/if}
+
+	{#if continueEpisodes.length === 0 && nextUpEpisodes.length === 0 && latestEpisodes.length === 0}
+		<div class="text-center text-text-secondary mt-16">
+			<svg
+				class="w-16 h-16 mx-auto mb-4"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="1"
+					d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+				/>
+			</svg>
+			<p>No episodes yet</p>
+			<p class="text-sm mt-1">Search and subscribe to podcasts in Discover</p>
+		</div>
+	{/if}
 </div>

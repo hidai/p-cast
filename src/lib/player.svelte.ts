@@ -63,6 +63,9 @@ class PlayerState {
 
 		this.currentEpisode = episode;
 
+		// Record last played timestamp
+		db.episodes.update(episode.guid, { lastPlayedAt: Date.now() });
+
 		// Try offline audio first
 		if (episode.isDownloaded) {
 			const audioFile = await db.audioFiles.get(episode.guid);
