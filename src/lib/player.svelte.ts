@@ -6,7 +6,6 @@ class PlayerState {
 	currentTime = $state(0);
 	duration = $state(0);
 	playbackRate = $state(1.0);
-	isFullPlayer = $state(false);
 
 	progress = $derived(this.duration > 0 ? this.currentTime / this.duration : 0);
 

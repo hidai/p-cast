@@ -4,15 +4,14 @@ import { fade, fly } from "svelte/transition";
 import { goto } from "$app/navigation";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
+import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
 
 let {
 	episode,
-	onclose,
 }: {
 	episode: Episode;
-	onclose: () => void;
 } = $props();
 
 // Sheet top position in px (distance from viewport top)
@@ -106,7 +105,7 @@ function handleTouchEnd() {
 	const closeThreshold = window.innerHeight * 0.65;
 
 	if (sheetTop > closeThreshold) {
-		onclose();
+		overlay.closeAll();
 	} else if (sheetTop > halfY * 0.4) {
 		// Snap to 70% height
 		sheetTop = halfY;
@@ -137,7 +136,7 @@ function handleWheel(e: WheelEvent) {
 		const closeThreshold = window.innerHeight * 0.65;
 
 		if (sheetTop > closeThreshold) {
-			onclose();
+			overlay.closeAll();
 		} else if (sheetTop > halfY * 0.4) {
 			sheetTop = halfY;
 		} else {
@@ -147,7 +146,7 @@ function handleWheel(e: WheelEvent) {
 }
 
 function handleBackdropClick() {
-	onclose();
+	overlay.closeAll();
 }
 
 // Is this episode currently loaded in the player?
@@ -155,12 +154,11 @@ let isCurrentEpisode = $derived(player.currentEpisode?.guid === episode.guid);
 
 function handlePlay() {
 	player.play(episode);
-	onclose();
+	overlay.closeAll();
 }
 
 function handleGoToPlayer() {
-	onclose();
-	player.isFullPlayer = true;
+	overlay.openFullPlayer();
 }
 
 async function handleDownload() {

@@ -3,7 +3,7 @@ import { liveQuery } from "dexie";
 import { page } from "$app/state";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
-import { episodeDetail } from "$lib/episode-detail.svelte";
+import { overlay } from "$lib/overlay.svelte";
 import {
 	downloadEpisode,
 	fetchEpisodes,
@@ -293,7 +293,7 @@ async function handleDownload(episode: Episode) {
 						? downloadingGuids.get(episode.guid) ?? 0
 						: null}
 					ondownload={handleDownload}
-					ondetail={(e) => episodeDetail.open(e)}
+					ondetail={(e) => overlay.openEpisodeDetail(e)}
 				/>
 			{/each}
 		</div>

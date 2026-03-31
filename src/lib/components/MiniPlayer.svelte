@@ -1,4 +1,5 @@
 <script lang="ts">
+import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
 </script>
@@ -7,7 +8,7 @@ import { formatDuration } from "$lib/podcast-service";
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="flex items-center gap-3 bg-bg-secondary border-t border-border px-4 py-2 cursor-pointer"
-	onclick={() => (player.isFullPlayer = true)}
+	onclick={() => overlay.openFullPlayer()}
 >
 	<div class="flex-1 min-w-0">
 		<p class="text-sm font-medium truncate">{player.currentEpisode?.title}</p>

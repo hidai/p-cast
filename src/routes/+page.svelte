@@ -2,7 +2,7 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
-import { episodeDetail } from "$lib/episode-detail.svelte";
+import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import {
 	deleteDownload,
@@ -229,7 +229,7 @@ async function handleDownload(episode: Episode) {
 							: null}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
-						ondetail={(e) => episodeDetail.open(e)}
+						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>
 				{/each}
 			</div>
@@ -252,7 +252,7 @@ async function handleDownload(episode: Episode) {
 							: null}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
-						ondetail={(e) => episodeDetail.open(e)}
+						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>
 				{/each}
 			</div>

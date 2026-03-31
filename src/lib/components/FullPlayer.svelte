@@ -2,7 +2,7 @@
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import { db } from "$lib/db";
-import { episodeDetail } from "$lib/episode-detail.svelte";
+import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
 
@@ -19,7 +19,7 @@ function handleTouchStart(e: TouchEvent) {
 function handleTouchEnd(e: TouchEvent) {
 	const diff = e.changedTouches[0].clientY - touchStartY;
 	if (diff > 100) {
-		player.isFullPlayer = false;
+		overlay.closeAll();
 	}
 }
 
@@ -75,7 +75,7 @@ $effect(() => {
 >
 	<!-- Header -->
 	<div class="flex items-center justify-between px-4 py-3">
-		<button class="text-text-secondary" onclick={() => (player.isFullPlayer = false)} aria-label="Close player">
+		<button class="text-text-secondary" onclick={() => overlay.closeAll()} aria-label="Close player">
 			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
@@ -105,8 +105,7 @@ $effect(() => {
 				class="shrink-0 text-xs text-accent border border-accent/30 rounded-full px-2.5 py-1 hover:bg-accent/10 transition-colors"
 				onclick={() => {
 					if (player.currentEpisode) {
-						episodeDetail.open(player.currentEpisode);
-						player.isFullPlayer = false;
+						overlay.openEpisodeDetail(player.currentEpisode);
 					}
 				}}
 			>
