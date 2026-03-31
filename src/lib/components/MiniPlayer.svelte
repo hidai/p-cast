@@ -7,9 +7,16 @@ import { formatDuration } from "$lib/podcast-service";
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="flex items-center gap-3 bg-bg-secondary border-t border-border px-4 py-2 cursor-pointer"
+	class="flex items-center gap-3 bg-bg-card border-t border-border px-4 py-2 cursor-pointer shadow-[0_-2px_8px_rgba(0,0,0,0.3)]"
 	onclick={() => overlay.openFullPlayer()}
 >
+	{#if player.currentEpisode?.coverUrl}
+		<img
+			src={player.currentEpisode.coverUrl}
+			alt=""
+			class="shrink-0 w-10 h-10 rounded object-cover"
+		/>
+	{/if}
 	<div class="flex-1 min-w-0">
 		<p class="text-sm font-medium truncate">{player.currentEpisode?.title}</p>
 		<p class="text-xs text-text-secondary">{formatDuration(player.currentTime)}</p>
@@ -30,6 +37,6 @@ import { formatDuration } from "$lib/podcast-service";
 	</button>
 </div>
 <!-- Progress bar -->
-<div class="h-0.5 bg-border">
+<div class="h-1 bg-border">
 	<div class="h-full bg-accent transition-all" style="width: {player.progress * 100}%"></div>
 </div>

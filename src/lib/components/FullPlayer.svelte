@@ -122,7 +122,8 @@ $effect(() => {
 				max={player.duration || 0}
 				value={player.currentTime}
 				oninput={handleSeek}
-				class="w-full h-1 appearance-none bg-border rounded-full accent-accent"
+				class="seek-bar w-full h-1 appearance-none bg-border rounded-full accent-accent"
+				style="--seek-progress: {player.duration ? (player.currentTime / player.duration) * 100 : 0}%"
 			/>
 			<div class="flex justify-between text-xs text-text-secondary mt-1">
 				<span>{formatDuration(player.currentTime)}</span>
@@ -200,3 +201,46 @@ $effect(() => {
 		</div>
 	</div>
 </div>
+
+<style>
+	.seek-bar::-webkit-slider-runnable-track {
+		height: 4px;
+		border-radius: 9999px;
+		background: linear-gradient(
+			to right,
+			var(--color-accent) 0%,
+			var(--color-accent) var(--seek-progress),
+			var(--color-border) var(--seek-progress),
+			var(--color-border) 100%
+		);
+	}
+
+	.seek-bar::-moz-range-track {
+		height: 4px;
+		border-radius: 9999px;
+		background: var(--color-border);
+	}
+
+	.seek-bar::-moz-range-progress {
+		height: 4px;
+		border-radius: 9999px;
+		background: var(--color-accent);
+	}
+
+	.seek-bar::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: var(--color-accent);
+		margin-top: -5px;
+	}
+
+	.seek-bar::-moz-range-thumb {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: var(--color-accent);
+		border: none;
+	}
+</style>
