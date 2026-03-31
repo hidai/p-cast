@@ -3,7 +3,12 @@ import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { player } from "$lib/player.svelte";
-import { downloadEpisode, formatDuration, refreshPodcast } from "$lib/podcast-service";
+import {
+	deleteDownload,
+	downloadEpisode,
+	formatDuration,
+	refreshPodcast,
+} from "$lib/podcast-service";
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
@@ -190,6 +195,7 @@ async function handleDownload(episode: Episode) {
 							? downloadingGuids.get(episode.guid) ?? 0
 							: null}
 						ondownload={handleDownload}
+						ondelete={(e) => deleteDownload(e.guid)}
 					/>
 				{/each}
 			</div>
