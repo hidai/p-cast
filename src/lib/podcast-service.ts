@@ -12,6 +12,34 @@ function proxyUrl(target: string): string {
 	return `/api/proxy?url=${encodeURIComponent(target)}`;
 }
 
+export interface TopPodcast {
+	id: string;
+	name: string;
+	artistName: string;
+	artworkUrl100: string;
+}
+
+export async function fetchTopPodcasts(): Promise<TopPodcast[]> {
+	const url = "https://rss.applemarketingtools.com/api/v2/jp/podcasts/top/25/podcasts.json";
+	const res = await fetch(proxyUrl(url));
+	const data = await res.json();
+	return data.feed?.results ?? [];
+}
+
+export async function lookupPodcastById(id: string): Promise<SearchResult | null> {
+	const res = await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=podcast`);
+	const data = await res.json();
+	const result = data.results?.[0];
+	if (!result?.feedUrl) return null;
+	return {
+		feedUrl: result.feedUrl,
+		trackName: result.trackName ?? "",
+		artistName: result.artistName ?? "",
+		artworkUrl100: result.artworkUrl100 ?? "",
+		artworkUrl600: result.artworkUrl600 ?? "",
+	};
+}
+
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
 	const res = await fetch(url);
