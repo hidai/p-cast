@@ -27,8 +27,7 @@ let sortMenuOpen = $state(false);
 $effect(() => {
 	if (!feedUrl) return;
 
-	const sub = liveQuery(() => db.podcasts.get(feedUrl));
-	sub.subscribe((val) => {
+	const sub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((val) => {
 		isSubscribed = !!val;
 		if (val?.episodeSortOrder) {
 			sortOrder = val.episodeSortOrder;
@@ -36,6 +35,8 @@ $effect(() => {
 	});
 
 	loadEpisodes();
+
+	return () => sub.unsubscribe();
 });
 
 function sortEpisodes(eps: Episode[], order: EpisodeSortOrder): Episode[] {

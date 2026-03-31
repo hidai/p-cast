@@ -44,11 +44,21 @@ async function toggleDownload() {
 	}
 }
 
-let coverUrl = $derived.by(async () => {
-	if (!player.currentEpisode) return "";
-	if (player.currentEpisode.coverUrl) return player.currentEpisode.coverUrl;
-	const podcast = await db.podcasts.get(player.currentEpisode.podcastFeedUrl);
-	return podcast?.coverUrl ?? "";
+let coverUrl = $state("");
+
+$effect(() => {
+	const episode = player.currentEpisode;
+	if (!episode) {
+		coverUrl = "";
+		return;
+	}
+	if (episode.coverUrl) {
+		coverUrl = episode.coverUrl;
+		return;
+	}
+	db.podcasts.get(episode.podcastFeedUrl).then((podcast) => {
+		coverUrl = podcast?.coverUrl ?? "";
+	});
 });
 </script>
 
@@ -71,17 +81,15 @@ let coverUrl = $derived.by(async () => {
 
 	<!-- Artwork -->
 	<div class="flex-1 flex items-center justify-center px-8">
-		{#await coverUrl then url}
-			{#if url}
-				<img src={url} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover" />
-			{:else}
-				<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center">
-					<svg class="w-24 h-24 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
-					</svg>
-				</div>
-			{/if}
-		{/await}
+		{#if coverUrl}
+			<img src={coverUrl} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover" />
+		{:else}
+			<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center">
+				<svg class="w-24 h-24 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+				</svg>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Info & Controls -->

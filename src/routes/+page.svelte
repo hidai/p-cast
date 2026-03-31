@@ -2,6 +2,7 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { player } from "$lib/player.svelte";
 import { downloadEpisode, formatDuration, refreshPodcast } from "$lib/podcast-service";
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);

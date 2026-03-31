@@ -12,18 +12,23 @@ class PlayerState {
 
 	private audio: HTMLAudioElement | null = null;
 	private saveInterval: ReturnType<typeof setInterval> | null = null;
+	private blobUrl: string | null = null;
 
 	constructor() {
 		if (typeof window !== "undefined") {
 			this.audio = new Audio();
 			this.audio.addEventListener("timeupdate", () => {
-				this.currentTime = this.audio?.currentTime;
+				this.currentTime = this.audio?.currentTime ?? 0;
 			});
 			this.audio.addEventListener("loadedmetadata", () => {
-				this.duration = this.audio?.duration;
+				this.duration = this.audio?.duration ?? 0;
 			});
 			this.audio.addEventListener("ended", () => {
 				this.isPlaying = false;
+				if (this.saveInterval) {
+					clearInterval(this.saveInterval);
+					this.saveInterval = null;
+				}
 				if (this.currentEpisode) {
 					db.episodes.update(this.currentEpisode.guid, {
 						isCompleted: true,
@@ -50,14 +55,20 @@ class PlayerState {
 			await this.savePosition();
 		}
 
+		// Revoke previous blob URL to prevent memory leak
+		if (this.blobUrl) {
+			URL.revokeObjectURL(this.blobUrl);
+			this.blobUrl = null;
+		}
+
 		this.currentEpisode = episode;
 
 		// Try offline audio first
 		if (episode.isDownloaded) {
 			const audioFile = await db.audioFiles.get(episode.guid);
 			if (audioFile) {
-				const url = URL.createObjectURL(audioFile.audioBlob);
-				this.audio.src = url;
+				this.blobUrl = URL.createObjectURL(audioFile.audioBlob);
+				this.audio.src = this.blobUrl;
 			}
 		} else {
 			this.audio.src = episode.audioUrl;
@@ -68,7 +79,12 @@ class PlayerState {
 			this.audio.currentTime = episode.currentTime;
 		}
 
-		await this.audio.play();
+		try {
+			await this.audio.play();
+		} catch {
+			this.isPlaying = false;
+			return;
+		}
 		this.setupMediaSession();
 		this.startSaveInterval();
 	}
