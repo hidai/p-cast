@@ -1,4 +1,6 @@
 <script lang="ts">
+import { cubicIn, cubicOut } from "svelte/easing";
+import { fly } from "svelte/transition";
 import { db } from "$lib/db";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
@@ -65,6 +67,8 @@ $effect(() => {
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="fixed inset-0 z-50 bg-bg-primary flex flex-col"
+	in:fly={{ y: window.innerHeight, duration: 300, easing: cubicOut }}
+	out:fly={{ y: window.innerHeight, duration: 300, easing: cubicIn }}
 	ontouchstart={handleTouchStart}
 	ontouchend={handleTouchEnd}
 >
