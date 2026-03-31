@@ -12,7 +12,10 @@ let { children } = $props();
 let closedByPopState = false;
 
 function handlePopState(_e: PopStateEvent) {
-	if (player.isFullPlayer) {
+	if (episodeDetail.episode) {
+		closedByPopState = true;
+		episodeDetail.close();
+	} else if (player.isFullPlayer) {
 		closedByPopState = true;
 		player.isFullPlayer = false;
 	}
@@ -24,6 +27,19 @@ $effect(() => {
 	} else {
 		if (!closedByPopState) {
 			if (history.state?.fullPlayer) {
+				history.back();
+			}
+		}
+		closedByPopState = false;
+	}
+});
+
+$effect(() => {
+	if (episodeDetail.episode) {
+		history.pushState({ episodeDetail: true }, "");
+	} else {
+		if (!closedByPopState) {
+			if (history.state?.episodeDetail) {
 				history.back();
 			}
 		}
