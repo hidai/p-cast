@@ -1,8 +1,10 @@
 <script lang="ts">
 import "../app.css";
 import BottomNav from "$lib/components/BottomNav.svelte";
+import EpisodeDetailSheet from "$lib/components/EpisodeDetailSheet.svelte";
 import FullPlayer from "$lib/components/FullPlayer.svelte";
 import MiniPlayer from "$lib/components/MiniPlayer.svelte";
+import { episodeDetail } from "$lib/episode-detail.svelte";
 import { player } from "$lib/player.svelte";
 
 let { children } = $props();
@@ -56,4 +58,8 @@ function handleKeydown(e: KeyboardEvent) {
 
 {#if player.isFullPlayer}
 	<FullPlayer />
+{/if}
+
+{#if episodeDetail.episode}
+	<EpisodeDetailSheet episode={episodeDetail.episode} onclose={() => episodeDetail.close()} />
 {/if}

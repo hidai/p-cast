@@ -3,6 +3,7 @@ import { liveQuery } from "dexie";
 import { page } from "$app/state";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type EpisodeSortOrder } from "$lib/db";
+import { episodeDetail } from "$lib/episode-detail.svelte";
 import {
 	downloadEpisode,
 	fetchEpisodes,
@@ -23,6 +24,8 @@ let isToggling = $state(false);
 let downloadingGuids = $state(new Map<string, number>());
 let sortOrder: EpisodeSortOrder = $state("newest");
 let sortMenuOpen = $state(false);
+let podcastDescription = $state("");
+let descriptionExpanded = $state(false);
 
 $effect(() => {
 	if (!feedUrl) return;
@@ -31,6 +34,9 @@ $effect(() => {
 		isSubscribed = !!val;
 		if (val?.episodeSortOrder) {
 			sortOrder = val.episodeSortOrder;
+		}
+		if (val?.description) {
+			podcastDescription = val.description;
 		}
 	});
 
@@ -148,6 +154,23 @@ async function handleDownload(episode: Episode) {
 		</div>
 	</div>
 
+	<!-- Podcast description -->
+	{#if podcastDescription}
+		<div class="mb-6">
+			<div
+				class="text-sm text-text-secondary leading-relaxed {descriptionExpanded ? '' : 'line-clamp-2'}"
+			>
+				{podcastDescription}
+			</div>
+			<button
+				class="text-xs text-accent mt-1"
+				onclick={() => (descriptionExpanded = !descriptionExpanded)}
+			>
+				{descriptionExpanded ? "閉じる" : "もっと見る"}
+			</button>
+		</div>
+	{/if}
+
 	<!-- Episodes -->
 	<div class="flex items-center justify-between mb-3">
 		<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider">
@@ -245,6 +268,7 @@ async function handleDownload(episode: Episode) {
 						? downloadingGuids.get(episode.guid) ?? 0
 						: null}
 					ondownload={handleDownload}
+					ondetail={(e) => episodeDetail.open(e)}
 				/>
 			{/each}
 		</div>

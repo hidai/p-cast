@@ -10,6 +10,7 @@ let {
 	ondownload,
 	ondelete,
 	onplay,
+	ondetail,
 }: {
 	episode: Episode;
 	podcast?: Podcast;
@@ -17,6 +18,7 @@ let {
 	ondownload?: (episode: Episode) => void;
 	ondelete?: (episode: Episode) => void;
 	onplay?: (episode: Episode) => void;
+	ondetail?: (episode: Episode) => void;
 } = $props();
 
 function formatDate(ts: number): string {
@@ -36,21 +38,28 @@ function handlePlay() {
 </script>
 
 <div class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition">
-	{#if imgUrl}
-		<img src={imgUrl} alt="" class="w-12 h-12 rounded-lg object-cover shrink-0" />
-	{/if}
-	<div class="flex-1 min-w-0">
-		<p class="text-sm font-medium truncate {episode.isCompleted ? 'text-text-secondary' : ''}">
-			{episode.title}
-		</p>
-		<p class="text-xs text-text-secondary">
-			{formatDate(episode.pubDate)}
-			{#if episode.duration > 0} · {formatDuration(episode.duration)}{/if}
-			{#if episode.isDownloaded}<span class="text-accent"> · Downloaded</span>{/if}
-			{#if episode.currentTime > 0 && !episode.isCompleted}
-				<span class="text-accent"> · {formatDuration(episode.currentTime)} played</span>
-			{/if}
-		</p>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="flex items-center gap-3 flex-1 min-w-0"
+		onclick={() => ondetail?.(episode)}
+	>
+		{#if imgUrl}
+			<img src={imgUrl} alt="" class="w-12 h-12 rounded-lg object-cover shrink-0" />
+		{/if}
+		<div class="flex-1 min-w-0">
+			<p class="text-sm font-medium truncate {episode.isCompleted ? 'text-text-secondary' : ''}">
+				{episode.title}
+			</p>
+			<p class="text-xs text-text-secondary">
+				{formatDate(episode.pubDate)}
+				{#if episode.duration > 0} · {formatDuration(episode.duration)}{/if}
+				{#if episode.isDownloaded}<span class="text-accent"> · Downloaded</span>{/if}
+				{#if episode.currentTime > 0 && !episode.isCompleted}
+					<span class="text-accent"> · {formatDuration(episode.currentTime)} played</span>
+				{/if}
+			</p>
+		</div>
 	</div>
 	<div class="flex gap-1 shrink-0">
 		{#if episode.isDownloaded && ondelete}

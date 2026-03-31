@@ -19,13 +19,14 @@ export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	return data.results ?? [];
 }
 
-export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isDownloaded">[]> {
-	const res = await fetch(proxyUrl(feedUrl));
-	const text = await res.text();
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, "text/xml");
-	const items = doc.querySelectorAll("item");
+function parseFeedDocument(doc: Document) {
+	const channel = doc.querySelector("channel");
+	const podcastDescription = channel?.querySelector("description")?.textContent ?? "";
+	return { podcastDescription };
+}
 
+function fetchEpisodesFromDoc(feedUrl: string, doc: Document): Omit<Episode, "isDownloaded">[] {
+	const items = doc.querySelectorAll("item");
 	const episodes: Omit<Episode, "isDownloaded">[] = [];
 	for (const item of items) {
 		const guid =
@@ -55,12 +56,21 @@ export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isD
 			"0";
 		const duration = parseDuration(durationStr);
 
+		const description =
+			item.getElementsByTagNameNS("http://purl.org/rss/1.0/modules/content/", "encoded")[0]
+				?.textContent ??
+			item.querySelector("description")?.textContent ??
+			item.getElementsByTagNameNS("http://www.itunes.com/dtds/podcast-1.0.dtd", "summary")[0]
+				?.textContent ??
+			"";
+
 		if (!audioUrl) continue;
 
 		episodes.push({
 			guid,
 			podcastFeedUrl: feedUrl,
 			title,
+			description,
 			pubDate,
 			duration,
 			audioUrl,
@@ -71,6 +81,14 @@ export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isD
 	}
 
 	return episodes;
+}
+
+export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isDownloaded">[]> {
+	const res = await fetch(proxyUrl(feedUrl));
+	const text = await res.text();
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(text, "text/xml");
+	return fetchEpisodesFromDoc(feedUrl, doc);
 }
 
 function parseDuration(str: string): number {
@@ -105,7 +123,18 @@ export async function unsubscribePodcast(feedUrl: string): Promise<void> {
 }
 
 export async function refreshPodcast(feedUrl: string): Promise<void> {
-	const rawEpisodes = await fetchEpisodes(feedUrl);
+	const res = await fetch(proxyUrl(feedUrl));
+	const text = await res.text();
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(text, "text/xml");
+
+	// Update podcast description from channel-level data
+	const { podcastDescription } = parseFeedDocument(doc);
+	if (podcastDescription) {
+		await db.podcasts.update(feedUrl, { description: podcastDescription });
+	}
+
+	const rawEpisodes = fetchEpisodesFromDoc(feedUrl, doc);
 	for (const ep of rawEpisodes) {
 		const existing = await db.episodes.get(ep.guid);
 		if (!existing) {
@@ -114,6 +143,7 @@ export async function refreshPodcast(feedUrl: string): Promise<void> {
 			// Update metadata but keep user state
 			await db.episodes.update(ep.guid, {
 				title: ep.title,
+				description: ep.description,
 				audioUrl: ep.audioUrl,
 				duration: ep.duration,
 			});

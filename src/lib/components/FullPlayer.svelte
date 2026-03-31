@@ -2,6 +2,7 @@
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import { db } from "$lib/db";
+import { episodeDetail } from "$lib/episode-detail.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
 
@@ -98,7 +99,20 @@ $effect(() => {
 
 	<!-- Info & Controls -->
 	<div class="px-6 pb-8 pt-4">
-		<h2 class="text-lg font-semibold truncate">{player.currentEpisode?.title}</h2>
+		<div class="flex items-center gap-2">
+			<h2 class="text-lg font-semibold truncate flex-1">{player.currentEpisode?.title}</h2>
+			<button
+				class="shrink-0 text-xs text-accent border border-accent/30 rounded-full px-2.5 py-1 hover:bg-accent/10 transition-colors"
+				onclick={() => {
+					if (player.currentEpisode) {
+						episodeDetail.open(player.currentEpisode);
+						player.isFullPlayer = false;
+					}
+				}}
+			>
+				詳細
+			</button>
+		</div>
 
 		<!-- Seek bar -->
 		<div class="mt-4">

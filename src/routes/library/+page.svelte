@@ -2,6 +2,7 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { episodeDetail } from "$lib/episode-detail.svelte";
 import { deleteDownload, downloadEpisode } from "$lib/podcast-service";
 
 type Tab = "subscribed" | "downloaded" | "history";
@@ -145,7 +146,7 @@ async function handleDownload(episode: Episode) {
 		{:else}
 			<div class="space-y-1">
 				{#each downloadedEpisodes as episode (episode.guid)}
-					<EpisodeItem {episode} podcast={episode.podcast} ondelete={(e) => deleteDownload(e.guid)} />
+					<EpisodeItem {episode} podcast={episode.podcast} ondelete={(e) => deleteDownload(e.guid)} ondetail={(e) => episodeDetail.open(e)} />
 				{/each}
 			</div>
 		{/if}
@@ -168,6 +169,7 @@ async function handleDownload(episode: Episode) {
 							? downloadingGuids.get(episode.guid) ?? 0
 							: null}
 						ondownload={handleDownload}
+						ondetail={(e) => episodeDetail.open(e)}
 					/>
 				{/each}
 			</div>

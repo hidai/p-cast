@@ -16,6 +16,7 @@ export interface Episode {
 	guid: string;
 	podcastFeedUrl: string;
 	title: string;
+	description: string;
 	pubDate: number;
 	duration: number;
 	audioUrl: string;
@@ -59,6 +60,11 @@ class PcastDatabase extends Dexie {
 			audioFiles: "episodeGuid",
 		});
 		this.version(5).stores({
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate, lastPlayedAt",
+			audioFiles: "episodeGuid",
+		});
+		this.version(6).stores({
 			podcasts: "feedUrl, subscribedAt",
 			episodes: "guid, podcastFeedUrl, pubDate, lastPlayedAt",
 			audioFiles: "episodeGuid",
