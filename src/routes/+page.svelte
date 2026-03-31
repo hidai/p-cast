@@ -1,5 +1,6 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
+import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { overlay } from "$lib/overlay.svelte";
@@ -10,6 +11,13 @@ import {
 	formatDuration,
 	refreshPodcast,
 } from "$lib/podcast-service";
+
+// Redirect to Discover if user has no subscriptions
+$effect(() => {
+	db.podcasts.count().then((count) => {
+		if (count === 0) goto("/discover", { replaceState: true });
+	});
+});
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let nextUpEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
