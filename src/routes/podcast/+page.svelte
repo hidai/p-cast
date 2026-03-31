@@ -125,6 +125,17 @@ async function handleDownload(episode: Episode) {
 </script>
 
 <div class="px-4 pt-4">
+	<!-- Back button -->
+	<button
+		class="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary mb-3 -ml-1"
+		onclick={() => history.back()}
+	>
+		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+		</svg>
+		戻る
+	</button>
+
 	<!-- Podcast header -->
 	<div class="flex gap-4 mb-6">
 		{#if coverUrl}

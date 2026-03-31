@@ -1,14 +1,23 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
+import { page } from "$app/stores";
 import { type SearchResult, searchPodcasts } from "$lib/podcast-service";
 
 let query = $state("");
 let results: SearchResult[] = $state([]);
 let isSearching = $state(false);
 
-async function handleSearch() {
-	const q = query.trim();
-	if (!q) return;
+const urlQuery = $derived($page.url.searchParams.get("q") ?? "");
+
+$effect(() => {
+	const q = urlQuery;
+	if (q && q !== query) {
+		query = q;
+		doSearch(q);
+	}
+});
+
+async function doSearch(q: string) {
 	isSearching = true;
 	try {
 		results = await searchPodcasts(q);
@@ -16,6 +25,13 @@ async function handleSearch() {
 		results = [];
 	}
 	isSearching = false;
+}
+
+async function handleSearch() {
+	const q = query.trim();
+	if (!q) return;
+	goto(`/discover?q=${encodeURIComponent(q)}`, { replaceState: true, keepFocus: true });
+	await doSearch(q);
 }
 
 function handleKeydown(e: KeyboardEvent) {

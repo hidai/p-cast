@@ -1,6 +1,7 @@
 <script lang="ts">
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fade, fly } from "svelte/transition";
+import { goto } from "$app/navigation";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
 import { player } from "$lib/player.svelte";
@@ -39,13 +40,26 @@ $effect(() => {
 	}
 });
 
-// Podcast name
+// Podcast info
 let podcastTitle = $state("");
+let podcastAuthor = $state("");
 $effect(() => {
 	db.podcasts.get(episode.podcastFeedUrl).then((p) => {
 		podcastTitle = p?.title ?? "";
+		podcastAuthor = p?.author ?? "";
 	});
 });
+
+function openPodcast() {
+	const params = new URLSearchParams({
+		feedUrl: episode.podcastFeedUrl,
+		title: podcastTitle,
+		author: podcastAuthor,
+		coverUrl: coverUrl,
+	});
+	onclose();
+	goto(`/podcast?${params.toString()}`);
+}
 
 function formatDate(ts: number): string {
 	if (!ts) return "";
@@ -235,7 +249,10 @@ async function handleDeleteDownload() {
 				<div class="min-w-0 flex-1">
 					<h2 class="text-base font-bold leading-tight line-clamp-2">{episode.title}</h2>
 					{#if podcastTitle}
-						<p class="text-sm text-accent mt-1 truncate">{podcastTitle}</p>
+						<button
+							class="text-sm text-accent mt-1 truncate block hover:underline"
+							onclick={openPodcast}
+						>{podcastTitle}</button>
 					{/if}
 					<p class="text-xs text-text-secondary mt-1">
 						{formatDate(episode.pubDate)}
