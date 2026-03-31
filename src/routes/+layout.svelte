@@ -7,6 +7,28 @@ import { player } from "$lib/player.svelte";
 
 let { children } = $props();
 
+let closedByPopState = false;
+
+function handlePopState(_e: PopStateEvent) {
+	if (player.isFullPlayer) {
+		closedByPopState = true;
+		player.isFullPlayer = false;
+	}
+}
+
+$effect(() => {
+	if (player.isFullPlayer) {
+		history.pushState({ fullPlayer: true }, "");
+	} else {
+		if (!closedByPopState) {
+			if (history.state?.fullPlayer) {
+				history.back();
+			}
+		}
+		closedByPopState = false;
+	}
+});
+
 function handleKeydown(e: KeyboardEvent) {
 	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 	if (e.code === "Space") {
@@ -20,7 +42,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onpopstate={handlePopState} />
 
 <div class="flex flex-col h-full">
 	<main class="flex-1 overflow-y-auto pb-2">
