@@ -111,6 +111,36 @@ function handleTouchEnd() {
 	}
 }
 
+let wheelTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function handleWheel(e: WheelEvent) {
+	// When fully expanded, let content scroll naturally.
+	// Only intercept when at scroll top AND swiping down (to collapse).
+	if (sheetTop === 0 && contentEl) {
+		if (!(contentEl.scrollTop <= 0 && e.deltaY < 0)) {
+			return;
+		}
+	}
+
+	e.preventDefault();
+	sheetTop = Math.max(0, sheetTop - e.deltaY);
+
+	// Debounced snap: after wheel stops, snap to position
+	if (wheelTimeout) clearTimeout(wheelTimeout);
+	wheelTimeout = setTimeout(() => {
+		const halfY = window.innerHeight * 0.3;
+		const closeThreshold = window.innerHeight * 0.65;
+
+		if (sheetTop > closeThreshold) {
+			onclose();
+		} else if (sheetTop > halfY * 0.4) {
+			sheetTop = halfY;
+		} else {
+			sheetTop = 0;
+		}
+	}, 150);
+}
+
 function handleBackdropClick() {
 	onclose();
 }
@@ -167,6 +197,7 @@ async function handleDeleteDownload() {
 		ontouchstart={handleTouchStart}
 		ontouchmove={handleTouchMove}
 		ontouchend={handleTouchEnd}
+		onwheel={handleWheel}
 	>
 		<!-- Drag handle -->
 		<div class="flex justify-center pt-3 pb-2 shrink-0">
