@@ -2,7 +2,7 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
-import { downloadEpisode } from "$lib/podcast-service";
+import { deleteDownload, downloadEpisode } from "$lib/podcast-service";
 
 type Tab = "subscribed" | "downloaded" | "history";
 
@@ -145,7 +145,7 @@ async function handleDownload(episode: Episode) {
 		{:else}
 			<div class="space-y-1">
 				{#each downloadedEpisodes as episode (episode.guid)}
-					<EpisodeItem {episode} podcast={episode.podcast} />
+					<EpisodeItem {episode} podcast={episode.podcast} ondelete={(e) => deleteDownload(e.guid)} />
 				{/each}
 			</div>
 		{/if}
