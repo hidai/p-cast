@@ -19,11 +19,21 @@ export interface TopPodcast {
 	artworkUrl100: string;
 }
 
+let topPodcastsCache: TopPodcast[] | null = null;
+let topPodcastsCacheTime = 0;
+const TOP_PODCASTS_TTL = 30 * 60 * 1000;
+
 export async function fetchTopPodcasts(): Promise<TopPodcast[]> {
+	if (topPodcastsCache && Date.now() - topPodcastsCacheTime < TOP_PODCASTS_TTL) {
+		return topPodcastsCache;
+	}
 	const url = "https://rss.applemarketingtools.com/api/v2/jp/podcasts/top/25/podcasts.json";
 	const res = await fetch(proxyUrl(url));
 	const data = await res.json();
-	return data.feed?.results ?? [];
+	const results = data.feed?.results ?? [];
+	topPodcastsCache = results;
+	topPodcastsCacheTime = Date.now();
+	return results;
 }
 
 export async function lookupPodcastById(id: string): Promise<SearchResult | null> {
