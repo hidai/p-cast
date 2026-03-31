@@ -83,12 +83,15 @@ function fetchEpisodesFromDoc(feedUrl: string, doc: Document): Omit<Episode, "is
 	return episodes;
 }
 
-export async function fetchEpisodes(feedUrl: string): Promise<Omit<Episode, "isDownloaded">[]> {
+export async function fetchEpisodes(
+	feedUrl: string,
+): Promise<{ episodes: Omit<Episode, "isDownloaded">[]; podcastDescription: string }> {
 	const res = await fetch(proxyUrl(feedUrl));
 	const text = await res.text();
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, "text/xml");
-	return fetchEpisodesFromDoc(feedUrl, doc);
+	const { podcastDescription } = parseFeedDocument(doc);
+	return { episodes: fetchEpisodesFromDoc(feedUrl, doc), podcastDescription };
 }
 
 function parseDuration(str: string): number {

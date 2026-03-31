@@ -51,10 +51,18 @@ function sortEpisodes(eps: Episode[], order: EpisodeSortOrder): Episode[] {
 	);
 }
 
+// Strip <script> tags for safety, keep other HTML
+function sanitizeHtml(html: string): string {
+	return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+}
+
 async function loadEpisodes() {
 	isLoading = true;
 	try {
-		const raw = await fetchEpisodes(feedUrl);
+		const { episodes: raw, podcastDescription: feedDescription } = await fetchEpisodes(feedUrl);
+		if (feedDescription && !podcastDescription) {
+			podcastDescription = feedDescription;
+		}
 		for (const ep of raw) {
 			const existing = await db.episodes.get(ep.guid);
 			if (!existing) {
@@ -158,9 +166,9 @@ async function handleDownload(episode: Episode) {
 	{#if podcastDescription}
 		<div class="mb-6">
 			<div
-				class="text-sm text-text-secondary leading-relaxed {descriptionExpanded ? '' : 'line-clamp-2'}"
+				class="text-sm text-text-secondary leading-relaxed podcast-description {descriptionExpanded ? '' : 'line-clamp-2'}"
 			>
-				{podcastDescription}
+				{@html sanitizeHtml(podcastDescription)}
 			</div>
 			<button
 				class="text-xs text-accent mt-1"
@@ -274,3 +282,20 @@ async function handleDownload(episode: Episode) {
 		</div>
 	{/if}
 </div>
+
+<style>
+.podcast-description :global(a) {
+	color: var(--color-accent);
+	text-decoration: underline;
+}
+
+.podcast-description :global(p) {
+	margin-bottom: 0.75rem;
+}
+
+.podcast-description :global(img) {
+	max-width: 100%;
+	border-radius: 0.5rem;
+	margin: 0.5rem 0;
+}
+</style>
