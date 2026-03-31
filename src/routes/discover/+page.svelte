@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+import { overlay } from "$lib/overlay.svelte";
 import { type SearchResult, searchPodcasts } from "$lib/podcast-service";
 
 let query = $state("");
@@ -39,13 +40,11 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function openPodcast(result: SearchResult) {
-	const params = new URLSearchParams({
-		feedUrl: result.feedUrl,
+	overlay.openPodcastDetail(result.feedUrl, {
 		title: result.trackName,
 		author: result.artistName,
 		coverUrl: result.artworkUrl600 || result.artworkUrl100,
 	});
-	goto(`/podcast?${params.toString()}`);
 }
 </script>
 

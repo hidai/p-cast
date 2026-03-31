@@ -5,6 +5,7 @@ import BottomNav from "$lib/components/BottomNav.svelte";
 import EpisodeDetailSheet from "$lib/components/EpisodeDetailSheet.svelte";
 import FullPlayer from "$lib/components/FullPlayer.svelte";
 import MiniPlayer from "$lib/components/MiniPlayer.svelte";
+import PodcastDetailSheet from "$lib/components/PodcastDetailSheet.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 
@@ -43,4 +44,8 @@ function handleKeydown(e: KeyboardEvent) {
 
 {#if overlay.activeOverlay === "episodeDetail" && overlay.detailEpisode}
 	<EpisodeDetailSheet episode={overlay.detailEpisode} />
+{/if}
+
+{#if overlay.activeOverlay === "podcastDetail" && overlay.detailPodcastFeedUrl}
+	<PodcastDetailSheet feedUrl={overlay.detailPodcastFeedUrl} meta={overlay.detailPodcastMeta} />
 {/if}

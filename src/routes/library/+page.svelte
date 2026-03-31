@@ -98,9 +98,9 @@ async function handleDownload(episode: Episode) {
 		{:else}
 			<div class="grid grid-cols-3 gap-3">
 				{#each podcasts as podcast (podcast.feedUrl)}
-					<a
-						href="/podcast?feedUrl={encodeURIComponent(podcast.feedUrl)}"
-						class="block"
+					<button
+						class="block text-left w-full"
+						onclick={() => overlay.openPodcastDetail(podcast.feedUrl)}
 					>
 						{#if podcast.coverUrl}
 							<img
@@ -130,7 +130,7 @@ async function handleDownload(episode: Episode) {
 						<p class="text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
 							{podcast.title}
 						</p>
-					</a>
+					</button>
 				{/each}
 			</div>
 		{/if}

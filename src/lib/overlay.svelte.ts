@@ -1,8 +1,16 @@
 import { db, type Episode } from "./db";
 
+export interface PodcastMeta {
+	title: string;
+	author: string;
+	coverUrl: string;
+}
+
 class OverlayManager {
-	activeOverlay: "none" | "fullPlayer" | "episodeDetail" = $state("none");
+	activeOverlay: "none" | "fullPlayer" | "episodeDetail" | "podcastDetail" = $state("none");
 	detailEpisode: Episode | null = $state(null);
+	detailPodcastFeedUrl = $state("");
+	detailPodcastMeta: PodcastMeta | null = $state(null);
 
 	private hasHistoryEntry = false;
 	private ignoringPopState = false;
@@ -18,13 +26,26 @@ class OverlayManager {
 		const wasActive = this.activeOverlay !== "none";
 		this.activeOverlay = "episodeDetail";
 		this.detailEpisode = episode;
+		this.detailPodcastFeedUrl = "";
+		this.detailPodcastMeta = null;
 		this.syncHistory(wasActive, { overlay: "episodeDetail", episodeGuid: episode.guid });
+	}
+
+	openPodcastDetail(feedUrl: string, meta?: PodcastMeta) {
+		const wasActive = this.activeOverlay !== "none";
+		this.activeOverlay = "podcastDetail";
+		this.detailEpisode = null;
+		this.detailPodcastFeedUrl = feedUrl;
+		this.detailPodcastMeta = meta ?? null;
+		this.syncHistory(wasActive, { overlay: "podcastDetail", feedUrl });
 	}
 
 	closeAll() {
 		if (this.activeOverlay === "none") return;
 		this.activeOverlay = "none";
 		this.detailEpisode = null;
+		this.detailPodcastFeedUrl = "";
+		this.detailPodcastMeta = null;
 		if (this.hasHistoryEntry) {
 			this.ignoringPopState = true;
 			this.hasHistoryEntry = false;
@@ -50,9 +71,16 @@ class OverlayManager {
 					this.hasHistoryEntry = true;
 				}
 			});
+		} else if (state?.overlay === "podcastDetail" && state?.feedUrl) {
+			this.activeOverlay = "podcastDetail";
+			this.detailPodcastFeedUrl = state.feedUrl as string;
+			this.detailPodcastMeta = null;
+			this.hasHistoryEntry = true;
 		} else {
 			this.activeOverlay = "none";
 			this.detailEpisode = null;
+			this.detailPodcastFeedUrl = "";
+			this.detailPodcastMeta = null;
 			this.hasHistoryEntry = false;
 		}
 	}
@@ -62,6 +90,8 @@ class OverlayManager {
 		if (this.activeOverlay !== "none") {
 			this.activeOverlay = "none";
 			this.detailEpisode = null;
+			this.detailPodcastFeedUrl = "";
+			this.detailPodcastMeta = null;
 			this.hasHistoryEntry = false;
 		}
 	}
