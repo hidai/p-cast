@@ -99,7 +99,7 @@ async function handleDownload(episode: Episode) {
 			<div class="grid grid-cols-3 gap-3">
 				{#each podcasts as podcast (podcast.feedUrl)}
 					<a
-						href="/podcast?feedUrl={encodeURIComponent(podcast.feedUrl)}&title={encodeURIComponent(podcast.title)}&author={encodeURIComponent(podcast.author)}&coverUrl={encodeURIComponent(podcast.coverUrl)}"
+						href="/podcast?feedUrl={encodeURIComponent(podcast.feedUrl)}"
 						class="block"
 					>
 						{#if podcast.coverUrl}

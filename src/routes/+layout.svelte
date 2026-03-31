@@ -1,22 +1,40 @@
 <script lang="ts">
 import "../app.css";
+import { afterNavigate } from "$app/navigation";
 import BottomNav from "$lib/components/BottomNav.svelte";
 import EpisodeDetailSheet from "$lib/components/EpisodeDetailSheet.svelte";
 import FullPlayer from "$lib/components/FullPlayer.svelte";
 import MiniPlayer from "$lib/components/MiniPlayer.svelte";
+import { db } from "$lib/db";
 import { episodeDetail } from "$lib/episode-detail.svelte";
 import { player } from "$lib/player.svelte";
 
 let { children } = $props();
 
-let closedByPopState = false;
+let sheetClosedByPopState = false;
+let sheetClosedByNavigation = false;
+let playerClosedByPopState = false;
 
-function handlePopState(_e: PopStateEvent) {
+afterNavigate(() => {
 	if (episodeDetail.episode) {
-		closedByPopState = true;
+		sheetClosedByNavigation = true;
+		episodeDetail.close();
+	}
+});
+
+function handlePopState(e: PopStateEvent) {
+	if (e.state?.episodeGuid && !episodeDetail.episode) {
+		// Navigated back to a sheet entry — restore it from DB
+		db.episodes.get(e.state.episodeGuid).then((ep) => {
+			if (ep) episodeDetail.open(ep);
+		});
+		return;
+	}
+	if (episodeDetail.episode) {
+		sheetClosedByPopState = true;
 		episodeDetail.close();
 	} else if (player.isFullPlayer) {
-		closedByPopState = true;
+		playerClosedByPopState = true;
 		player.isFullPlayer = false;
 	}
 }
@@ -25,25 +43,29 @@ $effect(() => {
 	if (player.isFullPlayer) {
 		history.pushState({ fullPlayer: true }, "");
 	} else {
-		if (!closedByPopState) {
+		if (!playerClosedByPopState) {
 			if (history.state?.fullPlayer) {
 				history.back();
 			}
 		}
-		closedByPopState = false;
+		playerClosedByPopState = false;
 	}
 });
 
 $effect(() => {
 	if (episodeDetail.episode) {
-		history.pushState({ episodeDetail: true }, "");
+		// Only push if current state doesn't already have this entry (avoids double-push on restore)
+		if (!history.state?.episodeDetail) {
+			history.pushState({ episodeDetail: true, episodeGuid: episodeDetail.episode.guid }, "");
+		}
 	} else {
-		if (!closedByPopState) {
+		if (!sheetClosedByPopState && !sheetClosedByNavigation) {
 			if (history.state?.episodeDetail) {
 				history.back();
 			}
 		}
-		closedByPopState = false;
+		sheetClosedByPopState = false;
+		sheetClosedByNavigation = false;
 	}
 });
 

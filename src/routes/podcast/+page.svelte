@@ -2,7 +2,7 @@
 import { liveQuery } from "dexie";
 import { page } from "$app/state";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
-import { db, type Episode, type EpisodeSortOrder } from "$lib/db";
+import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
 import { episodeDetail } from "$lib/episode-detail.svelte";
 import {
 	downloadEpisode,
@@ -13,9 +13,14 @@ import {
 } from "$lib/podcast-service";
 
 const feedUrl = $derived(page.url.searchParams.get("feedUrl") ?? "");
-const title = $derived(page.url.searchParams.get("title") ?? "");
-const author = $derived(page.url.searchParams.get("author") ?? "");
-const coverUrl = $derived(page.url.searchParams.get("coverUrl") ?? "");
+const urlTitle = $derived(page.url.searchParams.get("title") ?? "");
+const urlAuthor = $derived(page.url.searchParams.get("author") ?? "");
+const urlCoverUrl = $derived(page.url.searchParams.get("coverUrl") ?? "");
+
+let dbPodcast = $state<Podcast | null>(null);
+const title = $derived(dbPodcast?.title || urlTitle);
+const author = $derived(dbPodcast?.author || urlAuthor);
+const coverUrl = $derived(dbPodcast?.coverUrl || urlCoverUrl);
 
 let isSubscribed = $state(false);
 let episodes: Episode[] = $state([]);
@@ -31,6 +36,7 @@ $effect(() => {
 	if (!feedUrl) return;
 
 	const sub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((val) => {
+		dbPodcast = val ?? null;
 		isSubscribed = !!val;
 		if (val?.episodeSortOrder) {
 			sortOrder = val.episodeSortOrder;

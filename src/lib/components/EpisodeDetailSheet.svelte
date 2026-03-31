@@ -40,25 +40,16 @@ $effect(() => {
 	}
 });
 
-// Podcast info
+// Podcast name
 let podcastTitle = $state("");
-let podcastAuthor = $state("");
 $effect(() => {
 	db.podcasts.get(episode.podcastFeedUrl).then((p) => {
 		podcastTitle = p?.title ?? "";
-		podcastAuthor = p?.author ?? "";
 	});
 });
 
 function openPodcast() {
-	const params = new URLSearchParams({
-		feedUrl: episode.podcastFeedUrl,
-		title: podcastTitle,
-		author: podcastAuthor,
-		coverUrl: coverUrl,
-	});
-	onclose();
-	goto(`/podcast?${params.toString()}`);
+	goto(`/podcast?feedUrl=${encodeURIComponent(episode.podcastFeedUrl)}`);
 }
 
 function formatDate(ts: number): string {
