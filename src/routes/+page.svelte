@@ -12,11 +12,15 @@ import {
 	refreshPodcast,
 } from "$lib/podcast-service";
 
-// Redirect to Discover if user has no subscriptions
+// Redirect to Discover if user has never used the app
 $effect(() => {
-	db.podcasts.count().then((count) => {
-		if (count === 0) goto("/discover", { replaceState: true });
-	});
+	Promise.all([db.podcasts.count(), db.episodes.count(), db.audioFiles.count()]).then(
+		([podcasts, episodes, audioFiles]) => {
+			if (podcasts === 0 && episodes === 0 && audioFiles === 0) {
+				goto("/discover", { replaceState: true });
+			}
+		},
+	);
 });
 
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
