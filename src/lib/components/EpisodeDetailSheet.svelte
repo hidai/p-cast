@@ -115,9 +115,17 @@ function handleBackdropClick() {
 	onclose();
 }
 
+// Is this episode currently loaded in the player?
+let isCurrentEpisode = $derived(player.currentEpisode?.guid === episode.guid);
+
 function handlePlay() {
 	player.play(episode);
 	onclose();
+}
+
+function handleGoToPlayer() {
+	onclose();
+	player.isFullPlayer = true;
 }
 
 async function handleDownload() {
@@ -229,19 +237,34 @@ async function handleDeleteDownload() {
 			class="shrink-0 px-5 py-4 border-t border-border flex items-center gap-3"
 			style="padding-bottom: max(1rem, env(safe-area-inset-bottom));"
 		>
-			<button
-				class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-medium text-sm"
-				onclick={handlePlay}
-			>
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
-				{#if episode.currentTime > 0 && !episode.isCompleted}
-					再開
-				{:else}
-					再生
-				{/if}
-			</button>
+			{#if isCurrentEpisode}
+				<button
+					class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-bg-card text-accent font-medium text-sm border border-accent/30"
+					onclick={handleGoToPlayer}
+				>
+					<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+						<rect x="3" y="8" width="3" height="8" rx="1" />
+						<rect x="8.5" y="4" width="3" height="16" rx="1" />
+						<rect x="14" y="6" width="3" height="12" rx="1" />
+						<rect x="19.5" y="9" width="3" height="6" rx="1" />
+					</svg>
+					再生中
+				</button>
+			{:else}
+				<button
+					class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-medium text-sm"
+					onclick={handlePlay}
+				>
+					<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M8 5v14l11-7z" />
+					</svg>
+					{#if episode.currentTime > 0 && !episode.isCompleted}
+						再開
+					{:else}
+						再生
+					{/if}
+				</button>
+			{/if}
 
 			{#if episode.isDownloaded}
 				<button
