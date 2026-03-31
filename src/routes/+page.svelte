@@ -12,11 +12,14 @@ import {
 	refreshPodcast,
 } from "$lib/podcast-service";
 
-// Redirect to Discover if user has never used the app
+// Redirect to Discover once if user has never used the app
+const redirectKey = "p-cast:discoveredOnce";
 $effect(() => {
+	if (sessionStorage.getItem(redirectKey)) return;
 	Promise.all([db.podcasts.count(), db.episodes.count(), db.audioFiles.count()]).then(
 		([podcasts, episodes, audioFiles]) => {
 			if (podcasts === 0 && episodes === 0 && audioFiles === 0) {
+				sessionStorage.setItem(redirectKey, "1");
 				goto("/discover", { replaceState: true });
 			}
 		},
