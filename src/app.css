@@ -39,28 +39,6 @@
 	--color-danger-hover: #ef4444;
 }
 
-/* System preference fallback (when no explicit class is set) */
-@media (prefers-color-scheme: dark) {
-	:root:not(.light) {
-		--color-bg-primary: #09090b;
-		--color-bg-secondary: #18181b;
-		--color-bg-card: #27272a;
-		--color-bg-elevated: #3f3f46;
-		--color-accent: #818cf8;
-		--color-accent-hover: #a5b4fc;
-		--color-accent-subtle: rgba(129, 140, 248, 0.12);
-		--color-text-primary: #fafafa;
-		--color-text-secondary: #a1a1aa;
-		--color-text-tertiary: #71717a;
-		--color-border: #3f3f46;
-		--color-border-subtle: #2e2e33;
-		--color-surface-glass: rgba(39, 39, 42, 0.8);
-		--color-mini-player-bg: #161527;
-		--color-danger: #f87171;
-		--color-danger-hover: #ef4444;
-	}
-}
-
 html,
 body {
 	height: 100%;
@@ -85,11 +63,6 @@ body {
 }
 :root.dark .bottom-bar-shadow {
 	box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.3);
-}
-@media (prefers-color-scheme: dark) {
-	:root:not(.light) .bottom-bar-shadow {
-		box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.3);
-	}
 }
 
 .rich-description a {
