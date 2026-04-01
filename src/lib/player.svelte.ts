@@ -1,3 +1,4 @@
+import { extractDominantColor } from "./color";
 import { db, type Episode } from "./db";
 
 class PlayerState {
@@ -6,6 +7,7 @@ class PlayerState {
 	currentTime = $state(0);
 	duration = $state(0);
 	playbackRate = $state(1.0);
+	dominantColor = $state("99, 102, 241");
 
 	progress = $derived(this.duration > 0 ? this.currentTime / this.duration : 0);
 
@@ -62,6 +64,16 @@ class PlayerState {
 		}
 
 		this.currentEpisode = episode;
+
+		// Extract dominant color from cover art
+		const coverUrl = episode.coverUrl || (await db.podcasts.get(episode.podcastFeedUrl))?.coverUrl;
+		if (coverUrl) {
+			extractDominantColor(coverUrl).then((color) => {
+				this.dominantColor = color;
+			});
+		} else {
+			this.dominantColor = "99, 102, 241";
+		}
 
 		// Record last played timestamp
 		await db.episodes.update(episode.guid, { lastPlayedAt: Date.now() });
