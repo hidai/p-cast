@@ -22,17 +22,18 @@ class PlayerState {
 			this.audio.addEventListener("loadedmetadata", () => {
 				this.duration = this.audio?.duration ?? 0;
 			});
-			this.audio.addEventListener("ended", () => {
+			this.audio.addEventListener("ended", async () => {
 				this.isPlaying = false;
 				if (this.saveInterval) {
 					clearInterval(this.saveInterval);
 					this.saveInterval = null;
 				}
 				if (this.currentEpisode) {
-					db.episodes.update(this.currentEpisode.guid, {
+					await db.episodes.update(this.currentEpisode.guid, {
 						isCompleted: true,
 						currentTime: 0,
 					});
+					await this.playNext();
 				}
 			});
 			this.audio.addEventListener("pause", () => {
@@ -122,6 +123,19 @@ class PlayerState {
 			await db.episodes.update(this.currentEpisode.guid, {
 				currentTime: this.currentTime,
 			});
+		}
+	}
+
+	private async playNext() {
+		if (!this.currentEpisode) return;
+		const current = this.currentEpisode;
+		const candidates = await db.episodes
+			.where("podcastFeedUrl")
+			.equals(current.podcastFeedUrl)
+			.and((e) => e.pubDate > current.pubDate && !e.isCompleted)
+			.sortBy("pubDate");
+		if (candidates.length > 0) {
+			await this.play(candidates[0]);
 		}
 	}
 
