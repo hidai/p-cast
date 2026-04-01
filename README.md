@@ -4,13 +4,15 @@ A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, su
 
 ## Features
 
-- **Podcast search** — Find podcasts via iTunes Search API
+- **Discover podcasts** — Browse top podcasts or search via iTunes Search API
 - **Subscribe & manage** — Save your favorite shows locally
 - **Offline playback** — Download episodes for listening without internet
 - **Resume playback** — Automatically saves your position and resumes where you left off
+- **Auto-play next** — Automatically plays the next unplayed episode from the same podcast
 - **Playback speed** — Adjustable speed (1.0x, 1.2x, 1.5x, 2.0x)
 - **Media controls** — Background playback with lock screen controls via Media Session API
 - **Keyboard shortcuts** — Space (play/pause), J (-10s), L (+10s)
+- **Multilingual** — Japanese and English UI
 - **No account required** — All data stays on your device
 
 ## Tech Stack
@@ -51,13 +53,14 @@ src/
 ├── lib/
 │   ├── db.ts              # Dexie database schema
 │   ├── podcast-service.ts # Search, subscribe, download, feed parsing
-│   └── player.svelte.ts   # Singleton player state (Svelte 5 runes)
+│   ├── player.svelte.ts   # Singleton player state (Svelte 5 runes)
+│   ├── overlay.svelte.ts  # Overlay sheet manager (podcast/episode detail, full player)
+│   └── i18n/              # Internationalization (Japanese, English)
 ├── routes/
-│   ├── +layout.svelte     # App shell, mini player, bottom nav
-│   ├── +page.svelte       # Home — latest episodes
-│   ├── discover/          # Podcast search
+│   ├── +layout.svelte     # App shell, mini player, bottom nav, overlay sheets
+│   ├── +page.svelte       # Home — continue listening, next up, latest episodes
+│   ├── discover/          # Top podcasts & search
 │   ├── library/           # Subscriptions, downloads, history
-│   ├── podcast/           # Podcast detail & episode list
 │   └── api/proxy/         # RSS feed CORS proxy
 └── app.css                # Tailwind theme (dark mode)
 ```

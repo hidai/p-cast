@@ -22,9 +22,10 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 
 ### Key Modules
 
-- **`src/lib/db.ts`** — Dexie database schema and TypeScript interfaces (`Podcast`, `Episode`, `AudioFile`)
-- **`src/lib/podcast-service.ts`** — All podcast logic: iTunes search API, RSS feed parsing (via DOMParser), subscribe/unsubscribe, episode download/delete, feed refresh
-- **`src/lib/player.svelte.ts`** — Singleton `PlayerState` class using Svelte 5 runes (`$state`, `$derived`). Manages HTMLAudioElement, playback, position saving (every 10s), Media Session API. Exported as `player`.
+- **`src/lib/db.ts`** — Dexie database schema and TypeScript interfaces (`Podcast`, `Episode`, `AudioFile`). Podcast has `description` and optional `episodeSortOrder`; Episode has `description`, `audioUrl`, `coverUrl`, and optional `lastPlayedAt` beyond what the original spec lists.
+- **`src/lib/podcast-service.ts`** — All podcast logic: iTunes search API, RSS feed parsing (via DOMParser), subscribe/unsubscribe, episode download/delete, feed refresh. Also provides `fetchTopPodcasts()` (Apple Marketing Tools API, 30-min in-memory cache) and `lookupPodcastById()`.
+- **`src/lib/player.svelte.ts`** — Singleton `PlayerState` class using Svelte 5 runes (`$state`, `$derived`). Manages HTMLAudioElement, playback, position saving (every 10s), Media Session API, and auto-play-next (plays the next unplayed episode from the same podcast when the current one finishes). Exported as `player`.
+- **`src/lib/overlay.svelte.ts`** — Singleton overlay manager for sheet-style modals (`FullPlayer`, `PodcastDetailSheet`, `EpisodeDetailSheet`). Integrates with browser history state so the back button closes overlays naturally.
 
 ### RSS Proxy
 
@@ -32,14 +33,15 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 
 ### Routes
 
-- `/` (Home) — Lists episodes from subscribed podcasts, sorted by date
-- `/discover` — Search podcasts via iTunes Search API, navigate to podcast detail
+- `/` (Home) — Three sections: "Continue Listening" (episodes in progress), "Next Up" (next unplayed episode per podcast), and "Latest Episodes" from subscribed podcasts
+- `/discover` — Top podcasts and keyword search via iTunes Search API, navigate to podcast detail overlay
 - `/library` — Three tabs: subscribed podcasts, downloaded episodes, listening history
-- `/podcast?feedUrl=...&title=...` — Podcast detail page with episode list, subscribe/unsubscribe, sort order toggle
+
+Podcast detail and episode detail are **overlay sheets** (not separate routes), managed by `overlay.svelte.ts` and rendered in `+layout.svelte`. They use `history.pushState` so the back button closes them.
 
 ### UI Structure
 
-Layout (`+layout.svelte`) renders: main content area, `MiniPlayer` (shown when an episode is loaded), `BottomNav` (Home/Discover/Library tabs), and `FullPlayer` overlay. Global keyboard shortcuts: Space (play/pause), J (-10s), L (+10s).
+Layout (`+layout.svelte`) renders: main content area, `MiniPlayer` (shown when an episode is loaded), `BottomNav` (Home/Discover/Library tabs), `FullPlayer` overlay, `PodcastDetailSheet` overlay, and `EpisodeDetailSheet` overlay. Global keyboard shortcuts: Space (play/pause), J (-10s), L (+10s).
 
 ### Deployment
 
