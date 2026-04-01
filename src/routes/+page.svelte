@@ -2,7 +2,7 @@
 import { liveQuery } from "dexie";
 import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
-import Spinner from "$lib/components/Spinner.svelte";
+import PullToRefresh from "$lib/components/PullToRefresh.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
@@ -27,7 +27,6 @@ $effect(() => {
 let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let nextUpEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
-let isRefreshing = $state(false);
 const downloading = createDownloadState();
 
 // All three sections computed from a single reactive query
@@ -112,10 +111,8 @@ $effect(() => {
 });
 
 async function handleRefresh() {
-	isRefreshing = true;
 	const podcasts = await db.podcasts.toArray();
 	await Promise.all(podcasts.map((p) => refreshPodcast(p.feedUrl).catch(() => {})));
-	isRefreshing = false;
 }
 
 function handleDownload(episode: Episode) {
@@ -123,25 +120,10 @@ function handleDownload(episode: Episode) {
 }
 </script>
 
+<PullToRefresh onrefresh={handleRefresh}>
 <div class="px-4 pt-4">
-	<div class="flex items-center justify-between mb-4">
+	<div class="mb-4">
 		<h1 class="text-xl font-bold">{i18n.t("home.title")}</h1>
-		<div class="flex items-center gap-2">
-			<button
-				class="text-sm text-accent disabled:opacity-50"
-				onclick={handleRefresh}
-				disabled={isRefreshing}
-			>
-				{#if isRefreshing}
-					<span class="inline-flex items-center gap-1.5">
-						<Spinner class="w-3.5 h-3.5" />
-						{i18n.t("home.refreshing")}
-					</span>
-				{:else}
-					{i18n.t("home.refresh")}
-				{/if}
-			</button>
-		</div>
 	</div>
 
 	<!-- Continue Listening -->
@@ -267,3 +249,4 @@ function handleDownload(episode: Episode) {
 		</div>
 	{/if}
 </div>
+</PullToRefresh>
