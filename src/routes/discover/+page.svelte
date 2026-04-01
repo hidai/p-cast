@@ -114,10 +114,10 @@ async function openTopPodcast(podcast: TopPodcast) {
 			bind:value={query}
 			onkeydown={handleKeydown}
 			oninput={handleInput}
-			class="flex-1 bg-bg-card border border-border rounded-lg px-4 py-2.5 text-sm text-text-primary placeholder-text-secondary focus:outline-none focus:border-accent"
+			class="flex-1 bg-bg-card border border-border rounded-xl px-4 py-2.5 text-sm text-text-primary placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
 		/>
 		<button
-			class="px-4 py-2.5 bg-accent text-white rounded-lg text-sm font-medium disabled:opacity-50"
+			class="px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-medium disabled:opacity-50 active:scale-95 transition-transform"
 			onclick={handleSearch}
 			disabled={isSearching}
 		>
@@ -131,7 +131,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 
 	{#if showTopPodcasts}
 		<div>
-			<h2 class="text-sm font-semibold uppercase tracking-wider text-text-secondary mb-3">
+			<h2 class="text-sm font-semibold tracking-wide text-text-secondary mb-3">
 				{i18n.t("discover.popularPodcasts")}
 			</h2>
 			{#if isLoadingTop}
@@ -142,7 +142,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 				<div class="space-y-2">
 					{#each topPodcasts as podcast, i (podcast.id)}
 						<button
-							class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition w-full text-left disabled:opacity-50"
+							class="flex items-center gap-3 p-3 rounded-xl bg-bg-card hover:bg-bg-elevated/50 transition w-full text-left disabled:opacity-50"
 							onclick={() => openTopPodcast(podcast)}
 							disabled={lookingUpId === podcast.id}
 						>
@@ -150,7 +150,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 							<img
 								src={podcast.artworkUrl100}
 								alt=""
-								class="w-14 h-14 rounded-lg object-cover shrink-0"
+								class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 							/>
 							<div class="min-w-0 flex-1">
 								<p class="text-sm font-medium truncate">{podcast.name}</p>
@@ -168,13 +168,13 @@ async function openTopPodcast(podcast: TopPodcast) {
 		<div class="space-y-2">
 			{#each results as result (result.feedUrl)}
 				<button
-					class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition w-full text-left"
+					class="flex items-center gap-3 p-3 rounded-xl bg-bg-card hover:bg-bg-elevated/50 transition w-full text-left"
 					onclick={() => openPodcast(result)}
 				>
 					<img
 						src={result.artworkUrl100}
 						alt=""
-						class="w-14 h-14 rounded-lg object-cover shrink-0"
+						class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 					/>
 					<div class="min-w-0">
 						<p class="text-sm font-medium truncate">{result.trackName}</p>

@@ -77,7 +77,7 @@ $effect(() => {
 >
 	<!-- Header -->
 	<div class="flex items-center justify-between px-4 py-3">
-		<button class="text-text-secondary" onclick={() => overlay.closeAll()} aria-label="Close player">
+		<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => overlay.closeAll()} aria-label="Close player">
 			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
@@ -89,10 +89,10 @@ $effect(() => {
 	<!-- Artwork -->
 	<div class="flex-1 flex items-center justify-center px-8">
 		{#if coverUrl}
-			<img src={coverUrl} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover" />
+			<img src={coverUrl} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover ring-1 ring-border-subtle" />
 		{:else}
-			<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center">
-				<svg class="w-24 h-24 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center ring-1 ring-border-subtle">
+				<svg class="w-24 h-24 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
 				</svg>
 			</div>
@@ -104,7 +104,7 @@ $effect(() => {
 		<div class="flex items-center gap-2">
 			<h2 class="text-lg font-semibold truncate flex-1">{player.currentEpisode?.title}</h2>
 			<button
-				class="shrink-0 text-xs text-accent border border-accent/30 rounded-full px-2.5 py-1 hover:bg-accent/10 transition-colors"
+				class="shrink-0 text-xs text-accent border border-accent/30 rounded-full px-2.5 py-1 hover:bg-accent-subtle active:scale-95 transition-all"
 				onclick={() => {
 					if (player.currentEpisode) {
 						overlay.openEpisodeDetail(player.currentEpisode);
@@ -134,14 +134,14 @@ $effect(() => {
 
 		<!-- Controls -->
 		<div class="flex items-center justify-center gap-8 mt-4">
-			<button class="text-text-secondary" onclick={() => player.skip(-10)}>
+			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(-10)}>
 				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
 				</svg>
 				<span class="text-xs block">10s</span>
 			</button>
 			<button
-				class="w-16 h-16 flex items-center justify-center rounded-full bg-accent text-white"
+				class="w-16 h-16 flex items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-accent/25 active:scale-95 transition-transform"
 				onclick={() => player.togglePlay()}
 			>
 				{#if player.isPlaying}
@@ -154,7 +154,7 @@ $effect(() => {
 					</svg>
 				{/if}
 			</button>
-			<button class="text-text-secondary" onclick={() => player.skip(10)}>
+			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(10)}>
 				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
 				</svg>
@@ -167,7 +167,7 @@ $effect(() => {
 			<div class="flex gap-1">
 				{#each rates as rate}
 					<button
-						class="px-2 py-1 text-xs rounded {player.playbackRate === rate ? 'bg-accent text-white' : 'bg-bg-card text-text-secondary'}"
+						class="px-2.5 py-1 text-xs rounded-lg font-medium transition-colors {player.playbackRate === rate ? 'bg-accent-subtle text-accent' : 'bg-bg-card text-text-tertiary hover:text-text-secondary'}"
 						onclick={() => player.setRate(rate)}
 					>
 						{rate}x
@@ -175,7 +175,7 @@ $effect(() => {
 				{/each}
 			</div>
 			<button
-				class="p-2 rounded-full disabled:opacity-50 {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
+				class="p-2 rounded-full disabled:opacity-50 active:scale-95 transition-transform {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
 				onclick={toggleDownload}
 				disabled={isDownloading}
 				aria-label="Toggle download"
@@ -219,16 +219,16 @@ $effect(() => {
 
 	.seek-bar::-webkit-slider-thumb {
 		-webkit-appearance: none;
-		width: 14px;
-		height: 14px;
+		width: 16px;
+		height: 16px;
 		border-radius: 50%;
 		background: var(--color-accent);
-		margin-top: -5px;
+		margin-top: -6px;
 	}
 
 	.seek-bar::-moz-range-thumb {
-		width: 14px;
-		height: 14px;
+		width: 16px;
+		height: 16px;
 		border-radius: 50%;
 		background: var(--color-accent);
 		border: none;

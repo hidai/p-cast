@@ -32,7 +32,7 @@ function handlePlay() {
 }
 </script>
 
-<div class="flex items-center gap-3 p-3 rounded-lg bg-bg-card/50 hover:bg-bg-card transition">
+<div class="flex items-center gap-3 p-3.5 rounded-xl bg-bg-card hover:bg-bg-elevated/50 transition">
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
@@ -40,7 +40,7 @@ function handlePlay() {
 		onclick={() => ondetail?.(episode)}
 	>
 		{#if imgUrl}
-			<img src={imgUrl} alt="" class="w-12 h-12 rounded-lg object-cover shrink-0" />
+			<img src={imgUrl} alt="" class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
 		{/if}
 		<div class="flex-1 min-w-0">
 			<p class="text-sm font-medium truncate {episode.isCompleted ? 'text-text-secondary' : ''}">
@@ -59,7 +59,7 @@ function handlePlay() {
 	<div class="flex gap-1 shrink-0">
 		{#if episode.isDownloaded && ondelete}
 			<button
-				class="p-2 text-text-secondary hover:text-red-400"
+				class="p-2 text-text-secondary hover:text-danger"
 				onclick={() => ondelete?.(episode)}
 				title="Delete download"
 			>

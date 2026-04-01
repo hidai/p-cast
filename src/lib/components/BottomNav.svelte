@@ -4,15 +4,15 @@ import { i18n } from "$lib/i18n";
 </script>
 
 <nav
-	class="flex items-center justify-around bg-bg-secondary border-t border-border py-2 pb-[env(safe-area-inset-bottom)]"
+	class="flex items-center justify-around bg-surface-glass backdrop-blur-xl border-t border-border-subtle py-2.5 pb-[env(safe-area-inset-bottom)]"
 >
 	<a
 		href="/"
-		class="flex flex-col items-center gap-0.5 text-xs {page.url.pathname === '/'
+		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname === '/'
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
@@ -21,14 +21,17 @@ import { i18n } from "$lib/i18n";
 			/>
 		</svg>
 		<span>{i18n.t("nav.home")}</span>
+		{#if page.url.pathname === "/"}
+			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
+		{/if}
 	</a>
 	<a
 		href="/discover"
-		class="flex flex-col items-center gap-0.5 text-xs {page.url.pathname === '/discover'
+		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname === '/discover'
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
@@ -37,14 +40,17 @@ import { i18n } from "$lib/i18n";
 			/>
 		</svg>
 		<span>{i18n.t("nav.discover")}</span>
+		{#if page.url.pathname === "/discover"}
+			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
+		{/if}
 	</a>
 	<a
 		href="/library"
-		class="flex flex-col items-center gap-0.5 text-xs {page.url.pathname.startsWith('/library')
+		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname.startsWith('/library')
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
@@ -53,5 +59,8 @@ import { i18n } from "$lib/i18n";
 			/>
 		</svg>
 		<span>{i18n.t("nav.library")}</span>
+		{#if page.url.pathname.startsWith("/library")}
+			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
+		{/if}
 	</a>
 </nav>

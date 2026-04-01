@@ -2,9 +2,9 @@
 import { liveQuery } from "dexie";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
-import { createDownloadState } from "$lib/download.svelte";
 import { deleteDownload } from "$lib/podcast-service";
 
 type Tab = "subscribed" | "downloaded" | "history";
@@ -71,9 +71,9 @@ function handleDownload(episode: Episode) {
 			{ key: "history", label: i18n.t("library.history") },
 		] as tab (tab.key)}
 			<button
-				class="px-3 py-1.5 text-sm rounded-full {activeTab === tab.key
-					? 'bg-accent text-white'
-					: 'bg-bg-card text-text-secondary'}"
+				class="px-3 py-1.5 text-sm rounded-full transition-colors {activeTab === tab.key
+					? 'bg-accent text-white shadow-sm'
+					: 'bg-bg-card text-text-secondary hover:bg-bg-elevated/50'}"
 				onclick={() => (activeTab = tab.key as Tab)}
 			>
 				{tab.label}
@@ -99,11 +99,11 @@ function handleDownload(episode: Episode) {
 							<img
 								src={podcast.coverUrl}
 								alt={podcast.title}
-								class="w-full aspect-square rounded-xl object-cover"
+								class="w-full aspect-square rounded-2xl object-cover ring-1 ring-border-subtle"
 							/>
 						{:else}
 							<div
-								class="w-full aspect-square rounded-xl bg-bg-card flex items-center justify-center"
+								class="w-full aspect-square rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
 							>
 								<svg
 									class="w-10 h-10 text-text-secondary"

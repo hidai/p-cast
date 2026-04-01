@@ -82,7 +82,7 @@ async function handleDeleteDownload() {
 		<!-- Header: cover + info -->
 		<div class="flex gap-4 mb-4">
 			{#if coverUrl}
-				<img src={coverUrl} alt="" class="w-20 h-20 rounded-xl object-cover shrink-0" />
+				<img src={coverUrl} alt="" class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
 			{:else}
 				<div
 					class="w-20 h-20 rounded-xl bg-bg-card flex items-center justify-center shrink-0"
@@ -124,7 +124,7 @@ async function handleDeleteDownload() {
 		</div>
 
 		<!-- Separator -->
-		<div class="border-t border-border mb-4"></div>
+		<div class="border-t border-border-subtle mb-4"></div>
 
 		<!-- Description -->
 		{#if episode.description}
@@ -139,7 +139,7 @@ async function handleDeleteDownload() {
 	{#snippet footer()}
 	<!-- Fixed footer: actions -->
 	<div
-		class="shrink-0 px-5 py-4 border-t border-border flex items-center gap-3"
+		class="shrink-0 px-5 py-4 border-t border-border-subtle flex items-center gap-3"
 		style="padding-bottom: max(1rem, env(safe-area-inset-bottom));"
 	>
 		{#if isCurrentEpisode}
@@ -157,7 +157,7 @@ async function handleDeleteDownload() {
 			</button>
 		{:else}
 			<button
-				class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-medium text-sm"
+				class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-medium text-sm shadow-md shadow-accent/20 active:scale-95 transition-transform"
 				onclick={handlePlay}
 			>
 				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -173,7 +173,7 @@ async function handleDeleteDownload() {
 
 		{#if episode.isDownloaded}
 			<button
-				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-red-400 font-medium text-sm"
+				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-danger font-medium text-sm"
 				onclick={handleDeleteDownload}
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

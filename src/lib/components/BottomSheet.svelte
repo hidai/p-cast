@@ -91,7 +91,7 @@ function handleWheel(e: WheelEvent) {
 	<!-- Backdrop -->
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
-		class="absolute inset-0 bg-black/60"
+		class="absolute inset-0 backdrop-overlay"
 		in:fade={{ duration: 300 }}
 		out:fade={{ duration: 200 }}
 		onclick={() => overlay.closeAll()}
@@ -99,7 +99,7 @@ function handleWheel(e: WheelEvent) {
 
 	<!-- Sheet -->
 	<div
-		class="absolute left-0 right-0 bottom-0 bg-bg-primary rounded-t-2xl flex flex-col overflow-hidden"
+		class="absolute left-0 right-0 bottom-0 bg-bg-secondary rounded-t-3xl flex flex-col overflow-hidden shadow-2xl"
 		in:fly={{ y: window.innerHeight * (1 - initialTop), duration: 300, easing: cubicOut }}
 		out:fly={{ y: window.innerHeight * (1 - initialTop), duration: 200, easing: cubicIn }}
 		style="top: {sheetTop}px; transition: {isDragging ? 'none' : 'top 0.3s cubic-bezier(0.32, 0.72, 0, 1)'};"
@@ -110,7 +110,7 @@ function handleWheel(e: WheelEvent) {
 	>
 		<!-- Drag handle -->
 		<div class="flex justify-center pt-3 pb-2 shrink-0">
-			<div class="w-10 h-1 rounded-full bg-text-secondary/40"></div>
+			<div class="w-8 h-1 rounded-full bg-border"></div>
 		</div>
 
 		<!-- Content -->
@@ -127,3 +127,17 @@ function handleWheel(e: WheelEvent) {
 		{/if}
 	</div>
 </div>
+
+<style>
+	.backdrop-overlay {
+		background: rgba(0, 0, 0, 0.3);
+	}
+	:global(:root.dark) .backdrop-overlay {
+		background: rgba(0, 0, 0, 0.6);
+	}
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not(.light)) .backdrop-overlay {
+			background: rgba(0, 0, 0, 0.6);
+		}
+	}
+</style>

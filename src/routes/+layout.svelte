@@ -8,6 +8,7 @@ import MiniPlayer from "$lib/components/MiniPlayer.svelte";
 import PodcastDetailSheet from "$lib/components/PodcastDetailSheet.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
+import "$lib/theme.svelte";
 
 let { children } = $props();
 

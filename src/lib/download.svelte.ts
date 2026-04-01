@@ -10,7 +10,7 @@ export function createDownloadState() {
 		},
 
 		getProgress(episodeGuid: string): number | null {
-			return guids.has(episodeGuid) ? guids.get(episodeGuid) ?? 0 : null;
+			return guids.has(episodeGuid) ? (guids.get(episodeGuid) ?? 0) : null;
 		},
 
 		async download(episode: Episode, onComplete?: () => Promise<void> | void) {

@@ -4,11 +4,12 @@ import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
+import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
-import { createDownloadState } from "$lib/download.svelte";
 import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
+import { theme } from "$lib/theme.svelte";
 
 // Redirect to Discover once if user has never used the app
 const redirectKey = "p-cast:discoveredOnce";
@@ -126,26 +127,43 @@ function handleDownload(episode: Episode) {
 <div class="px-4 pt-4">
 	<div class="flex items-center justify-between mb-4">
 		<h1 class="text-xl font-bold">{i18n.t("home.title")}</h1>
-		<button
-			class="text-sm text-accent disabled:opacity-50"
-			onclick={handleRefresh}
-			disabled={isRefreshing}
-		>
-			{#if isRefreshing}
-				<span class="inline-flex items-center gap-1.5">
-					<Spinner class="w-3.5 h-3.5" />
-					{i18n.t("home.refreshing")}
-				</span>
-			{:else}
-				{i18n.t("home.refresh")}
-			{/if}
-		</button>
+		<div class="flex items-center gap-2">
+			<button
+				class="p-2 rounded-xl bg-bg-card text-text-secondary hover:text-text-primary active:scale-95 transition-all"
+				onclick={() => theme.toggle()}
+				aria-label="Toggle theme"
+			>
+				{#if theme.resolvedDark}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+					</svg>
+				{:else}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+					</svg>
+				{/if}
+			</button>
+			<button
+				class="text-sm text-accent disabled:opacity-50"
+				onclick={handleRefresh}
+				disabled={isRefreshing}
+			>
+				{#if isRefreshing}
+					<span class="inline-flex items-center gap-1.5">
+						<Spinner class="w-3.5 h-3.5" />
+						{i18n.t("home.refreshing")}
+					</span>
+				{:else}
+					{i18n.t("home.refresh")}
+				{/if}
+			</button>
+		</div>
 	</div>
 
 	<!-- Continue Listening -->
 	{#if continueEpisodes.length > 0}
 		<section class="mb-6">
-			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+			<h2 class="text-sm font-semibold text-text-secondary tracking-wide mb-3">
 				{i18n.t("home.continueListening")}
 			</h2>
 			<div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
@@ -160,11 +178,11 @@ function handleDownload(episode: Episode) {
 								<img
 									src={imgUrl}
 									alt=""
-									class="w-36 h-36 rounded-xl object-cover"
+									class="w-36 h-36 rounded-2xl object-cover ring-1 ring-border-subtle"
 								/>
 							{:else}
 								<div
-									class="w-36 h-36 rounded-xl bg-bg-card flex items-center justify-center"
+									class="w-36 h-36 rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
 								>
 									<svg
 										class="w-10 h-10 text-text-secondary"
@@ -182,7 +200,7 @@ function handleDownload(episode: Episode) {
 								</div>
 							{/if}
 							<!-- Progress bar overlay -->
-							<div class="absolute bottom-0 left-0 right-0 h-1 bg-black/40 rounded-b-xl overflow-hidden">
+							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-black/40 rounded-b-2xl overflow-hidden">
 								<div
 									class="h-full bg-accent"
 									style="width: {episode.duration > 0
@@ -206,7 +224,7 @@ function handleDownload(episode: Episode) {
 	<!-- Next Up -->
 	{#if nextUpEpisodes.length > 0}
 		<section class="mb-6">
-			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+			<h2 class="text-sm font-semibold text-text-secondary tracking-wide mb-3">
 				{i18n.t("home.nextUp")}
 			</h2>
 			<div class="space-y-1">
@@ -227,7 +245,7 @@ function handleDownload(episode: Episode) {
 	<!-- Latest Episodes -->
 	{#if latestEpisodes.length > 0}
 		<section class="mb-6">
-			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+			<h2 class="text-sm font-semibold text-text-secondary tracking-wide mb-3">
 				{i18n.t("home.latestEpisodes")}
 			</h2>
 			<div class="space-y-1">

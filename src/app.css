@@ -1,14 +1,61 @@
 @import "tailwindcss";
 
 @theme {
-	--color-bg-primary: #0f0e1a;
-	--color-bg-secondary: #1a1830;
-	--color-bg-card: #252340;
+	--color-bg-primary: #fafafa;
+	--color-bg-secondary: #f4f4f5;
+	--color-bg-card: #ffffff;
+	--color-bg-elevated: #e4e4e7;
+	--color-accent: #6366f1;
+	--color-accent-hover: #4f46e5;
+	--color-accent-subtle: rgba(99, 102, 241, 0.08);
+	--color-text-primary: #18181b;
+	--color-text-secondary: #52525b;
+	--color-text-tertiary: #a1a1aa;
+	--color-border: #e4e4e7;
+	--color-border-subtle: #f4f4f5;
+	--color-surface-glass: rgba(255, 255, 255, 0.8);
+	--color-danger: #ef4444;
+	--color-danger-hover: #dc2626;
+}
+
+/* Dark mode */
+:root.dark {
+	--color-bg-primary: #09090b;
+	--color-bg-secondary: #18181b;
+	--color-bg-card: #27272a;
+	--color-bg-elevated: #3f3f46;
 	--color-accent: #818cf8;
 	--color-accent-hover: #a5b4fc;
-	--color-text-primary: #f1f5f9;
-	--color-text-secondary: #94a3b8;
-	--color-border: #334155;
+	--color-accent-subtle: rgba(129, 140, 248, 0.12);
+	--color-text-primary: #fafafa;
+	--color-text-secondary: #a1a1aa;
+	--color-text-tertiary: #71717a;
+	--color-border: #3f3f46;
+	--color-border-subtle: #27272a;
+	--color-surface-glass: rgba(39, 39, 42, 0.8);
+	--color-danger: #f87171;
+	--color-danger-hover: #ef4444;
+}
+
+/* System preference fallback (when no explicit class is set) */
+@media (prefers-color-scheme: dark) {
+	:root:not(.light) {
+		--color-bg-primary: #09090b;
+		--color-bg-secondary: #18181b;
+		--color-bg-card: #27272a;
+		--color-bg-elevated: #3f3f46;
+		--color-accent: #818cf8;
+		--color-accent-hover: #a5b4fc;
+		--color-accent-subtle: rgba(129, 140, 248, 0.12);
+		--color-text-primary: #fafafa;
+		--color-text-secondary: #a1a1aa;
+		--color-text-tertiary: #71717a;
+		--color-border: #3f3f46;
+		--color-border-subtle: #27272a;
+		--color-surface-glass: rgba(39, 39, 42, 0.8);
+		--color-danger: #f87171;
+		--color-danger-hover: #ef4444;
+	}
 }
 
 html,
@@ -21,6 +68,13 @@ body {
 	background-color: var(--color-bg-primary);
 	color: var(--color-text-primary);
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+	background: var(--color-accent-subtle);
+	color: var(--color-accent);
 }
 
 .rich-description a {

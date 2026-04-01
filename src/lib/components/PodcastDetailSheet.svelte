@@ -4,9 +4,9 @@ import BottomSheet from "$lib/components/BottomSheet.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
+import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay, type PodcastMeta } from "$lib/overlay.svelte";
-import { createDownloadState } from "$lib/download.svelte";
 import {
 	fetchEpisodes,
 	type SearchResult,
@@ -127,15 +127,15 @@ function handleDownload(episode: Episode) {
 		<!-- Podcast header -->
 		<div class="flex gap-4 mb-6">
 			{#if coverUrl}
-				<img src={coverUrl} alt="" class="w-28 h-28 rounded-xl object-cover shrink-0" />
+				<img src={coverUrl} alt="" class="w-24 h-24 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-border-subtle" />
 			{/if}
 			<div class="min-w-0">
 				<h1 class="text-lg font-bold leading-tight">{title}</h1>
 				<p class="text-sm text-text-secondary mt-1">{author}</p>
 				<button
-					class="mt-3 px-4 py-1.5 rounded-full text-sm font-medium inline-flex items-center gap-1.5 disabled:opacity-50 {isSubscribed
-						? 'bg-bg-card text-text-secondary border border-border'
-						: 'bg-accent text-white'}"
+					class="mt-3 px-4 py-1.5 rounded-xl text-sm font-medium inline-flex items-center gap-1.5 disabled:opacity-50 active:scale-95 transition-all {isSubscribed
+						? 'bg-accent-subtle text-accent border border-accent/20'
+						: 'bg-accent text-white shadow-md shadow-accent/20'}"
 					onclick={toggleSubscribe}
 					disabled={isToggling}
 				>
@@ -166,7 +166,7 @@ function handleDownload(episode: Episode) {
 
 		<!-- Episodes header -->
 		<div class="flex items-center justify-between mb-3">
-			<h2 class="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+			<h2 class="text-sm font-semibold text-text-secondary tracking-wide">
 				{i18n.t("podcast.episodes")}{episodes.length > 0 ? ` (${episodes.length})` : ""}
 			</h2>
 			<div class="relative">
@@ -199,14 +199,14 @@ function handleDownload(episode: Episode) {
 						aria-label="Close menu"
 					></button>
 					<div
-						class="absolute right-0 top-full mt-1 z-20 bg-bg-card border border-border rounded-lg shadow-lg py-1 min-w-[140px]"
+						class="absolute right-0 top-full mt-1 z-20 bg-bg-card border border-border rounded-xl shadow-xl py-1 min-w-[140px]"
 					>
 						{#each [
 							{ key: "newest", label: i18n.t("podcast.newestFirst") },
 							{ key: "oldest", label: i18n.t("podcast.oldestFirst") },
 						] as option (option.key)}
 							<button
-								class="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors {sortOrder ===
+								class="w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-bg-elevated/50 transition-colors {sortOrder ===
 								option.key
 									? 'text-accent'
 									: 'text-text-primary'}"

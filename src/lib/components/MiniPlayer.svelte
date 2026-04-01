@@ -6,37 +6,42 @@ import { formatDuration } from "$lib/podcast-service";
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="flex items-center gap-3 bg-bg-card border-t border-border px-4 py-2 cursor-pointer shadow-[0_-2px_8px_rgba(0,0,0,0.3)]"
-	onclick={() => overlay.openFullPlayer()}
->
-	{#if player.currentEpisode?.coverUrl}
-		<img
-			src={player.currentEpisode.coverUrl}
-			alt=""
-			class="shrink-0 w-10 h-10 rounded object-cover"
-		/>
-	{/if}
-	<div class="flex-1 min-w-0">
-		<p class="text-sm font-medium truncate">{player.currentEpisode?.title}</p>
-		<p class="text-xs text-text-secondary">{formatDuration(player.currentTime)}</p>
+<div>
+	<!-- Progress bar on top -->
+	<div class="h-0.5 bg-border-subtle">
+		<div
+			class="h-full bg-accent transition-all"
+			style="width: {player.progress * 100}%"
+		></div>
 	</div>
-	<button
-		class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent text-white"
-		onclick={(e: MouseEvent) => { e.stopPropagation(); player.togglePlay(); }}
+	<div
+		class="flex items-center gap-3 bg-surface-glass backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
+		onclick={() => overlay.openFullPlayer()}
 	>
-		{#if player.isPlaying}
-			<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-				<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-			</svg>
-		{:else}
-			<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-				<path d="M8 5v14l11-7z" />
-			</svg>
+		{#if player.currentEpisode?.coverUrl}
+			<img
+				src={player.currentEpisode.coverUrl}
+				alt=""
+				class="shrink-0 w-10 h-10 rounded-lg object-cover ring-1 ring-border-subtle"
+			/>
 		{/if}
-	</button>
-</div>
-<!-- Progress bar -->
-<div class="h-1 bg-border">
-	<div class="h-full bg-accent transition-all" style="width: {player.progress * 100}%"></div>
+		<div class="flex-1 min-w-0">
+			<p class="text-sm font-medium truncate">{player.currentEpisode?.title}</p>
+			<p class="text-xs text-text-secondary">{formatDuration(player.currentTime)}</p>
+		</div>
+		<button
+			class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent text-white shadow-md active:scale-95 transition-transform"
+			onclick={(e: MouseEvent) => { e.stopPropagation(); player.togglePlay(); }}
+		>
+			{#if player.isPlaying}
+				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+				</svg>
+			{:else}
+				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M8 5v14l11-7z" />
+				</svg>
+			{/if}
+		</button>
+	</div>
 </div>
