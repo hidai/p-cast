@@ -1,5 +1,6 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
+import MusicNote from "phosphor-svelte/lib/MusicNote";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { createDownloadState } from "$lib/download.svelte";
@@ -90,19 +91,7 @@ function handleDownload(episode: Episode) {
 							<div
 								class="w-full aspect-square rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
 							>
-								<svg
-									class="w-10 h-10 text-text-secondary"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="1.5"
-										d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-									/>
-								</svg>
+								<MusicNote size={40} weight="light" class="text-text-secondary" />
 							</div>
 						{/if}
 						<p class="text-xs font-medium mt-1.5 line-clamp-2 leading-tight">

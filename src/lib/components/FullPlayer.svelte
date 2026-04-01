@@ -1,4 +1,11 @@
 <script lang="ts">
+import CaretDown from "phosphor-svelte/lib/CaretDown";
+import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
+import FastForward from "phosphor-svelte/lib/FastForward";
+import MusicNote from "phosphor-svelte/lib/MusicNote";
+import Pause from "phosphor-svelte/lib/Pause";
+import Play from "phosphor-svelte/lib/Play";
+import Rewind from "phosphor-svelte/lib/Rewind";
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
@@ -72,9 +79,7 @@ $effect(() => {
 	<!-- Header -->
 	<div class="flex items-center justify-between px-4 py-3">
 		<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => overlay.closeAll()} aria-label="Close player">
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-			</svg>
+			<CaretDown size={24} />
 		</button>
 		<span class="text-sm text-text-secondary">{i18n.t("player.nowPlaying")}</span>
 		<div class="w-6"></div>
@@ -86,9 +91,7 @@ $effect(() => {
 			<img src={coverUrl} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover ring-1 ring-border-subtle" />
 		{:else}
 			<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center ring-1 ring-border-subtle">
-				<svg class="w-24 h-24 text-text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
-				</svg>
+				<MusicNote size={96} weight="light" class="text-text-tertiary" />
 			</div>
 		{/if}
 	</div>
@@ -129,9 +132,7 @@ $effect(() => {
 		<!-- Controls -->
 		<div class="flex items-center justify-center gap-8 mt-4">
 			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(-10)}>
-				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-				</svg>
+				<Rewind size={32} weight="fill" />
 				<span class="text-xs block">10s</span>
 			</button>
 			<button
@@ -139,19 +140,13 @@ $effect(() => {
 				onclick={() => player.togglePlay()}
 			>
 				{#if player.isPlaying}
-					<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-					</svg>
+					<Pause size={32} weight="fill" />
 				{:else}
-					<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-						<path d="M8 5v14l11-7z" />
-					</svg>
+					<Play size={32} weight="fill" />
 				{/if}
 			</button>
 			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(10)}>
-				<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
-				</svg>
+				<FastForward size={32} weight="fill" />
 				<span class="text-xs block">10s</span>
 			</button>
 		</div>
@@ -177,9 +172,7 @@ $effect(() => {
 				{#if isDownloading}
 					<DownloadProgress progress={downloadProgress} class="w-6 h-6" />
 				{:else}
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-					</svg>
+					<DownloadSimple size={24} />
 				{/if}
 			</button>
 		</div>

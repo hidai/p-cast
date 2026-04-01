@@ -1,5 +1,7 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
+import Microphone from "phosphor-svelte/lib/Microphone";
+import MusicNote from "phosphor-svelte/lib/MusicNote";
 import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import PullToRefresh from "$lib/components/PullToRefresh.svelte";
@@ -181,19 +183,7 @@ function handleDownload(episode: Episode) {
 								<div
 									class="w-36 h-36 rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
 								>
-									<svg
-										class="w-10 h-10 text-text-secondary"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="1.5"
-											d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-										/>
-									</svg>
+									<MusicNote size={40} weight="light" class="text-text-secondary" />
 								</div>
 							{/if}
 							<!-- Progress bar overlay -->
@@ -262,19 +252,9 @@ function handleDownload(episode: Episode) {
 
 	{#if continueEpisodes.length === 0 && nextUpEpisodes.length === 0 && latestEpisodes.length === 0}
 		<div class="text-center text-text-secondary mt-16">
-			<svg
-				class="w-16 h-16 mx-auto mb-4"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="1"
-					d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-				/>
-			</svg>
+			<div class="flex justify-center mb-4">
+				<Microphone size={64} weight="light" />
+			</div>
 			<p>{i18n.t("home.emptyTitle")}</p>
 			<p class="text-sm mt-1">{i18n.t("home.emptySubtitle")}</p>
 		</div>

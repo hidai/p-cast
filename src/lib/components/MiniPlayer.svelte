@@ -1,4 +1,6 @@
 <script lang="ts">
+import Pause from "phosphor-svelte/lib/Pause";
+import Play from "phosphor-svelte/lib/Play";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
@@ -46,13 +48,9 @@ $effect(() => {
 			onclick={(e: MouseEvent) => { e.stopPropagation(); player.togglePlay(); }}
 		>
 			{#if player.isPlaying}
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-				</svg>
+				<Pause size={20} weight="fill" />
 			{:else}
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
+				<Play size={20} weight="fill" />
 			{/if}
 		</button>
 	</div>

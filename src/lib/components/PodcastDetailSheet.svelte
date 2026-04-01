@@ -1,5 +1,8 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
+import CaretDown from "phosphor-svelte/lib/CaretDown";
+import Check from "phosphor-svelte/lib/Check";
+import SortAscending from "phosphor-svelte/lib/SortAscending";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
@@ -174,23 +177,9 @@ function handleDownload(episode: Episode) {
 					class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-bg-card text-text-secondary hover:text-text-primary transition-colors"
 					onclick={() => (sortMenuOpen = !sortMenuOpen)}
 				>
-					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 4h13M3 8h9M3 12h5m4 0l4-4m0 0l4 4m-4-4v12"
-						/>
-					</svg>
+					<SortAscending size={14} />
 					{sortOrder === "newest" ? i18n.t("podcast.newestFirst") : i18n.t("podcast.oldestFirst")}
-					<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 9l-7 7-7-7"
-						/>
-					</svg>
+					<CaretDown size={12} />
 				</button>
 				{#if sortMenuOpen}
 					<button
@@ -213,14 +202,7 @@ function handleDownload(episode: Episode) {
 								onclick={() => changeSortOrder(option.key as EpisodeSortOrder)}
 							>
 								{#if sortOrder === option.key}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+									<Check size={16} />
 								{:else}
 									<span class="w-4"></span>
 								{/if}

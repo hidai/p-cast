@@ -1,4 +1,8 @@
 <script lang="ts">
+import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
+import MusicNote from "phosphor-svelte/lib/MusicNote";
+import Play from "phosphor-svelte/lib/Play";
+import Trash from "phosphor-svelte/lib/Trash";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import type { Episode } from "$lib/db";
@@ -81,19 +85,7 @@ async function handleDeleteDownload() {
 				<div
 					class="w-20 h-20 rounded-xl bg-bg-card flex items-center justify-center shrink-0"
 				>
-					<svg
-						class="w-8 h-8 text-text-secondary"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"
-						/>
-					</svg>
+					<MusicNote size={32} weight="light" class="text-text-secondary" />
 				</div>
 			{/if}
 			<div class="min-w-0 flex-1">
@@ -154,9 +146,7 @@ async function handleDeleteDownload() {
 				class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-medium text-sm shadow-md shadow-accent/20 active:scale-95 transition-transform"
 				onclick={handlePlay}
 			>
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
+				<Play size={20} weight="fill" />
 				{#if episode.currentTime > 0 && !episode.isCompleted}
 					{i18n.t("episode.resume")}
 				{:else}
@@ -170,14 +160,7 @@ async function handleDeleteDownload() {
 				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-danger font-medium text-sm"
 				onclick={handleDeleteDownload}
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-					/>
-				</svg>
+				<Trash size={20} />
 				{i18n.t("episode.delete")}
 			</button>
 		{:else}
@@ -189,14 +172,7 @@ async function handleDeleteDownload() {
 				{#if isDownloading}
 					<DownloadProgress progress={downloadProgress} />
 				{:else}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-						/>
-					</svg>
+					<DownloadSimple size={20} />
 				{/if}
 				{i18n.t("episode.download")}
 			</button>

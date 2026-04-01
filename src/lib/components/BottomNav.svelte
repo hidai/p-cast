@@ -1,6 +1,17 @@
 <script lang="ts">
+import Archive from "phosphor-svelte/lib/Archive";
+import Gear from "phosphor-svelte/lib/Gear";
+import House from "phosphor-svelte/lib/House";
+import MagnifyingGlass from "phosphor-svelte/lib/MagnifyingGlass";
 import { page } from "$app/state";
 import { i18n } from "$lib/i18n";
+
+const isActive = $derived({
+	home: page.url.pathname === "/",
+	discover: page.url.pathname === "/discover",
+	library: page.url.pathname.startsWith("/library"),
+	settings: page.url.pathname === "/settings",
+});
 </script>
 
 <nav
@@ -8,85 +19,38 @@ import { i18n } from "$lib/i18n";
 >
 	<a
 		href="/"
-		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname === '/'
+		class="flex flex-1 flex-col items-center gap-1 text-xs py-1 {isActive.home
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"
-			/>
-		</svg>
+		<House size={20} weight={isActive.home ? "fill" : "regular"} />
 		<span>{i18n.t("nav.home")}</span>
-		{#if page.url.pathname === "/"}
-			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
-		{/if}
 	</a>
 	<a
 		href="/discover"
-		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname === '/discover'
+		class="flex flex-1 flex-col items-center gap-1 text-xs py-1 {isActive.discover
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
-		</svg>
+		<MagnifyingGlass size={20} weight={isActive.discover ? "fill" : "regular"} />
 		<span>{i18n.t("nav.discover")}</span>
-		{#if page.url.pathname === "/discover"}
-			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
-		{/if}
 	</a>
 	<a
 		href="/library"
-		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname.startsWith('/library')
+		class="flex flex-1 flex-col items-center gap-1 text-xs py-1 {isActive.library
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-			/>
-		</svg>
+		<Archive size={20} weight={isActive.library ? "fill" : "regular"} />
 		<span>{i18n.t("nav.library")}</span>
-		{#if page.url.pathname.startsWith("/library")}
-			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
-		{/if}
 	</a>
 	<a
 		href="/settings"
-		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname ===
-		'/settings'
+		class="flex flex-1 flex-col items-center gap-1 text-xs py-1 {isActive.settings
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-			/>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-			/>
-		</svg>
+		<Gear size={20} weight={isActive.settings ? "fill" : "regular"} />
 		<span>{i18n.t("nav.settings")}</span>
-		{#if page.url.pathname === "/settings"}
-			<div class="absolute -bottom-0.5 w-1 h-1 rounded-full bg-accent"></div>
-		{/if}
 	</a>
 </nav>

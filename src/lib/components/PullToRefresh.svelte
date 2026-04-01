@@ -1,4 +1,5 @@
 <script lang="ts">
+import ArrowDown from "phosphor-svelte/lib/ArrowDown";
 import type { Snippet } from "svelte";
 import Spinner from "./Spinner.svelte";
 
@@ -94,20 +95,12 @@ async function handleTouchEnd() {
 		{#if isRefreshing}
 			<Spinner class="w-5 h-5 text-accent" />
 		{:else if pullDistance > 0}
-			<svg
-				class="w-5 h-5 text-text-secondary transition-transform"
-				style="transform: rotate({Math.min((pullDistance / THRESHOLD) * 180, 180)}deg); opacity: {Math.min(pullDistance / THRESHOLD, 1)}"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
+			<span
+				class="text-text-secondary transition-transform"
+				style="display:inline-flex; transform: rotate({Math.min((pullDistance / THRESHOLD) * 180, 180)}deg); opacity: {Math.min(pullDistance / THRESHOLD, 1)}"
 			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M19 14l-7 7m0 0l-7-7m7 7V3"
-				/>
-			</svg>
+				<ArrowDown size={20} />
+			</span>
 		{/if}
 	</div>
 	{@render children()}
