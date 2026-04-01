@@ -8,7 +8,7 @@ import { i18n } from "$lib/i18n";
 >
 	<a
 		href="/"
-		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname === '/'
+		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname === '/'
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
@@ -27,7 +27,7 @@ import { i18n } from "$lib/i18n";
 	</a>
 	<a
 		href="/discover"
-		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname === '/discover'
+		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname === '/discover'
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
@@ -46,7 +46,7 @@ import { i18n } from "$lib/i18n";
 	</a>
 	<a
 		href="/library"
-		class="flex flex-col items-center gap-1 text-xs relative {page.url.pathname.startsWith('/library')
+		class="flex flex-1 flex-col items-center gap-1 text-xs relative py-1 {page.url.pathname.startsWith('/library')
 			? 'text-accent'
 			: 'text-text-secondary'}"
 	>
