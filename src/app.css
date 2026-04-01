@@ -12,7 +12,7 @@
 	--color-text-secondary: #52525b;
 	--color-text-tertiary: #a1a1aa;
 	--color-border: #e4e4e7;
-	--color-border-subtle: #f4f4f5;
+	--color-border-subtle: #e8e8ec;
 	--color-surface-glass: rgba(255, 255, 255, 0.8);
 	--color-mini-player-bg: #f4f2fd;
 	--color-danger: #ef4444;
@@ -32,7 +32,7 @@
 	--color-text-secondary: #a1a1aa;
 	--color-text-tertiary: #71717a;
 	--color-border: #3f3f46;
-	--color-border-subtle: #27272a;
+	--color-border-subtle: #2e2e33;
 	--color-surface-glass: rgba(39, 39, 42, 0.8);
 	--color-mini-player-bg: #161527;
 	--color-danger: #f87171;
@@ -53,7 +53,7 @@
 		--color-text-secondary: #a1a1aa;
 		--color-text-tertiary: #71717a;
 		--color-border: #3f3f46;
-		--color-border-subtle: #27272a;
+		--color-border-subtle: #2e2e33;
 		--color-surface-glass: rgba(39, 39, 42, 0.8);
 		--color-mini-player-bg: #161527;
 		--color-danger: #f87171;
@@ -78,6 +78,18 @@ body {
 ::selection {
 	background: var(--color-accent-subtle);
 	color: var(--color-accent);
+}
+
+.bottom-bar-shadow {
+	box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+:root.dark .bottom-bar-shadow {
+	box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.3);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not(.light) .bottom-bar-shadow {
+		box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.3);
+	}
 }
 
 .rich-description a {

@@ -4,7 +4,7 @@ import { i18n } from "$lib/i18n";
 </script>
 
 <nav
-	class="flex items-center justify-around bg-surface-glass backdrop-blur-xl border-t border-border-subtle py-2.5 pb-[env(safe-area-inset-bottom)]"
+	class="flex items-center justify-around bg-surface-glass backdrop-blur-xl py-2.5 pb-[env(safe-area-inset-bottom)]"
 >
 	<a
 		href="/"

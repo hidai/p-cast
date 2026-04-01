@@ -36,7 +36,7 @@ function handleKeydown(e: KeyboardEvent) {
 </div>
 
 <!-- Fixed bottom bar: MiniPlayer + BottomNav -->
-<div class="fixed bottom-0 left-0 right-0 z-40">
+<div class="fixed bottom-0 left-0 right-0 z-40 border-t border-border bottom-bar-shadow">
 	{#if player.currentEpisode}
 		<MiniPlayer />
 	{/if}
