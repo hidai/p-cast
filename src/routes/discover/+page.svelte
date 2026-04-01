@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+import Spinner from "$lib/components/Spinner.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import {
@@ -121,10 +122,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 			disabled={isSearching}
 		>
 			{#if isSearching}
-					<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-					</svg>
+					<Spinner />
 				{:else}
 					{i18n.t("discover.search")}
 				{/if}
@@ -138,10 +136,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 			</h2>
 			{#if isLoadingTop}
 				<div class="flex justify-center py-8">
-					<svg class="w-6 h-6 animate-spin text-accent" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-					</svg>
+					<Spinner class="w-6 h-6 text-accent" />
 				</div>
 			{:else}
 				<div class="space-y-2">
@@ -162,10 +157,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 								<p class="text-xs text-text-secondary truncate">{podcast.artistName}</p>
 							</div>
 							{#if lookingUpId === podcast.id}
-								<svg class="w-4 h-4 animate-spin text-accent shrink-0" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-								</svg>
+								<Spinner class="w-4 h-4 text-accent shrink-0" />
 							{/if}
 						</button>
 					{/each}

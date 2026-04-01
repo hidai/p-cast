@@ -2,6 +2,7 @@
 import { liveQuery } from "dexie";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
+import Spinner from "$lib/components/Spinner.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay, type PodcastMeta } from "$lib/overlay.svelte";
@@ -139,21 +140,7 @@ function handleDownload(episode: Episode) {
 					disabled={isToggling}
 				>
 					{#if isToggling}
-						<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							/>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-							/>
-						</svg>
+						<Spinner class="w-3.5 h-3.5" />
 					{/if}
 					{isSubscribed ? i18n.t("podcast.unsubscribe") : i18n.t("podcast.subscribe")}
 				</button>
@@ -247,21 +234,7 @@ function handleDownload(episode: Episode) {
 
 		{#if isLoading}
 			<div class="flex items-center justify-center gap-2 text-text-secondary py-8">
-				<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-					<circle
-						class="opacity-25"
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
-					/>
-					<path
-						class="opacity-75"
-						fill="currentColor"
-						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-					/>
-				</svg>
+				<Spinner class="w-5 h-5" />
 				<span>{i18n.t("podcast.loadingEpisodes")}</span>
 			</div>
 		{:else}
