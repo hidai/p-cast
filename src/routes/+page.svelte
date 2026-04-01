@@ -24,80 +24,111 @@ $effect(() => {
 	);
 });
 
-let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
-let nextUpEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
-let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
+type EpisodeWithPodcast = Episode & { podcast?: Podcast };
+
+function buildContinueList(
+	allEpisodes: Episode[],
+	podcastMap: Map<string, Podcast>,
+): { list: EpisodeWithPodcast[]; guids: Set<string> } {
+	const guids = new Set<string>();
+	const list = allEpisodes
+		.filter((e) => !e.isCompleted && e.currentTime > 0)
+		.map((e) => {
+			guids.add(e.guid);
+			return { ...e, podcast: podcastMap.get(e.podcastFeedUrl) };
+		});
+	return { list, guids };
+}
+
+function groupByPodcast(
+	allEpisodes: Episode[],
+	podcastMap: Map<string, Podcast>,
+): Map<string, Episode[]> {
+	const map = new Map<string, Episode[]>();
+	for (const e of allEpisodes) {
+		if (!podcastMap.has(e.podcastFeedUrl)) continue;
+		let list = map.get(e.podcastFeedUrl);
+		if (!list) {
+			list = [];
+			map.set(e.podcastFeedUrl, list);
+		}
+		list.push(e);
+	}
+	return map;
+}
+
+function buildNextUpList(
+	episodesByPodcast: Map<string, Episode[]>,
+	podcastMap: Map<string, Podcast>,
+	excludeGuids: Set<string>,
+): { list: EpisodeWithPodcast[]; guids: Set<string> } {
+	const guids = new Set<string>();
+	const list: EpisodeWithPodcast[] = [];
+	for (const [feedUrl, episodes] of episodesByPodcast) {
+		let lastPlayed: Episode | null = null;
+		for (const e of episodes) {
+			if (e.lastPlayedAt && (!lastPlayed || e.lastPlayedAt > (lastPlayed.lastPlayedAt ?? 0))) {
+				lastPlayed = e;
+			}
+		}
+		if (!lastPlayed) continue;
+
+		let nextEp: Episode | null = null;
+		for (const e of episodes) {
+			if (e.pubDate > lastPlayed.pubDate) {
+				if (!nextEp || e.pubDate < nextEp.pubDate) {
+					nextEp = e;
+				}
+			}
+		}
+		if (nextEp && !excludeGuids.has(nextEp.guid)) {
+			guids.add(nextEp.guid);
+			list.push({ ...nextEp, podcast: podcastMap.get(feedUrl) });
+		}
+	}
+	list.sort((a, b) => b.pubDate - a.pubDate);
+	return { list, guids };
+}
+
+function buildLatestList(
+	episodesByPodcast: Map<string, Episode[]>,
+	podcastMap: Map<string, Podcast>,
+	excludeGuids: Set<string>,
+): EpisodeWithPodcast[] {
+	const list: EpisodeWithPodcast[] = [];
+	for (const [feedUrl, episodes] of episodesByPodcast) {
+		const newest = episodes.find((e) => !e.isCompleted && !excludeGuids.has(e.guid));
+		if (newest) {
+			list.push({ ...newest, podcast: podcastMap.get(feedUrl) });
+		}
+	}
+	list.sort((a, b) => b.pubDate - a.pubDate);
+	return list;
+}
+
+let continueEpisodes: EpisodeWithPodcast[] = $state([]);
+let nextUpEpisodes: EpisodeWithPodcast[] = $state([]);
+let latestEpisodes: EpisodeWithPodcast[] = $state([]);
 const downloading = createDownloadState();
 
-// All three sections computed from a single reactive query
 $effect(() => {
 	const sub = liveQuery(async () => {
 		const podcasts = await db.podcasts.toArray();
 		const podcastMap = new Map(podcasts.map((p) => [p.feedUrl, p]));
 		const allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
+		const episodesByPodcast = groupByPodcast(allEpisodes, podcastMap);
 
-		// 1. Continue Listening: in-progress episodes
-		const continueGuids = new Set<string>();
-		const continueList = allEpisodes
-			.filter((e) => !e.isCompleted && e.currentTime > 0)
-			.map((e) => {
-				continueGuids.add(e.guid);
-				return { ...e, podcast: podcastMap.get(e.podcastFeedUrl) };
-			});
-
-		// Group episodes by podcast for Next Up and Latest
-		const episodesByPodcast = new Map<string, Episode[]>();
-		for (const e of allEpisodes) {
-			if (!podcastMap.has(e.podcastFeedUrl)) continue;
-			let list = episodesByPodcast.get(e.podcastFeedUrl);
-			if (!list) {
-				list = [];
-				episodesByPodcast.set(e.podcastFeedUrl, list);
-			}
-			list.push(e);
-		}
-
-		// 2. Next Up: for each podcast, find the episode after the last played one
-		const nextUpGuids = new Set<string>();
-		const nextUpList: (Episode & { podcast?: Podcast })[] = [];
-		for (const [feedUrl, episodes] of episodesByPodcast) {
-			// Find the most recently played episode (highest lastPlayedAt)
-			let lastPlayed: Episode | null = null;
-			for (const e of episodes) {
-				if (e.lastPlayedAt && (!lastPlayed || e.lastPlayedAt > (lastPlayed.lastPlayedAt ?? 0))) {
-					lastPlayed = e;
-				}
-			}
-			if (!lastPlayed) continue; // Never played → skip, will appear in Latest
-
-			// Episodes are sorted by pubDate descending; find the one right after lastPlayed
-			// "right after" = smallest pubDate that is greater than lastPlayed's pubDate
-			let nextEp: Episode | null = null;
-			for (const e of episodes) {
-				if (e.pubDate > lastPlayed.pubDate) {
-					if (!nextEp || e.pubDate < nextEp.pubDate) {
-						nextEp = e;
-					}
-				}
-			}
-			if (nextEp && !continueGuids.has(nextEp.guid)) {
-				nextUpGuids.add(nextEp.guid);
-				nextUpList.push({ ...nextEp, podcast: podcastMap.get(feedUrl) });
-			}
-		}
-		nextUpList.sort((a, b) => b.pubDate - a.pubDate);
-
-		// 3. Latest Episodes: newest unread episode per podcast (excluding continue & next up)
-		const excludedGuids = new Set([...continueGuids, ...nextUpGuids]);
-		const latestList: (Episode & { podcast?: Podcast })[] = [];
-		for (const [feedUrl, episodes] of episodesByPodcast) {
-			// episodes are already sorted by pubDate descending
-			const newest = episodes.find((e) => !e.isCompleted && !excludedGuids.has(e.guid));
-			if (newest) {
-				latestList.push({ ...newest, podcast: podcastMap.get(feedUrl) });
-			}
-		}
-		latestList.sort((a, b) => b.pubDate - a.pubDate);
+		const { list: continueList, guids: continueGuids } = buildContinueList(allEpisodes, podcastMap);
+		const { list: nextUpList, guids: nextUpGuids } = buildNextUpList(
+			episodesByPodcast,
+			podcastMap,
+			continueGuids,
+		);
+		const latestList = buildLatestList(
+			episodesByPodcast,
+			podcastMap,
+			new Set([...continueGuids, ...nextUpGuids]),
+		);
 
 		return { continueList, nextUpList, latestList };
 	}).subscribe((val) => {
