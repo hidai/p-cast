@@ -115,7 +115,7 @@ function handleWheel(e: WheelEvent) {
 
 		<!-- Content -->
 		<div
-			class="flex-1 {isFullyExpanded ? 'overflow-y-auto' : 'overflow-hidden'}"
+			class="flex-1 overflow-x-hidden {isFullyExpanded ? 'overflow-y-auto' : 'overflow-hidden'}"
 			bind:this={contentEl}
 		>
 			{@render children()}

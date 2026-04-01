@@ -100,7 +100,7 @@ async function handleDeleteDownload() {
 				<h2 class="text-base font-bold leading-tight line-clamp-2">{episode.title}</h2>
 				{#if podcastTitle}
 					<button
-						class="text-sm text-accent mt-1 truncate block hover:underline"
+						class="text-sm text-accent mt-1 truncate block max-w-full hover:underline"
 						onclick={openPodcast}
 					>{podcastTitle}</button>
 				{/if}
