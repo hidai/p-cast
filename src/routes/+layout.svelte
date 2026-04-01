@@ -30,9 +30,13 @@ function handleKeydown(e: KeyboardEvent) {
 <svelte:window onkeydown={handleKeydown} onpopstate={(e) => overlay.handlePopState(e)} />
 
 <div class="flex flex-col h-full">
-	<main class="flex-1 overflow-y-auto pb-2">
+	<main class="flex-1 overflow-y-auto {player.currentEpisode ? 'pb-28' : 'pb-16'}">
 		{@render children()}
 	</main>
+</div>
+
+<!-- Fixed bottom bar: MiniPlayer + BottomNav -->
+<div class="fixed bottom-0 left-0 right-0 z-40">
 	{#if player.currentEpisode}
 		<MiniPlayer />
 	{/if}
