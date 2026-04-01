@@ -11,7 +11,6 @@ let {
 	downloadingProgress = null,
 	ondownload,
 	ondelete,
-	onplay,
 	ondetail,
 }: {
 	episode: Episode;
@@ -19,7 +18,6 @@ let {
 	downloadingProgress?: number | null;
 	ondownload?: (episode: Episode) => void;
 	ondelete?: (episode: Episode) => void;
-	onplay?: (episode: Episode) => void;
 	ondetail?: (episode: Episode) => void;
 } = $props();
 
@@ -30,11 +28,7 @@ function formatDate(ts: number): string {
 const imgUrl = $derived(episode.coverUrl || podcast?.coverUrl);
 
 function handlePlay() {
-	if (onplay) {
-		onplay(episode);
-	} else {
-		player.play(episode);
-	}
+	player.play(episode);
 }
 </script>
 
