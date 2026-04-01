@@ -1,6 +1,7 @@
 <script lang="ts">
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
+import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import { db } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
@@ -180,18 +181,7 @@ $effect(() => {
 				aria-label="Toggle download"
 			>
 				{#if isDownloading}
-					{@const pct = Math.round(downloadProgress * 100)}
-					<svg class="w-6 h-6" viewBox="0 0 24 24">
-						<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5" class="opacity-25" />
-						<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"
-							stroke-dasharray={2 * Math.PI * 10}
-							stroke-dashoffset={2 * Math.PI * 10 * (1 - downloadProgress)}
-							stroke-linecap="round"
-							transform="rotate(-90 12 12)"
-							class="text-accent transition-[stroke-dashoffset] duration-300"
-						/>
-						<text x="12" y="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" font-size="7" class="text-accent">{pct}</text>
-					</svg>
+					<DownloadProgress progress={downloadProgress} class="w-6 h-6" />
 				{:else}
 					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
