@@ -57,6 +57,12 @@ export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	return data.results ?? [];
 }
 
+async function fetchAndParseFeed(feedUrl: string): Promise<Document> {
+	const res = await fetch(proxyUrl(feedUrl));
+	const text = await res.text();
+	return new DOMParser().parseFromString(text, "text/xml");
+}
+
 function parseFeedDocument(doc: Document) {
 	const channel = doc.querySelector("channel");
 	const podcastDescription = channel?.querySelector("description")?.textContent ?? "";
@@ -124,10 +130,7 @@ function fetchEpisodesFromDoc(feedUrl: string, doc: Document): Omit<Episode, "is
 export async function fetchEpisodes(
 	feedUrl: string,
 ): Promise<{ episodes: Omit<Episode, "isDownloaded">[]; podcastDescription: string }> {
-	const res = await fetch(proxyUrl(feedUrl));
-	const text = await res.text();
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, "text/xml");
+	const doc = await fetchAndParseFeed(feedUrl);
 	const { podcastDescription } = parseFeedDocument(doc);
 	return { episodes: fetchEpisodesFromDoc(feedUrl, doc), podcastDescription };
 }
@@ -164,10 +167,7 @@ export async function unsubscribePodcast(feedUrl: string): Promise<void> {
 }
 
 export async function refreshPodcast(feedUrl: string): Promise<void> {
-	const res = await fetch(proxyUrl(feedUrl));
-	const text = await res.text();
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, "text/xml");
+	const doc = await fetchAndParseFeed(feedUrl);
 
 	// Update podcast description from channel-level data
 	const { podcastDescription } = parseFeedDocument(doc);
