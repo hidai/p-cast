@@ -15,42 +15,27 @@ let downloadedEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let historyEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 const downloading = createDownloadState();
 
-// Subscribed podcasts
-$effect(() => {
-	const sub = liveQuery(() => db.podcasts.orderBy("subscribedAt").reverse().toArray()).subscribe(
-		(val) => {
-			podcasts = val ?? [];
-		},
-	);
-	return () => sub.unsubscribe();
-});
-
-// Downloaded episodes (regardless of subscription)
 $effect(() => {
 	const sub = liveQuery(async () => {
-		const allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
-		const episodes = allEpisodes.filter((e) => e.isDownloaded);
-
-		const allPodcasts = await db.podcasts.toArray();
+		const [allPodcasts, allEpisodes] = await Promise.all([
+			db.podcasts.orderBy("subscribedAt").reverse().toArray(),
+			db.episodes.orderBy("pubDate").reverse().toArray(),
+		]);
 		const podcastMap = new Map(allPodcasts.map((p) => [p.feedUrl, p]));
-		return episodes.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
+		return {
+			podcasts: allPodcasts,
+			downloaded: allEpisodes
+				.filter((e) => e.isDownloaded)
+				.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) })),
+			history: allEpisodes
+				.filter((e) => e.isCompleted)
+				.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) })),
+		};
 	}).subscribe((val) => {
-		downloadedEpisodes = val ?? [];
-	});
-	return () => sub.unsubscribe();
-});
-
-// History: completed episodes
-$effect(() => {
-	const sub = liveQuery(async () => {
-		const allEpisodes = await db.episodes.orderBy("pubDate").reverse().toArray();
-		const episodes = allEpisodes.filter((e) => e.isCompleted);
-
-		const allPodcasts = await db.podcasts.toArray();
-		const podcastMap = new Map(allPodcasts.map((p) => [p.feedUrl, p]));
-		return episodes.map((e) => ({ ...e, podcast: podcastMap.get(e.podcastFeedUrl) }));
-	}).subscribe((val) => {
-		historyEpisodes = val ?? [];
+		if (!val) return;
+		podcasts = val.podcasts;
+		downloadedEpisodes = val.downloaded;
+		historyEpisodes = val.history;
 	});
 	return () => sub.unsubscribe();
 });
