@@ -2,9 +2,6 @@
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
-import { theme } from "$lib/theme.svelte";
-
-const bgAlpha = $derived(theme.resolvedDark ? 0.15 : 0.08);
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -18,8 +15,7 @@ const bgAlpha = $derived(theme.resolvedDark ? 0.15 : 0.08);
 		></div>
 	</div>
 	<div
-		class="flex items-center gap-3 backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg transition-colors duration-500"
-		style="background: rgba({player.dominantColor}, {bgAlpha})"
+		class="flex items-center gap-3 bg-mini-player-bg backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
 		onclick={() => overlay.openFullPlayer()}
 	>
 		{#if player.currentEpisode?.coverUrl}
