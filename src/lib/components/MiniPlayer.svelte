@@ -15,7 +15,7 @@ import { formatDuration } from "$lib/podcast-service";
 		></div>
 	</div>
 	<div
-		class="flex items-center gap-3 bg-mini-player-bg backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
+		class="flex items-center gap-3 bg-mini-player-bg border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
 		onclick={() => overlay.openFullPlayer()}
 	>
 		{#if player.currentEpisode?.coverUrl}
