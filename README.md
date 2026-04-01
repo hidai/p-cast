@@ -44,6 +44,18 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | `npm run lint` | Lint with Biome |
 | `npm run format` | Format with Biome |
 
+## Deployment
+
+This app requires [Vercel](https://vercel.com/) (or a similar platform that supports SvelteKit server routes) for deployment. RSS feeds from podcast servers typically don't include CORS headers, so a server-side proxy (`/api/proxy`) is needed to fetch them. Static hosting (e.g., GitHub Pages) won't work because the proxy route requires a server runtime.
+
+Local development works out of the box — Vite's dev server handles the proxy route automatically.
+
+```bash
+# Deploy to Vercel
+npm i -g vercel
+vercel
+```
+
 ## Architecture
 
 All data is stored in the browser via IndexedDB (Dexie). There is no backend database — the app runs entirely client-side. A server-side proxy route handles RSS feed fetching to avoid CORS restrictions.
