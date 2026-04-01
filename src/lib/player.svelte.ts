@@ -32,6 +32,7 @@ class PlayerState {
 					await db.episodes.update(this.currentEpisode.guid, {
 						isCompleted: true,
 						currentTime: 0,
+						completedAt: Date.now(),
 					});
 					await this.playNext();
 				}

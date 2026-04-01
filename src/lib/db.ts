@@ -25,6 +25,7 @@ export interface Episode {
 	isCompleted: boolean;
 	isDownloaded: boolean;
 	lastPlayedAt?: number;
+	completedAt?: number;
 }
 
 export interface AudioFile {
@@ -65,6 +66,11 @@ class PcastDatabase extends Dexie {
 			audioFiles: "episodeGuid",
 		});
 		this.version(6).stores({
+			podcasts: "feedUrl, subscribedAt",
+			episodes: "guid, podcastFeedUrl, pubDate, lastPlayedAt",
+			audioFiles: "episodeGuid",
+		});
+		this.version(7).stores({
 			podcasts: "feedUrl, subscribedAt",
 			episodes: "guid, podcastFeedUrl, pubDate, lastPlayedAt",
 			audioFiles: "episodeGuid",

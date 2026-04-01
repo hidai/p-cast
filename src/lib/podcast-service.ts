@@ -232,6 +232,18 @@ export async function deleteDownload(episodeGuid: string): Promise<void> {
 	await db.episodes.update(episodeGuid, { isDownloaded: false });
 }
 
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+export async function cleanupExpiredDownloads(): Promise<void> {
+	const cutoff = Date.now() - TWENTY_FOUR_HOURS;
+	const expired = await db.episodes
+		.filter((e) => e.isDownloaded && e.isCompleted && !!e.completedAt && e.completedAt < cutoff)
+		.toArray();
+	for (const episode of expired) {
+		await deleteDownload(episode.guid);
+	}
+}
+
 export function formatDuration(seconds: number): string {
 	if (!seconds || seconds <= 0) return "0:00";
 	const h = Math.floor(seconds / 3600);

@@ -8,11 +8,14 @@ import MiniPlayer from "$lib/components/MiniPlayer.svelte";
 import PodcastDetailSheet from "$lib/components/PodcastDetailSheet.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
+import { cleanupExpiredDownloads } from "$lib/podcast-service";
 import "$lib/theme.svelte";
 
 let { children } = $props();
 
 afterNavigate((nav) => overlay.handleNavigation(nav.type));
+
+cleanupExpiredDownloads();
 
 function handleKeydown(e: KeyboardEvent) {
 	if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
