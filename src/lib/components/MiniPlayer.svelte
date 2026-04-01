@@ -1,7 +1,25 @@
 <script lang="ts">
+import { db } from "$lib/db";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
+
+let coverUrl = $state("");
+
+$effect(() => {
+	const episode = player.currentEpisode;
+	if (!episode) {
+		coverUrl = "";
+		return;
+	}
+	if (episode.coverUrl) {
+		coverUrl = episode.coverUrl;
+		return;
+	}
+	db.podcasts.get(episode.podcastFeedUrl).then((podcast) => {
+		coverUrl = podcast?.coverUrl ?? "";
+	});
+});
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -18,9 +36,9 @@ import { formatDuration } from "$lib/podcast-service";
 		class="flex items-center gap-3 bg-mini-player-bg border-b border-border-subtle px-4 py-2.5 cursor-pointer"
 		onclick={() => overlay.openFullPlayer()}
 	>
-		{#if player.currentEpisode?.coverUrl}
+		{#if coverUrl}
 			<img
-				src={player.currentEpisode.coverUrl}
+				src={coverUrl}
 				alt=""
 				class="shrink-0 w-10 h-10 rounded-lg object-cover ring-1 ring-border-subtle"
 			/>
