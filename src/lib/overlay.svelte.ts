@@ -15,6 +15,14 @@ class OverlayManager {
 	private hasHistoryEntry = false;
 	private ignoringPopState = false;
 
+	private resetState() {
+		this.activeOverlay = "none";
+		this.detailEpisode = null;
+		this.detailPodcastFeedUrl = "";
+		this.detailPodcastMeta = null;
+		this.hasHistoryEntry = false;
+	}
+
 	openFullPlayer() {
 		const wasActive = this.activeOverlay !== "none";
 		this.activeOverlay = "fullPlayer";
@@ -42,13 +50,10 @@ class OverlayManager {
 
 	closeAll() {
 		if (this.activeOverlay === "none") return;
-		this.activeOverlay = "none";
-		this.detailEpisode = null;
-		this.detailPodcastFeedUrl = "";
-		this.detailPodcastMeta = null;
-		if (this.hasHistoryEntry) {
+		const hadHistoryEntry = this.hasHistoryEntry;
+		this.resetState();
+		if (hadHistoryEntry) {
 			this.ignoringPopState = true;
-			this.hasHistoryEntry = false;
 			history.back();
 		}
 	}
@@ -77,22 +82,14 @@ class OverlayManager {
 			this.detailPodcastMeta = null;
 			this.hasHistoryEntry = true;
 		} else {
-			this.activeOverlay = "none";
-			this.detailEpisode = null;
-			this.detailPodcastFeedUrl = "";
-			this.detailPodcastMeta = null;
-			this.hasHistoryEntry = false;
+			this.resetState();
 		}
 	}
 
 	handleNavigation(type: string) {
 		if (type === "popstate") return;
 		if (this.activeOverlay !== "none") {
-			this.activeOverlay = "none";
-			this.detailEpisode = null;
-			this.detailPodcastFeedUrl = "";
-			this.detailPodcastMeta = null;
-			this.hasHistoryEntry = false;
+			this.resetState();
 		}
 	}
 
