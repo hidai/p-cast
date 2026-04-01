@@ -1,23 +1,17 @@
 <script lang="ts">
-import { db } from "$lib/db";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
+import { resolveCoverUrl } from "$lib/utils";
 
 let coverUrl = $state("");
 
 $effect(() => {
 	const episode = player.currentEpisode;
-	if (!episode) {
-		coverUrl = "";
-		return;
-	}
-	if (episode.coverUrl) {
-		coverUrl = episode.coverUrl;
-		return;
-	}
-	db.podcasts.get(episode.podcastFeedUrl).then((podcast) => {
-		coverUrl = podcast?.coverUrl ?? "";
+	coverUrl = "";
+	if (!episode) return;
+	resolveCoverUrl(episode).then((url) => {
+		coverUrl = url;
 	});
 });
 </script>

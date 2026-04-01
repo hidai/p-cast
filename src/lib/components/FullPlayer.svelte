@@ -2,11 +2,11 @@
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
-import { db } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
+import { resolveCoverUrl } from "$lib/utils";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
 let isDownloading = $state(false);
@@ -53,16 +53,10 @@ let coverUrl = $state("");
 
 $effect(() => {
 	const episode = player.currentEpisode;
-	if (!episode) {
-		coverUrl = "";
-		return;
-	}
-	if (episode.coverUrl) {
-		coverUrl = episode.coverUrl;
-		return;
-	}
-	db.podcasts.get(episode.podcastFeedUrl).then((podcast) => {
-		coverUrl = podcast?.coverUrl ?? "";
+	coverUrl = "";
+	if (!episode) return;
+	resolveCoverUrl(episode).then((url) => {
+		coverUrl = url;
 	});
 });
 </script>

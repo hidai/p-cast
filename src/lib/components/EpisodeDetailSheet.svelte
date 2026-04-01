@@ -7,7 +7,7 @@ import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
-import { sanitizeHtml } from "$lib/utils";
+import { resolveCoverUrl, sanitizeHtml } from "$lib/utils";
 
 let {
 	episode,
@@ -18,21 +18,15 @@ let {
 let isDownloading = $state(false);
 let downloadProgress = $state(0);
 
-// Cover URL with fallback to podcast cover
 let coverUrl = $state("");
-$effect(() => {
-	if (episode.coverUrl) {
-		coverUrl = episode.coverUrl;
-	} else {
-		db.podcasts.get(episode.podcastFeedUrl).then((p) => {
-			coverUrl = p?.coverUrl ?? "";
-		});
-	}
-});
-
-// Podcast name
 let podcastTitle = $state("");
+
 $effect(() => {
+	coverUrl = "";
+	podcastTitle = "";
+	resolveCoverUrl(episode).then((url) => {
+		coverUrl = url;
+	});
 	db.podcasts.get(episode.podcastFeedUrl).then((p) => {
 		podcastTitle = p?.title ?? "";
 	});
