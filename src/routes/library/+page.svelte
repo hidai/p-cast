@@ -4,7 +4,8 @@ import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
-import { deleteDownload, downloadEpisode } from "$lib/podcast-service";
+import { createDownloadState } from "$lib/download.svelte";
+import { deleteDownload } from "$lib/podcast-service";
 
 type Tab = "subscribed" | "downloaded" | "history";
 
@@ -12,7 +13,7 @@ let activeTab: Tab = $state("subscribed");
 let podcasts: Podcast[] = $state([]);
 let downloadedEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let historyEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
-let downloadingGuids = $state(new Map<string, number>());
+const downloading = createDownloadState();
 
 // Subscribed podcasts
 $effect(() => {
@@ -54,17 +55,8 @@ $effect(() => {
 	return () => sub.unsubscribe();
 });
 
-async function handleDownload(episode: Episode) {
-	downloadingGuids = new Map([...downloadingGuids, [episode.guid, 0]]);
-	try {
-		await downloadEpisode(episode, (progress) => {
-			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
-		});
-	} finally {
-		const next = new Map(downloadingGuids);
-		next.delete(episode.guid);
-		downloadingGuids = next;
-	}
+function handleDownload(episode: Episode) {
+	downloading.download(episode);
 }
 </script>
 
@@ -166,9 +158,7 @@ async function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloadingGuids.has(episode.guid)
-							? downloadingGuids.get(episode.guid) ?? 0
-							: null}
+						downloadingProgress={downloading.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>

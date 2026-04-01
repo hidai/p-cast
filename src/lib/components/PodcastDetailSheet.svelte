@@ -5,8 +5,8 @@ import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay, type PodcastMeta } from "$lib/overlay.svelte";
+import { createDownloadState } from "$lib/download.svelte";
 import {
-	downloadEpisode,
 	fetchEpisodes,
 	type SearchResult,
 	subscribePodcast,
@@ -31,7 +31,7 @@ let isSubscribed = $state(false);
 let episodes: Episode[] = $state([]);
 let isLoading = $state(true);
 let isToggling = $state(false);
-let downloadingGuids = $state(new Map<string, number>());
+const downloading = createDownloadState();
 let sortOrder: EpisodeSortOrder = $state("newest");
 let sortMenuOpen = $state(false);
 let podcastDescription = $state("");
@@ -113,19 +113,11 @@ async function toggleSubscribe() {
 	}
 }
 
-async function handleDownload(episode: Episode) {
-	downloadingGuids = new Map([...downloadingGuids, [episode.guid, 0]]);
-	try {
-		await downloadEpisode(episode, (progress) => {
-			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
-		});
+function handleDownload(episode: Episode) {
+	downloading.download(episode, async () => {
 		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
 		episodes = sortEpisodes(all, sortOrder);
-	} finally {
-		const next = new Map(downloadingGuids);
-		next.delete(episode.guid);
-		downloadingGuids = next;
-	}
+	});
 }
 </script>
 
@@ -277,9 +269,7 @@ async function handleDownload(episode: Episode) {
 				{#each episodes as episode (episode.guid)}
 					<EpisodeItem
 						{episode}
-						downloadingProgress={downloadingGuids.has(episode.guid)
-							? downloadingGuids.get(episode.guid) ?? 0
-							: null}
+						downloadingProgress={downloading.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>

@@ -6,12 +6,8 @@ import { db, type Episode, type Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
-import {
-	deleteDownload,
-	downloadEpisode,
-	formatDuration,
-	refreshPodcast,
-} from "$lib/podcast-service";
+import { createDownloadState } from "$lib/download.svelte";
+import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
 
 // Redirect to Discover once if user has never used the app
 const redirectKey = "p-cast:discoveredOnce";
@@ -31,7 +27,7 @@ let continueEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let nextUpEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let latestEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let isRefreshing = $state(false);
-let downloadingGuids = $state(new Map<string, number>());
+const downloading = createDownloadState();
 
 // All three sections computed from a single reactive query
 $effect(() => {
@@ -121,17 +117,8 @@ async function handleRefresh() {
 	isRefreshing = false;
 }
 
-async function handleDownload(episode: Episode) {
-	downloadingGuids = new Map([...downloadingGuids, [episode.guid, 0]]);
-	try {
-		await downloadEpisode(episode, (progress) => {
-			downloadingGuids = new Map([...downloadingGuids, [episode.guid, progress]]);
-		});
-	} finally {
-		const next = new Map(downloadingGuids);
-		next.delete(episode.guid);
-		downloadingGuids = next;
-	}
+function handleDownload(episode: Episode) {
+	downloading.download(episode);
 }
 </script>
 
@@ -240,9 +227,7 @@ async function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloadingGuids.has(episode.guid)
-							? downloadingGuids.get(episode.guid) ?? 0
-							: null}
+						downloadingProgress={downloading.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
@@ -263,9 +248,7 @@ async function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloadingGuids.has(episode.guid)
-							? downloadingGuids.get(episode.guid) ?? 0
-							: null}
+						downloadingProgress={downloading.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
