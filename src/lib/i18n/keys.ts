@@ -41,6 +41,13 @@ export type TranslationKey =
 	| "episode.downloaded"
 	| "episode.played"
 	| "player.nowPlaying"
-	| "player.details";
+	| "player.details"
+	| "nav.settings"
+	| "settings.title"
+	| "settings.theme"
+	| "settings.themeSystem"
+	| "settings.themeLight"
+	| "settings.themeDark"
+	| "settings.language";
 
 export type TranslationKeys = Record<TranslationKey, string>;

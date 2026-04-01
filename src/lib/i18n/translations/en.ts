@@ -57,4 +57,13 @@ export const en = {
 	// Player
 	"player.nowPlaying": "Now Playing",
 	"player.details": "Details",
+
+	// Settings
+	"nav.settings": "Settings",
+	"settings.title": "Settings",
+	"settings.theme": "Theme",
+	"settings.themeSystem": "System",
+	"settings.themeLight": "Light",
+	"settings.themeDark": "Dark",
+	"settings.language": "Language",
 } satisfies TranslationKeys;

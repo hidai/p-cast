@@ -57,4 +57,13 @@ export const ja = {
 	// Player
 	"player.nowPlaying": "再生中",
 	"player.details": "詳細",
+
+	// Settings
+	"nav.settings": "設定",
+	"settings.title": "設定",
+	"settings.theme": "テーマ",
+	"settings.themeSystem": "システム",
+	"settings.themeLight": "ライト",
+	"settings.themeDark": "ダーク",
+	"settings.language": "言語",
 } satisfies TranslationKeys;
