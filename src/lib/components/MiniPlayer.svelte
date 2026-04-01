@@ -8,14 +8,14 @@ import { formatDuration } from "$lib/podcast-service";
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div>
 	<!-- Progress bar on top -->
-	<div class="h-0.5 bg-border-subtle">
+	<div class="h-1 bg-accent/20">
 		<div
-			class="h-full bg-accent transition-all"
+			class="h-full bg-accent transition-all {player.isPlaying ? 'shadow-[0_0_8px_var(--color-accent)]' : ''}"
 			style="width: {player.progress * 100}%"
 		></div>
 	</div>
 	<div
-		class="flex items-center gap-3 bg-surface-glass backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
+		class="flex items-center gap-3 bg-bg-card/90 backdrop-blur-xl border-t border-border-subtle px-4 py-2.5 cursor-pointer shadow-lg"
 		onclick={() => overlay.openFullPlayer()}
 	>
 		{#if player.currentEpisode?.coverUrl}
@@ -30,7 +30,7 @@ import { formatDuration } from "$lib/podcast-service";
 			<p class="text-xs text-text-secondary">{formatDuration(player.currentTime)}</p>
 		</div>
 		<button
-			class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent text-white shadow-md active:scale-95 transition-transform"
+			class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent text-white active:scale-95 transition-all {player.isPlaying ? 'shadow-[0_0_12px_var(--color-accent)]' : 'shadow-md'}"
 			onclick={(e: MouseEvent) => { e.stopPropagation(); player.togglePlay(); }}
 		>
 			{#if player.isPlaying}
