@@ -251,20 +251,3 @@ function handleDownload(episode: Episode) {
 		{/if}
 	</div>
 </BottomSheet>
-
-<style>
-	.rich-description :global(a) {
-		color: var(--color-accent);
-		text-decoration: underline;
-	}
-
-	.rich-description :global(p) {
-		margin-bottom: 0.75rem;
-	}
-
-	.rich-description :global(img) {
-		max-width: 100%;
-		border-radius: 0.5rem;
-		margin: 0.5rem 0;
-	}
-</style>
