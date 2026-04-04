@@ -72,6 +72,9 @@ async function handleDownload() {
 async function handleDeleteDownload() {
 	await deleteDownload(episode.guid);
 	episode = { ...episode, isDownloaded: false };
+	if (player.currentEpisode?.guid === episode.guid) {
+		player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
+	}
 }
 </script>
 
