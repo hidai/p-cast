@@ -9,12 +9,12 @@ import Play from "phosphor-svelte/lib/Play";
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
+import { createCoverUrlState } from "$lib/cover-url.svelte";
 import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration } from "$lib/podcast-service";
-import { resolveCoverUrl } from "$lib/utils";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
 const downloading = createDownloadState();
@@ -62,16 +62,7 @@ const currentDownloadProgress = $derived(
 	player.currentEpisode ? downloading.getProgress(player.currentEpisode.guid) : null,
 );
 
-let coverUrl = $state("");
-
-$effect(() => {
-	const episode = player.currentEpisode;
-	coverUrl = "";
-	if (!episode) return;
-	resolveCoverUrl(episode).then((url) => {
-		coverUrl = url;
-	});
-});
+const cover = createCoverUrlState(() => player.currentEpisode);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -93,8 +84,8 @@ $effect(() => {
 
 	<!-- Artwork -->
 	<div class="flex-1 flex items-center justify-center px-8">
-		{#if coverUrl}
-			<img src={coverUrl} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover ring-1 ring-border-subtle" />
+		{#if cover.url}
+			<img src={cover.url} alt="Cover" class="w-full max-w-80 rounded-2xl shadow-2xl aspect-square object-cover ring-1 ring-border-subtle" />
 		{:else}
 			<div class="w-full max-w-80 rounded-2xl bg-bg-card aspect-square flex items-center justify-center ring-1 ring-border-subtle">
 				<MusicNote size={96} weight="light" class="text-text-tertiary" />

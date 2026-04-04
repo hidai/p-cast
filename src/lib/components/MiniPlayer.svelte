@@ -1,21 +1,12 @@
 <script lang="ts">
 import Pause from "phosphor-svelte/lib/Pause";
 import Play from "phosphor-svelte/lib/Play";
+import { createCoverUrlState } from "$lib/cover-url.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
-import { resolveCoverUrl } from "$lib/utils";
 
-let coverUrl = $state("");
-
-$effect(() => {
-	const episode = player.currentEpisode;
-	coverUrl = "";
-	if (!episode) return;
-	resolveCoverUrl(episode).then((url) => {
-		coverUrl = url;
-	});
-});
+const cover = createCoverUrlState(() => player.currentEpisode);
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -32,9 +23,9 @@ $effect(() => {
 		class="flex items-center gap-3 bg-mini-player-bg border-b border-border-subtle px-4 py-2.5 cursor-pointer"
 		onclick={() => overlay.openFullPlayer()}
 	>
-		{#if coverUrl}
+		{#if cover.url}
 			<img
-				src={coverUrl}
+				src={cover.url}
 				alt=""
 				class="shrink-0 w-10 h-10 rounded-lg object-cover ring-1 ring-border-subtle"
 			/>

@@ -5,6 +5,7 @@ import Trash from "phosphor-svelte/lib/Trash";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
+import { createCoverUrlState } from "$lib/cover-url.svelte";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
 import { createDownloadState } from "$lib/download.svelte";
@@ -12,7 +13,7 @@ import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration } from "$lib/podcast-service";
-import { resolveCoverUrl, sanitizeHtml } from "$lib/utils";
+import { sanitizeHtml } from "$lib/utils";
 
 let {
 	episode,
@@ -23,15 +24,11 @@ let {
 const downloading = createDownloadState();
 let isDeleting = $state(false);
 
-let coverUrl = $state("");
+const cover = createCoverUrlState(() => episode);
 let podcastTitle = $state("");
 
 $effect(() => {
-	coverUrl = "";
 	podcastTitle = "";
-	resolveCoverUrl(episode).then((url) => {
-		coverUrl = url;
-	});
 	db.podcasts.get(episode.podcastFeedUrl).then((p) => {
 		podcastTitle = p?.title ?? "";
 	});
@@ -82,7 +79,7 @@ async function handleDeleteDownload() {
 	<div class="px-5 pb-4">
 		<!-- Header: cover + info -->
 		<div class="flex gap-4 mb-4">
-			<CoverImage src={coverUrl} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
+			<CoverImage src={cover.url} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
 			<div class="min-w-0 flex-1">
 				<h2 class="text-base font-bold leading-tight line-clamp-2">{episode.title}</h2>
 				{#if podcastTitle}
