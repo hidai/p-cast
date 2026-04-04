@@ -19,20 +19,20 @@ export interface TopPodcast {
 	artworkUrl100: string;
 }
 
-let topPodcastsCache: TopPodcast[] | null = null;
-let topPodcastsCacheTime = 0;
+const topPodcastsCache = new Map<string, { data: TopPodcast[]; fetchedAt: number }>();
 const TOP_PODCASTS_TTL = 30 * 60 * 1000;
 
-export async function fetchTopPodcasts(): Promise<TopPodcast[]> {
-	if (topPodcastsCache && Date.now() - topPodcastsCacheTime < TOP_PODCASTS_TTL) {
-		return topPodcastsCache;
+export async function fetchTopPodcasts(countryCode = "us"): Promise<TopPodcast[]> {
+	const cached = topPodcastsCache.get(countryCode);
+	if (cached && Date.now() - cached.fetchedAt < TOP_PODCASTS_TTL) {
+		return cached.data;
 	}
-	const url = "https://rss.applemarketingtools.com/api/v2/jp/podcasts/top/25/podcasts.json";
+	const url = `https://rss.applemarketingtools.com/api/v2/${countryCode}/podcasts/top/25/podcasts.json`;
 	const res = await fetch(proxyUrl(url));
+	if (!res.ok) throw new Error(`HTTP ${res.status}`);
 	const data = await res.json();
-	const results = data.feed?.results ?? [];
-	topPodcastsCache = results;
-	topPodcastsCacheTime = Date.now();
+	const results: TopPodcast[] = data.feed?.results ?? [];
+	topPodcastsCache.set(countryCode, { data: results, fetchedAt: Date.now() });
 	return results;
 }
 

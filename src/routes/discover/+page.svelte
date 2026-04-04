@@ -34,20 +34,32 @@ $effect(() => {
 	}
 });
 
+// Locale change: reset results so the fetch effect re-runs for the new country
+let prevLocale = $state(i18n.locale);
 $effect(() => {
-	if (topPodcasts.length === 0 && network.online) {
-		loadTopPodcasts();
+	const locale = i18n.locale;
+	if (locale !== prevLocale) {
+		prevLocale = locale;
+		topPodcasts = [];
 	}
 });
 
-async function loadTopPodcasts() {
+// Fetch when data is absent and online (guards against spurious network-change re-fetches)
+$effect(() => {
+	if (topPodcasts.length === 0 && network.online) {
+		const countryCode = i18n.locale === "ja" ? "jp" : "us";
+		loadTopPodcasts(countryCode);
+	}
+});
+
+async function loadTopPodcasts(countryCode: string) {
 	if (!network.online) {
 		isLoadingTop = false;
 		return;
 	}
 	isLoadingTop = true;
 	try {
-		topPodcasts = await fetchTopPodcasts();
+		topPodcasts = await fetchTopPodcasts(countryCode);
 	} catch {
 		topPodcasts = [];
 	}
