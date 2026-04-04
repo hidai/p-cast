@@ -1,6 +1,7 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
+import CoverImage from "$lib/components/CoverImage.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { i18n } from "$lib/i18n";
 import { network } from "$lib/network.svelte";
@@ -174,9 +175,8 @@ async function openTopPodcast(podcast: TopPodcast) {
 							disabled={lookingUpId === podcast.id}
 						>
 							<span class="text-sm font-bold text-text-secondary w-6 text-right shrink-0">{i + 1}</span>
-							<img
+							<CoverImage
 								src={podcast.artworkUrl100}
-								alt=""
 								class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 							/>
 							<div class="min-w-0 flex-1">
@@ -198,9 +198,8 @@ async function openTopPodcast(podcast: TopPodcast) {
 					class="flex items-center gap-3 p-3 rounded-xl bg-bg-card hover:bg-bg-elevated/50 transition w-full text-left"
 					onclick={() => openPodcast(result)}
 				>
-					<img
+					<CoverImage
 						src={result.artworkUrl100}
-						alt=""
 						class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 					/>
 					<div class="min-w-0">

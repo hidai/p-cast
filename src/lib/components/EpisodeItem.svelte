@@ -2,6 +2,7 @@
 import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
 import Play from "phosphor-svelte/lib/Play";
 import Trash from "phosphor-svelte/lib/Trash";
+import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import type { Episode, Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
@@ -42,9 +43,7 @@ function handlePlay() {
 		class="flex items-center gap-3 flex-1 min-w-0"
 		onclick={() => ondetail?.(episode)}
 	>
-		{#if imgUrl}
-			<img src={imgUrl} alt="" class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
-		{/if}
+		<CoverImage src={imgUrl} class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
 		<div class="flex-1 min-w-0">
 			<p class="text-sm font-medium truncate {episode.isCompleted ? 'text-text-secondary' : ''}">
 				{episode.title}

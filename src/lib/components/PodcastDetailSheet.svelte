@@ -4,6 +4,7 @@ import CaretDown from "phosphor-svelte/lib/CaretDown";
 import Check from "phosphor-svelte/lib/Check";
 import SortAscending from "phosphor-svelte/lib/SortAscending";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
+import CoverImage from "$lib/components/CoverImage.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
@@ -132,9 +133,7 @@ function handleDownload(episode: Episode) {
 	<div class="px-4 pb-4">
 		<!-- Podcast header -->
 		<div class="flex gap-4 mb-6">
-			{#if coverUrl}
-				<img src={coverUrl} alt="" class="w-24 h-24 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-border-subtle" />
-			{/if}
+			<CoverImage src={coverUrl} class="w-24 h-24 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-border-subtle" />
 			<div class="min-w-0">
 				<h1 class="text-lg font-bold leading-tight">{title}</h1>
 				<p class="text-sm text-text-secondary mt-1">{author}</p>

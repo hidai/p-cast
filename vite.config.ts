@@ -44,6 +44,22 @@ export default defineConfig({
 							expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 },
 						},
 					},
+					{
+						urlPattern: /^https:\/\/.*\.mzstatic\.com\/.*/i,
+						handler: "CacheFirst",
+						options: {
+							cacheName: "podcast-artwork-cache",
+							expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
+						},
+					},
+					{
+						urlPattern: /^https?:\/\/.+\.(?:png|jpg|jpeg|webp|gif)(?:\?.*)?$/i,
+						handler: "CacheFirst",
+						options: {
+							cacheName: "podcast-image-cache",
+							expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
+						},
+					},
 				],
 			},
 		}),

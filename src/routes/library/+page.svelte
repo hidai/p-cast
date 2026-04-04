@@ -1,6 +1,6 @@
 <script lang="ts">
 import { liveQuery } from "dexie";
-import MusicNote from "phosphor-svelte/lib/MusicNote";
+import CoverImage from "$lib/components/CoverImage.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { createDownloadState } from "$lib/download.svelte";
@@ -81,19 +81,11 @@ function handleDownload(episode: Episode) {
 						class="block text-left w-full"
 						onclick={() => overlay.openPodcastDetail(podcast.feedUrl)}
 					>
-						{#if podcast.coverUrl}
-							<img
-								src={podcast.coverUrl}
-								alt={podcast.title}
-								class="w-full aspect-square rounded-2xl object-cover ring-1 ring-border-subtle"
-							/>
-						{:else}
-							<div
-								class="w-full aspect-square rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
-							>
-								<MusicNote size={40} weight="light" class="text-text-secondary" />
-							</div>
-						{/if}
+						<CoverImage
+							src={podcast.coverUrl}
+							alt={podcast.title}
+							class="w-full aspect-square rounded-2xl object-cover ring-1 ring-border-subtle"
+						/>
 						<p class="text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
 							{podcast.title}
 						</p>

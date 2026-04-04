@@ -1,9 +1,9 @@
 <script lang="ts">
 import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
-import MusicNote from "phosphor-svelte/lib/MusicNote";
 import Play from "phosphor-svelte/lib/Play";
 import Trash from "phosphor-svelte/lib/Trash";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
+import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
@@ -79,15 +79,7 @@ async function handleDeleteDownload() {
 	<div class="px-5 pb-4">
 		<!-- Header: cover + info -->
 		<div class="flex gap-4 mb-4">
-			{#if coverUrl}
-				<img src={coverUrl} alt="" class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
-			{:else}
-				<div
-					class="w-20 h-20 rounded-xl bg-bg-card flex items-center justify-center shrink-0"
-				>
-					<MusicNote size={32} weight="light" class="text-text-secondary" />
-				</div>
-			{/if}
+			<CoverImage src={coverUrl} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
 			<div class="min-w-0 flex-1">
 				<h2 class="text-base font-bold leading-tight line-clamp-2">{episode.title}</h2>
 				{#if podcastTitle}
