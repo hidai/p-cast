@@ -1,4 +1,5 @@
 import { db, type Episode } from "./db";
+import { resolveCoverUrl } from "./utils";
 
 class PlayerState {
 	currentEpisode: Episode | null = $state(null);
@@ -157,13 +158,15 @@ class PlayerState {
 		this.saveInterval = setInterval(() => this.savePosition(), 10000);
 	}
 
-	private setupMediaSession() {
+	private async setupMediaSession() {
 		if (!("mediaSession" in navigator) || !this.currentEpisode) return;
 
+		const coverUrl = await resolveCoverUrl(this.currentEpisode);
 		navigator.mediaSession.metadata = new MediaMetadata({
 			title: this.currentEpisode.title,
 			artist: "",
 			album: "Podcast",
+			artwork: coverUrl ? [{ src: coverUrl }] : [],
 		});
 
 		navigator.mediaSession.setActionHandler("play", () => this.togglePlay());
