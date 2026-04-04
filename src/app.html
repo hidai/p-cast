@@ -8,6 +8,7 @@
 		<title>P-Cast</title>
 		<link rel="icon" href="%sveltekit.assets%/favicon.ico" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icon-192.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
@@ -21,5 +22,6 @@
 			})();
 		</script>
 		<div style="display: contents">%sveltekit.body%</div>
+		<script src="/registerSW.js"></script>
 	</body>
 </html>
