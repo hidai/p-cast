@@ -5,19 +5,19 @@ export function createDownloadState() {
 	let guids = $state(new Map<string, number>());
 
 	return {
-		get guids() {
-			return guids;
-		},
-
 		getProgress(episodeGuid: string): number | null {
 			return guids.has(episodeGuid) ? (guids.get(episodeGuid) ?? 0) : null;
 		},
 
 		async download(episode: Episode, onComplete?: () => Promise<void> | void) {
-			guids = new Map([...guids, [episode.guid, 0]]);
+			const start = new Map(guids);
+			start.set(episode.guid, 0);
+			guids = start;
 			try {
 				await downloadEpisode(episode, (progress) => {
-					guids = new Map([...guids, [episode.guid, progress]]);
+					const next = new Map(guids);
+					next.set(episode.guid, progress);
+					guids = next;
 				});
 				await onComplete?.();
 			} finally {

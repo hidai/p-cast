@@ -9,15 +9,16 @@ import Play from "phosphor-svelte/lib/Play";
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
+import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
-import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
+import { deleteDownload, formatDuration } from "$lib/podcast-service";
 import { resolveCoverUrl } from "$lib/utils";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
-let isDownloading = $state(false);
-let downloadProgress = $state(0);
+const downloading = createDownloadState();
+let isDeleting = $state(false);
 
 let touchStartY = 0;
 
@@ -39,22 +40,27 @@ function handleSeek(e: Event) {
 
 async function toggleDownload() {
 	if (!player.currentEpisode) return;
-	isDownloading = true;
-	try {
-		if (player.currentEpisode.isDownloaded) {
+	if (player.currentEpisode.isDownloaded) {
+		isDeleting = true;
+		try {
 			await deleteDownload(player.currentEpisode.guid);
 			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
-		} else {
-			downloadProgress = 0;
-			await downloadEpisode(player.currentEpisode, (p) => {
-				downloadProgress = p;
-			});
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
+		} finally {
+			isDeleting = false;
 		}
-	} finally {
-		isDownloading = false;
+	} else {
+		const episode = player.currentEpisode;
+		await downloading.download(episode, async () => {
+			if (player.currentEpisode?.guid === episode.guid) {
+				player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
+			}
+		});
 	}
 }
+
+const currentDownloadProgress = $derived(
+	player.currentEpisode ? downloading.getProgress(player.currentEpisode.guid) : null,
+);
 
 let coverUrl = $state("");
 
@@ -166,11 +172,11 @@ $effect(() => {
 			<button
 				class="p-2 rounded-full disabled:opacity-50 active:scale-95 transition-transform {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
 				onclick={toggleDownload}
-				disabled={isDownloading}
+				disabled={currentDownloadProgress !== null || isDeleting}
 				aria-label="Toggle download"
 			>
-				{#if isDownloading}
-					<DownloadProgress progress={downloadProgress} class="w-6 h-6" />
+				{#if currentDownloadProgress !== null}
+					<DownloadProgress progress={currentDownloadProgress} class="w-6 h-6" />
 				{:else}
 					<DownloadSimple size={24} />
 				{/if}

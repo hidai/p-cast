@@ -7,10 +7,11 @@ import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
+import { createDownloadState } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
-import { deleteDownload, downloadEpisode, formatDuration } from "$lib/podcast-service";
+import { deleteDownload, formatDuration } from "$lib/podcast-service";
 import { resolveCoverUrl, sanitizeHtml } from "$lib/utils";
 
 let {
@@ -19,8 +20,8 @@ let {
 	episode: Episode;
 } = $props();
 
-let isDownloading = $state(false);
-let downloadProgress = $state(0);
+const downloading = createDownloadState();
+let isDeleting = $state(false);
 
 let coverUrl = $state("");
 let podcastTitle = $state("");
@@ -46,6 +47,7 @@ function formatDate(ts: number): string {
 
 // Is this episode currently loaded in the player?
 let isCurrentEpisode = $derived(player.currentEpisode?.guid === episode.guid);
+const episodeDownloadProgress = $derived(downloading.getProgress(episode.guid));
 
 function handlePlay() {
 	player.play(episode);
@@ -57,23 +59,21 @@ function handleGoToPlayer() {
 }
 
 async function handleDownload() {
-	isDownloading = true;
-	downloadProgress = 0;
-	try {
-		await downloadEpisode(episode, (p) => {
-			downloadProgress = p;
-		});
+	await downloading.download(episode, async () => {
 		episode = { ...episode, isDownloaded: true };
-	} finally {
-		isDownloading = false;
-	}
+	});
 }
 
 async function handleDeleteDownload() {
-	await deleteDownload(episode.guid);
-	episode = { ...episode, isDownloaded: false };
-	if (player.currentEpisode?.guid === episode.guid) {
-		player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
+	isDeleting = true;
+	try {
+		await deleteDownload(episode.guid);
+		episode = { ...episode, isDownloaded: false };
+		if (player.currentEpisode?.guid === episode.guid) {
+			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
+		}
+	} finally {
+		isDeleting = false;
 	}
 }
 </script>
@@ -162,10 +162,10 @@ async function handleDeleteDownload() {
 			<button
 				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-text-secondary font-medium text-sm disabled:opacity-50"
 				onclick={handleDownload}
-				disabled={isDownloading}
+				disabled={episodeDownloadProgress !== null || isDeleting}
 			>
-				{#if isDownloading}
-					<DownloadProgress progress={downloadProgress} />
+				{#if episodeDownloadProgress !== null}
+					<DownloadProgress progress={episodeDownloadProgress} />
 				{:else}
 					<DownloadSimple size={20} />
 				{/if}
