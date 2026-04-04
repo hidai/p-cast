@@ -1,11 +1,11 @@
 <script lang="ts">
+import ArrowClockwise from "phosphor-svelte/lib/ArrowClockwise";
+import ArrowCounterClockwise from "phosphor-svelte/lib/ArrowCounterClockwise";
 import CaretDown from "phosphor-svelte/lib/CaretDown";
 import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
-import FastForward from "phosphor-svelte/lib/FastForward";
 import MusicNote from "phosphor-svelte/lib/MusicNote";
 import Pause from "phosphor-svelte/lib/Pause";
 import Play from "phosphor-svelte/lib/Play";
-import Rewind from "phosphor-svelte/lib/Rewind";
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
@@ -132,7 +132,7 @@ $effect(() => {
 		<!-- Controls -->
 		<div class="flex items-center justify-center gap-8 mt-4">
 			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(-10)}>
-				<Rewind size={32} weight="fill" />
+				<ArrowCounterClockwise size={32} weight="fill" />
 				<span class="text-xs block">10s</span>
 			</button>
 			<button
@@ -146,7 +146,7 @@ $effect(() => {
 				{/if}
 			</button>
 			<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => player.skip(10)}>
-				<FastForward size={32} weight="fill" />
+				<ArrowClockwise size={32} weight="fill" />
 				<span class="text-xs block">10s</span>
 			</button>
 		</div>
