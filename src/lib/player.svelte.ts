@@ -62,25 +62,37 @@ class PlayerState {
 			this.blobUrl = null;
 		}
 
-		this.currentEpisode = episode;
+		// DBから最新の状態を取得（古いスナップショットに依存しない）
+		const freshEpisode = await db.episodes.get(episode.guid);
+		if (!freshEpisode) return;
+
+		this.currentEpisode = freshEpisode;
 
 		// Record last played timestamp
-		await db.episodes.update(episode.guid, { lastPlayedAt: Date.now() });
+		await db.episodes.update(freshEpisode.guid, { lastPlayedAt: Date.now() });
 
 		// Try offline audio first
-		if (episode.isDownloaded) {
-			const audioFile = await db.audioFiles.get(episode.guid);
+		if (freshEpisode.isDownloaded) {
+			const audioFile = await db.audioFiles.get(freshEpisode.guid);
 			if (audioFile) {
 				this.blobUrl = URL.createObjectURL(audioFile.audioBlob);
 				this.audio.src = this.blobUrl;
 			}
 		} else {
-			this.audio.src = episode.audioUrl;
+			this.audio.src = freshEpisode.audioUrl;
 		}
 
 		this.audio.playbackRate = this.playbackRate;
-		if (episode.currentTime > 0) {
-			this.audio.currentTime = episode.currentTime;
+
+		// 完了済みなら最初から、途中なら続きから再生
+		if (freshEpisode.isCompleted) {
+			this.audio.currentTime = 0;
+			await db.episodes.update(freshEpisode.guid, {
+				isCompleted: false,
+				currentTime: 0,
+			});
+		} else if (freshEpisode.currentTime > 0) {
+			this.audio.currentTime = freshEpisode.currentTime;
 		}
 
 		try {
