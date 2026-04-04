@@ -37,7 +37,7 @@ export async function fetchTopPodcasts(countryCode = "us"): Promise<TopPodcast[]
 }
 
 export async function lookupPodcastById(id: string): Promise<SearchResult | null> {
-	const res = await fetch(`https://itunes.apple.com/lookup?id=${id}&entity=podcast`);
+	const res = await fetch(proxyUrl(`https://itunes.apple.com/lookup?id=${id}&entity=podcast`));
 	const data = await res.json();
 	const result = data.results?.[0];
 	if (!result?.feedUrl) return null;
@@ -52,7 +52,7 @@ export async function lookupPodcastById(id: string): Promise<SearchResult | null
 
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
-	const res = await fetch(url);
+	const res = await fetch(proxyUrl(url));
 	const data = await res.json();
 	return data.results ?? [];
 }
