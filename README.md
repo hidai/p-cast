@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/icon-512.png" alt="P-Cast" width="120" />
+</p>
+
 # P-Cast
 
 A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, subscribe, download, and listen — all in the browser with IndexedDB storage.
