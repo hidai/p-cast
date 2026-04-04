@@ -1,6 +1,6 @@
 <script lang="ts">
 import { goto } from "$app/navigation";
-import { page } from "$app/stores";
+import { page } from "$app/state";
 import CoverImage from "$lib/components/CoverImage.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { i18n } from "$lib/i18n";
@@ -22,7 +22,7 @@ let topPodcasts: TopPodcast[] = $state([]);
 let isLoadingTop = $state(false);
 let lookingUpId: string | null = $state(null);
 
-const urlQuery = $derived($page.url.searchParams.get("q") ?? "");
+const urlQuery = $derived(page.url.searchParams.get("q") ?? "");
 const showTopPodcasts = $derived(results.length === 0 && !isSearching && !urlQuery);
 
 let lastSyncedUrlQuery = "";
