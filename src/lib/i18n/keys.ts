@@ -50,6 +50,7 @@ export type TranslationKey =
 	| "settings.themeDark"
 	| "settings.language"
 	| "offline.banner"
-	| "offline.searchUnavailable";
+	| "offline.searchUnavailable"
+	| "app.description";
 
 export type TranslationKeys = Record<TranslationKey, string>;

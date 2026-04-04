@@ -70,4 +70,8 @@ export const ja = {
 	// Offline
 	"offline.banner": "オフライン",
 	"offline.searchUnavailable": "オフラインのためポッドキャストを検索できません",
+
+	// App metadata
+	"app.description":
+		"ポッドキャストプレイヤー。お気に入りのポッドキャストを検索・購読・再生できます。",
 } satisfies TranslationKeys;

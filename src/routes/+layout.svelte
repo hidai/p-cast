@@ -32,6 +32,10 @@ function handleKeydown(e: KeyboardEvent) {
 }
 </script>
 
+<svelte:head>
+	<meta name="description" content={i18n.t("app.description")} />
+</svelte:head>
+
 <svelte:window onkeydown={handleKeydown} onpopstate={(e) => overlay.handlePopState(e)} />
 
 {#if !network.online}

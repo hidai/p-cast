@@ -70,4 +70,7 @@ export const en = {
 	// Offline
 	"offline.banner": "You are offline",
 	"offline.searchUnavailable": "Search is unavailable while offline",
+
+	// App metadata
+	"app.description": "A podcast player. Search, subscribe, and play your favorite podcasts.",
 } satisfies TranslationKeys;
