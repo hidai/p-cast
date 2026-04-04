@@ -3,6 +3,7 @@ import { goto } from "$app/navigation";
 import { page } from "$app/stores";
 import Spinner from "$lib/components/Spinner.svelte";
 import { i18n } from "$lib/i18n";
+import { network } from "$lib/network.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import {
 	fetchTopPodcasts,
@@ -34,12 +35,16 @@ $effect(() => {
 });
 
 $effect(() => {
-	if (topPodcasts.length === 0) {
+	if (topPodcasts.length === 0 && network.online) {
 		loadTopPodcasts();
 	}
 });
 
 async function loadTopPodcasts() {
+	if (!network.online) {
+		isLoadingTop = false;
+		return;
+	}
 	isLoadingTop = true;
 	try {
 		topPodcasts = await fetchTopPodcasts();
@@ -50,6 +55,10 @@ async function loadTopPodcasts() {
 }
 
 async function doSearch(q: string) {
+	if (!network.online) {
+		isSearching = false;
+		return;
+	}
 	isSearching = true;
 	try {
 		results = await searchPodcasts(q);
@@ -98,6 +107,8 @@ async function openTopPodcast(podcast: TopPodcast) {
 				coverUrl: result.artworkUrl600 || result.artworkUrl100,
 			});
 		}
+	} catch {
+		// Ignore network errors (e.g. offline) and let the UI remain as-is
 	} finally {
 		lookingUpId = null;
 	}
@@ -119,7 +130,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 		<button
 			class="px-4 py-2.5 bg-accent text-white rounded-xl text-sm font-medium disabled:opacity-50 active:scale-95 transition-transform"
 			onclick={handleSearch}
-			disabled={isSearching}
+			disabled={isSearching || !network.online}
 		>
 			{#if isSearching}
 					<Spinner />
@@ -129,7 +140,11 @@ async function openTopPodcast(podcast: TopPodcast) {
 		</button>
 	</div>
 
-	{#if showTopPodcasts}
+	{#if !network.online}
+		<div class="flex flex-col items-center justify-center py-16 gap-3 text-center">
+			<p class="text-sm text-text-secondary">{i18n.t("offline.searchUnavailable")}</p>
+		</div>
+	{:else if showTopPodcasts}
 		<div>
 			<h2 class="text-sm font-semibold tracking-wide text-text-secondary mb-3">
 				{i18n.t("discover.popularPodcasts")}

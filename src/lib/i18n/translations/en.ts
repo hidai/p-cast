@@ -66,4 +66,8 @@ export const en = {
 	"settings.themeLight": "Light",
 	"settings.themeDark": "Dark",
 	"settings.language": "Language",
+
+	// Offline
+	"offline.banner": "You are offline",
+	"offline.searchUnavailable": "Search is unavailable while offline",
 } satisfies TranslationKeys;

@@ -48,6 +48,8 @@ export type TranslationKey =
 	| "settings.themeSystem"
 	| "settings.themeLight"
 	| "settings.themeDark"
-	| "settings.language";
+	| "settings.language"
+	| "offline.banner"
+	| "offline.searchUnavailable";
 
 export type TranslationKeys = Record<TranslationKey, string>;

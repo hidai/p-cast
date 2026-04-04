@@ -82,9 +82,12 @@ async function loadEpisodes() {
 		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
 		episodes = sortEpisodes(all, sortOrder);
 	} catch {
-		episodes = [];
+		// Fall back to Dexie cache on network error (e.g. offline)
+		const cached = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
+		episodes = sortEpisodes(cached, sortOrder);
+	} finally {
+		isLoading = false;
 	}
-	isLoading = false;
 }
 
 async function changeSortOrder(order: EpisodeSortOrder) {

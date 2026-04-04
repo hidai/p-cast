@@ -66,4 +66,8 @@ export const ja = {
 	"settings.themeLight": "ライト",
 	"settings.themeDark": "ダーク",
 	"settings.language": "言語",
+
+	// Offline
+	"offline.banner": "オフライン",
+	"offline.searchUnavailable": "オフラインのためポッドキャストを検索できません",
 } satisfies TranslationKeys;

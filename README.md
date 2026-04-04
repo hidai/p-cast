@@ -11,6 +11,7 @@ A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, su
 - **Discover podcasts** — Browse top podcasts or search via iTunes Search API
 - **Subscribe & manage** — Save your favorite shows locally
 - **Offline playback** — Download episodes for listening without internet
+- **Offline detection** — Shows a banner when offline; search is gracefully disabled while cached content remains accessible
 - **Resume playback** — Automatically saves your position and resumes where you left off
 - **Auto-play next** — Automatically plays the next unplayed episode from the same podcast
 - **Playback speed** — Adjustable speed (1.0x, 1.2x, 1.5x, 2.0x)
