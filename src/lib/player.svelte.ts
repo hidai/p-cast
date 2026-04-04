@@ -62,7 +62,7 @@ class PlayerState {
 			this.blobUrl = null;
 		}
 
-		// DBから最新の状態を取得（古いスナップショットに依存しない）
+		// Fetch the latest state from DB to avoid stale snapshot issues
 		const freshEpisode = await db.episodes.get(episode.guid);
 		if (!freshEpisode) return;
 
@@ -84,7 +84,7 @@ class PlayerState {
 
 		this.audio.playbackRate = this.playbackRate;
 
-		// 完了済みなら最初から、途中なら続きから再生
+		// If completed, restart from beginning; otherwise resume from saved position
 		if (freshEpisode.isCompleted) {
 			this.audio.currentTime = 0;
 			await db.episodes.update(freshEpisode.guid, {
