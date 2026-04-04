@@ -66,6 +66,10 @@ export const en = {
 	"settings.themeLight": "Light",
 	"settings.themeDark": "Dark",
 	"settings.language": "Language",
+	"settings.credits": "Credits",
+	"settings.madeBy": "P-Cast is a product by Kenichi Hidai.",
+	"settings.libraries": "Open Source Libraries",
+	"settings.dataSource": "Data Source",
 
 	// Offline
 	"offline.banner": "You are offline",

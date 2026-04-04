@@ -49,6 +49,10 @@ export type TranslationKey =
 	| "settings.themeLight"
 	| "settings.themeDark"
 	| "settings.language"
+	| "settings.credits"
+	| "settings.madeBy"
+	| "settings.libraries"
+	| "settings.dataSource"
 	| "offline.banner"
 	| "offline.searchUnavailable"
 	| "app.description";
