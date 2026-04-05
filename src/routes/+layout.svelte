@@ -10,15 +10,13 @@ import { i18n } from "$lib/i18n";
 import { network } from "$lib/network.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
-import { pwa } from "$lib/pwa.svelte";
 import { cleanupExpiredDownloads } from "$lib/podcast-service";
+import { pwa } from "$lib/pwa.svelte";
 import "$lib/theme.svelte";
 
 let { children } = $props();
 
-const bannerCount = $derived(
-	(network.online ? 0 : 1) + (pwa.updateAvailable ? 1 : 0),
-);
+const bannerCount = $derived((network.online ? 0 : 1) + (pwa.updateAvailable ? 1 : 0));
 
 afterNavigate((nav) => overlay.handleNavigation(nav.type));
 

@@ -15,7 +15,7 @@ import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
 import { theme } from "$lib/theme.svelte";
 
-const logoBg = $derived(theme.resolvedDark ? '#000000' : '#ffffff');
+const logoBg = $derived(theme.resolvedDark ? "#000000" : "#ffffff");
 
 async function markAsPlayed(guid: string) {
 	await db.episodes.update(guid, {

@@ -37,7 +37,12 @@ class PlayerState {
 						currentTime: 0,
 						completedAt,
 					});
-					this.currentEpisode = { ...this.currentEpisode, isCompleted: true, currentTime: 0, completedAt };
+					this.currentEpisode = {
+						...this.currentEpisode,
+						isCompleted: true,
+						currentTime: 0,
+						completedAt,
+					};
 					await this.playNext();
 				}
 			});
@@ -105,7 +110,12 @@ class PlayerState {
 				currentTime: 0,
 				completedAt: undefined,
 			});
-			this.currentEpisode = { ...freshEpisode, isCompleted: false, currentTime: 0, completedAt: undefined };
+			this.currentEpisode = {
+				...freshEpisode,
+				isCompleted: false,
+				currentTime: 0,
+				completedAt: undefined,
+			};
 		} else if (freshEpisode.currentTime > 0) {
 			this.audio.currentTime = freshEpisode.currentTime;
 		}
