@@ -58,6 +58,9 @@ function handleGoToPlayer() {
 async function handleDownload() {
 	await downloading.download(episode, async () => {
 		episode = { ...episode, isDownloaded: true };
+		if (player.currentEpisode?.guid === episode.guid) {
+			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
+		}
 	});
 }
 
