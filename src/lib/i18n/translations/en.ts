@@ -49,6 +49,8 @@ export const en = {
 	"episode.nowPlaying": "Now Playing",
 	"episode.resume": "Resume",
 	"episode.play": "Play",
+	"episode.pause": "Pause",
+	"episode.paused": "Paused",
 	"episode.delete": "Delete",
 	"episode.download": "DL",
 	"episode.downloaded": "Downloaded",

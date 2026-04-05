@@ -1,9 +1,11 @@
 <script lang="ts">
 import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
+import Pause from "phosphor-svelte/lib/Pause";
 import Play from "phosphor-svelte/lib/Play";
 import Trash from "phosphor-svelte/lib/Trash";
 import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
+import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import type { Episode, Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { player } from "$lib/player.svelte";
@@ -30,9 +32,15 @@ function formatDate(ts: number): string {
 }
 
 const imgUrl = $derived(episode.coverUrl || podcast?.coverUrl);
+const isCurrentEpisode = $derived(player.currentEpisode?.guid === episode.guid);
+const isActivePlaying = $derived(isCurrentEpisode && player.isPlaying);
 
 function handlePlay() {
-	player.play(episode);
+	if (isCurrentEpisode) {
+		player.togglePlay();
+	} else {
+		player.play(episode);
+	}
 }
 </script>
 
@@ -45,8 +53,11 @@ function handlePlay() {
 	>
 		<CoverImage src={imgUrl} class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
 		<div class="flex-1 min-w-0">
-			<p class="text-sm font-medium truncate {episode.isCompleted ? 'text-text-secondary' : ''}">
-				{episode.title}
+			<p class="flex items-center gap-1.5 text-sm font-medium {episode.isCompleted ? 'text-text-secondary' : ''}">
+				{#if isCurrentEpisode}
+					<PlayingIndicator playing={isActivePlaying} />
+				{/if}
+				<span class="truncate">{episode.title}</span>
 			</p>
 			<p class="text-xs text-text-secondary">
 				{formatDate(episode.pubDate)}
@@ -82,8 +93,16 @@ function handlePlay() {
 				{/if}
 			</button>
 		{/if}
-		<button class="p-2 text-text-secondary hover:text-accent" onclick={handlePlay} title="Play">
-			<Play size={20} weight="fill" />
+		<button
+			class="p-2 hover:text-accent {isCurrentEpisode ? 'text-accent' : 'text-text-secondary'}"
+			onclick={handlePlay}
+			title={isActivePlaying ? i18n.t("episode.pause") : i18n.t("episode.play")}
+		>
+			{#if isActivePlaying}
+				<Pause size={20} weight="fill" />
+			{:else}
+				<Play size={20} weight="fill" />
+			{/if}
 		</button>
 	</div>
 </div>

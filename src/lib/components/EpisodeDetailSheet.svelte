@@ -5,6 +5,7 @@ import Trash from "phosphor-svelte/lib/Trash";
 import BottomSheet from "$lib/components/BottomSheet.svelte";
 import CoverImage from "$lib/components/CoverImage.svelte";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
+import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import { createCoverUrlState } from "$lib/cover-url.svelte";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
@@ -128,12 +129,7 @@ async function handleDeleteDownload() {
 				class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-bg-card text-accent font-medium text-sm border border-accent/30"
 				onclick={handleGoToPlayer}
 			>
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-					<rect x="3" y="8" width="3" height="8" rx="1" />
-					<rect x="8.5" y="4" width="3" height="16" rx="1" />
-					<rect x="14" y="6" width="3" height="12" rx="1" />
-					<rect x="19.5" y="9" width="3" height="6" rx="1" />
-				</svg>
+				<PlayingIndicator playing={isCurrentEpisode && player.isPlaying} />
 				{i18n.t("episode.nowPlaying")}
 			</button>
 		{:else}

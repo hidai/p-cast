@@ -49,6 +49,8 @@ export const ja = {
 	"episode.nowPlaying": "再生中",
 	"episode.resume": "再開",
 	"episode.play": "再生",
+	"episode.pause": "一時停止",
+	"episode.paused": "一時停止中",
 	"episode.delete": "削除",
 	"episode.download": "DL",
 	"episode.downloaded": "DL済み",

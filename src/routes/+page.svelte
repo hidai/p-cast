@@ -4,6 +4,7 @@ import Microphone from "phosphor-svelte/lib/Microphone";
 import MusicNote from "phosphor-svelte/lib/MusicNote";
 import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
+import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import PullToRefresh from "$lib/components/PullToRefresh.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
 import { createDownloadState } from "$lib/download.svelte";
@@ -169,9 +170,12 @@ function handleDownload(episode: Episode) {
 			<div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
 				{#each continueEpisodes as episode (episode.guid)}
 					{@const imgUrl = episode.coverUrl || episode.podcast?.coverUrl}
+					{@const isCardCurrentEpisode = player.currentEpisode?.guid === episode.guid}
+					{@const isCardPlaying = isCardCurrentEpisode && player.isPlaying}
 					<button
 						class="snap-start shrink-0 w-36 text-left"
-						onclick={() => player.play(episode)}
+						onclick={() => isCardCurrentEpisode ? player.togglePlay() : player.play(episode)}
+						title={isCardPlaying ? i18n.t("episode.pause") : i18n.t("episode.play")}
 					>
 						<div class="relative">
 							{#if imgUrl}
@@ -196,6 +200,12 @@ function handleDownload(episode: Episode) {
 										: 0}%"
 								></div>
 							</div>
+							<!-- Playing indicator overlay -->
+							{#if isCardCurrentEpisode}
+								<div class="absolute top-2 right-2 bg-black/50 rounded-md px-1.5 py-1 flex items-center">
+									<PlayingIndicator playing={isCardPlaying} />
+								</div>
+							{/if}
 						</div>
 						<p class="text-xs font-medium mt-2 line-clamp-2 leading-tight">
 							{episode.title}

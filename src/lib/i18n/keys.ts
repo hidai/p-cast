@@ -36,6 +36,8 @@ export type TranslationKey =
 	| "episode.nowPlaying"
 	| "episode.resume"
 	| "episode.play"
+	| "episode.pause"
+	| "episode.paused"
 	| "episode.delete"
 	| "episode.download"
 	| "episode.downloaded"
