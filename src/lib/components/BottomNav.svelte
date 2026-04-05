@@ -15,7 +15,7 @@ const isActive = $derived({
 </script>
 
 <nav
-	class="flex items-center justify-around bg-surface-glass backdrop-blur-xl py-2.5 pb-[env(safe-area-inset-bottom)]"
+	class="flex items-center justify-around bg-surface-glass backdrop-blur-xl py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]"
 >
 	<a
 		href="/"
