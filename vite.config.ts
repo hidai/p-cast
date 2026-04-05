@@ -8,7 +8,7 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA({
-			registerType: "autoUpdate",
+			registerType: "prompt",
 			manifest: {
 				name: "P-Cast",
 				short_name: "P-Cast",

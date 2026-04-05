@@ -78,6 +78,11 @@ export const en = {
 	"offline.banner": "You are offline",
 	"offline.searchUnavailable": "Search is unavailable while offline",
 
+	// PWA update
+	"pwa.updateAvailable": "Update available",
+	"pwa.updateNow": "Update now",
+	"pwa.dismiss": "Dismiss",
+
 	// App metadata
 	"app.description": "A podcast player. Search, subscribe, and play your favorite podcasts.",
 } satisfies TranslationKeys;

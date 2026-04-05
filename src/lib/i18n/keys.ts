@@ -58,6 +58,9 @@ export type TranslationKey =
 	| "settings.dataSource"
 	| "offline.banner"
 	| "offline.searchUnavailable"
+	| "pwa.updateAvailable"
+	| "pwa.updateNow"
+	| "pwa.dismiss"
 	| "app.description";
 
 export type TranslationKeys = Record<TranslationKey, string>;

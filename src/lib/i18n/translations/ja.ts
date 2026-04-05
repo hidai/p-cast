@@ -78,6 +78,11 @@ export const ja = {
 	"offline.banner": "オフライン",
 	"offline.searchUnavailable": "オフラインのためポッドキャストを検索できません",
 
+	// PWA update
+	"pwa.updateAvailable": "アップデートがあります",
+	"pwa.updateNow": "今すぐ更新",
+	"pwa.dismiss": "閉じる",
+
 	// App metadata
 	"app.description":
 		"ポッドキャストプレイヤー。お気に入りのポッドキャストを検索・購読・再生できます。",
