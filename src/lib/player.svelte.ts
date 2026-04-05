@@ -1,4 +1,5 @@
 import { db, type Episode } from "./db";
+import { i18n } from "./i18n";
 import { resolveCoverUrl } from "./utils";
 
 class PlayerState {
@@ -48,7 +49,16 @@ class PlayerState {
 				this.isPlaying = true;
 				this.updateMediaSession();
 			});
+			this.initMediaSessionHandlers();
 		}
+	}
+
+	private initMediaSessionHandlers() {
+		if (!("mediaSession" in navigator)) return;
+		navigator.mediaSession.setActionHandler("play", () => this.togglePlay());
+		navigator.mediaSession.setActionHandler("pause", () => this.togglePlay());
+		navigator.mediaSession.setActionHandler("seekbackward", () => this.skip(-10));
+		navigator.mediaSession.setActionHandler("seekforward", () => this.skip(10));
 	}
 
 	async play(episode: Episode) {
@@ -106,7 +116,7 @@ class PlayerState {
 			this.isPlaying = false;
 			return;
 		}
-		this.setupMediaSession();
+		await this.setupMediaSession();
 		this.startSaveInterval();
 	}
 
@@ -165,18 +175,16 @@ class PlayerState {
 	private async setupMediaSession() {
 		if (!("mediaSession" in navigator) || !this.currentEpisode) return;
 
-		const coverUrl = await resolveCoverUrl(this.currentEpisode);
+		const [coverUrl, podcast] = await Promise.all([
+			resolveCoverUrl(this.currentEpisode),
+			db.podcasts.get(this.currentEpisode.podcastFeedUrl),
+		]);
 		navigator.mediaSession.metadata = new MediaMetadata({
 			title: this.currentEpisode.title,
-			artist: "",
-			album: "Podcast",
+			artist: podcast?.title ?? "",
+			album: i18n.t("player.nowPlaying"),
 			artwork: coverUrl ? [{ src: coverUrl }] : [],
 		});
-
-		navigator.mediaSession.setActionHandler("play", () => this.togglePlay());
-		navigator.mediaSession.setActionHandler("pause", () => this.togglePlay());
-		navigator.mediaSession.setActionHandler("seekbackward", () => this.skip(-10));
-		navigator.mediaSession.setActionHandler("seekforward", () => this.skip(10));
 	}
 
 	private updateMediaSession() {
