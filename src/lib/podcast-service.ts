@@ -237,7 +237,9 @@ const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 export async function cleanupExpiredDownloads(): Promise<void> {
 	const cutoff = Date.now() - TWENTY_FOUR_HOURS;
 	const expired = await db.episodes
-		.filter((e) => e.isDownloaded && e.isCompleted && !!e.completedAt && e.completedAt < cutoff)
+		.where("completedAt")
+		.below(cutoff)
+		.and((e) => e.isDownloaded && e.isCompleted)
 		.toArray();
 	for (const episode of expired) {
 		await deleteDownload(episode.guid);
