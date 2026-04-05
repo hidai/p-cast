@@ -55,6 +55,7 @@ export const ja = {
 	"episode.download": "DL",
 	"episode.downloaded": "DL済み",
 	"episode.played": "再生済み",
+	"episode.markAsPlayed": "再生済みにする",
 
 	// Player
 	"player.nowPlaying": "再生中",

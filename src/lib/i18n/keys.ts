@@ -42,6 +42,7 @@ export type TranslationKey =
 	| "episode.download"
 	| "episode.downloaded"
 	| "episode.played"
+	| "episode.markAsPlayed"
 	| "player.nowPlaying"
 	| "player.details"
 	| "nav.settings"

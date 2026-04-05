@@ -2,6 +2,7 @@
 import { liveQuery } from "dexie";
 import Microphone from "phosphor-svelte/lib/Microphone";
 import MusicNote from "phosphor-svelte/lib/MusicNote";
+import X from "phosphor-svelte/lib/X";
 import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
@@ -12,6 +13,14 @@ import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
+
+async function markAsPlayed(guid: string) {
+	await db.episodes.update(guid, {
+		isCompleted: true,
+		currentTime: 0,
+		completedAt: Date.now(),
+	});
+}
 
 // Redirect to Discover once if user has never used the app
 const redirectKey = "p-cast:discoveredOnce";
@@ -172,40 +181,51 @@ function handleDownload(episode: Episode) {
 					{@const imgUrl = episode.coverUrl || episode.podcast?.coverUrl}
 					{@const isCardCurrentEpisode = player.currentEpisode?.guid === episode.guid}
 					{@const isCardPlaying = isCardCurrentEpisode && player.isPlaying}
-					<button
-						class="snap-start shrink-0 w-36 text-left"
-						onclick={() => isCardCurrentEpisode ? player.togglePlay() : player.play(episode)}
-						title={isCardPlaying ? i18n.t("episode.pause") : i18n.t("episode.play")}
-					>
+					<div class="snap-start shrink-0 w-36">
 						<div class="relative">
-							{#if imgUrl}
-								<img
-									src={imgUrl}
-									alt=""
-									class="w-36 h-36 rounded-2xl object-cover ring-1 ring-border-subtle"
-								/>
-							{:else}
-								<div
-									class="w-36 h-36 rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
-								>
-									<MusicNote size={40} weight="light" class="text-text-secondary" />
+							<button
+								class="block text-left w-full"
+								onclick={() => isCardCurrentEpisode ? player.togglePlay() : player.play(episode)}
+								title={isCardPlaying ? i18n.t("episode.pause") : i18n.t("episode.play")}
+							>
+								{#if imgUrl}
+									<img
+										src={imgUrl}
+										alt=""
+										class="w-36 h-36 rounded-2xl object-cover ring-1 ring-border-subtle"
+									/>
+								{:else}
+									<div
+										class="w-36 h-36 rounded-2xl bg-bg-card flex items-center justify-center ring-1 ring-border-subtle"
+									>
+										<MusicNote size={40} weight="light" class="text-text-secondary" />
+									</div>
+								{/if}
+								<!-- Progress bar overlay -->
+								<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-black/40 rounded-b-2xl overflow-hidden">
+									<div
+										class="h-full bg-accent"
+										style="width: {episode.duration > 0
+											? (episode.currentTime / episode.duration) * 100
+											: 0}%"
+									></div>
 								</div>
-							{/if}
-							<!-- Progress bar overlay -->
-							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-black/40 rounded-b-2xl overflow-hidden">
-								<div
-									class="h-full bg-accent"
-									style="width: {episode.duration > 0
-										? (episode.currentTime / episode.duration) * 100
-										: 0}%"
-								></div>
-							</div>
-							<!-- Playing indicator overlay -->
-							{#if isCardCurrentEpisode}
-								<div class="absolute top-2 right-2 bg-black/50 rounded-md px-1.5 py-1 flex items-center">
-									<PlayingIndicator playing={isCardPlaying} />
-								</div>
-							{/if}
+								<!-- Playing indicator overlay -->
+								{#if isCardCurrentEpisode}
+									<div class="absolute top-2 right-2 bg-black/50 rounded-md px-1.5 py-1 flex items-center">
+										<PlayingIndicator playing={isCardPlaying} />
+									</div>
+								{/if}
+							</button>
+							<!-- Dismiss button -->
+							<button
+								class="absolute top-2 left-2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center"
+								onclick={() => markAsPlayed(episode.guid)}
+								title={i18n.t("episode.markAsPlayed")}
+								aria-label={i18n.t("episode.markAsPlayed")}
+							>
+								<X size={12} weight="bold" class="text-white" />
+							</button>
 						</div>
 						<p class="text-xs font-medium mt-2 line-clamp-2 leading-tight">
 							{episode.title}
@@ -213,7 +233,7 @@ function handleDownload(episode: Episode) {
 						<p class="text-xs text-text-secondary mt-0.5">
 							{formatDuration(episode.currentTime)} / {formatDuration(episode.duration)}
 						</p>
-					</button>
+					</div>
 				{/each}
 			</div>
 		</section>

@@ -55,6 +55,7 @@ export const en = {
 	"episode.download": "DL",
 	"episode.downloaded": "Downloaded",
 	"episode.played": "played",
+	"episode.markAsPlayed": "Mark as Played",
 
 	// Player
 	"player.nowPlaying": "Now Playing",
