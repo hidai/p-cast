@@ -3,7 +3,6 @@ import { liveQuery } from "dexie";
 import Microphone from "phosphor-svelte/lib/Microphone";
 import MusicNote from "phosphor-svelte/lib/MusicNote";
 import X from "phosphor-svelte/lib/X";
-import { goto } from "$app/navigation";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import PullToRefresh from "$lib/components/PullToRefresh.svelte";
@@ -24,20 +23,6 @@ async function markAsPlayed(guid: string) {
 		completedAt: Date.now(),
 	});
 }
-
-// Redirect to Discover once if user has never used the app
-const redirectKey = "p-cast:discoveredOnce";
-$effect(() => {
-	if (sessionStorage.getItem(redirectKey)) return;
-	Promise.all([db.podcasts.count(), db.episodes.count(), db.audioFiles.count()]).then(
-		([podcasts, episodes, audioFiles]) => {
-			if (podcasts === 0 && episodes === 0 && audioFiles === 0) {
-				sessionStorage.setItem(redirectKey, "1");
-				goto("/discover", { replaceState: true });
-			}
-		},
-	);
-});
 
 type EpisodeWithPodcast = Episode & { podcast?: Podcast };
 
