@@ -26,7 +26,10 @@ A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, su
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [Dexie.js](https://dexie.org/) (IndexedDB wrapper)
 - [Vite PWA](https://vite-pwa-org.netlify.app/) for offline support
+- [DOMPurify](https://github.com/cure53/DOMPurify) for HTML sanitization (RSS feed content)
+- [Phosphor Icons](https://phosphoricons.com/) (phosphor-svelte)
 - [Biome](https://biomejs.dev/) for linting & formatting
+- [Vercel Analytics](https://vercel.com/analytics)
 - Deployed on [Vercel](https://vercel.com/)
 
 ## Getting Started
@@ -47,6 +50,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript type checking |
 | `npm run lint` | Lint with Biome |
+| `npm run lint:fix` | Lint and auto-fix with Biome |
 | `npm run format` | Format with Biome |
 
 ## Deployment
@@ -68,18 +72,25 @@ All data is stored in the browser via IndexedDB (Dexie). There is no backend dat
 ```
 src/
 ├── lib/
-│   ├── db.ts              # Dexie database schema
-│   ├── podcast-service.ts # Search, subscribe, download, feed parsing
-│   ├── player.svelte.ts   # Singleton player state (Svelte 5 runes)
-│   ├── overlay.svelte.ts  # Overlay sheet manager (podcast/episode detail, full player)
-│   └── i18n/              # Internationalization (Japanese, English)
+│   ├── db.ts                # Dexie database schema
+│   ├── podcast-service.ts   # Search, subscribe, download, feed parsing
+│   ├── player.svelte.ts     # Singleton player state (Svelte 5 runes)
+│   ├── overlay.svelte.ts    # Overlay sheet manager (podcast/episode detail, full player)
+│   ├── download.svelte.ts   # Episode download progress state
+│   ├── network.svelte.ts    # Online/offline state
+│   ├── theme.svelte.ts      # Theme management (system/light/dark)
+│   ├── cover-url.svelte.ts  # Cover image URL resolution (blob or remote)
+│   ├── pwa.svelte.ts        # PWA update detection and prompt
+│   ├── utils.ts             # Shared utilities (HTML sanitization, cover URL resolver)
+│   └── i18n/               # Internationalization (Japanese, English)
 ├── routes/
-│   ├── +layout.svelte     # App shell, mini player, bottom nav, overlay sheets
-│   ├── +page.svelte       # Home — continue listening, next up, latest episodes
-│   ├── discover/          # Top podcasts & search
-│   ├── library/           # Subscriptions, downloads, history
-│   └── api/proxy/         # RSS feed CORS proxy
-└── app.css                # Tailwind theme (dark mode)
+│   ├── +layout.svelte       # App shell, mini player, bottom nav, overlay sheets
+│   ├── +page.svelte         # Home — continue listening, next up, latest episodes
+│   ├── discover/            # Top podcasts & search
+│   ├── library/             # Subscriptions, downloads, history
+│   ├── settings/            # Theme and language settings
+│   └── api/proxy/           # RSS feed CORS proxy
+└── app.css                  # Tailwind theme (dark mode)
 ```
 
 ## License
