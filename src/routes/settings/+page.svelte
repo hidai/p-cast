@@ -74,7 +74,7 @@ const languageOptions: { value: Locale; label: string }[] = [
 						{i18n.t("settings.libraries")}
 					</h3>
 					<ul class="space-y-1">
-						{#each [["SvelteKit", "MIT"], ["Svelte", "MIT"], ["Dexie.js", "Apache 2.0"], ["Tailwind CSS", "MIT"], ["phosphor-svelte", "MIT"]] as [lib, license]}
+						{#each [["SvelteKit", "MIT"], ["Svelte", "MIT"], ["Dexie.js", "Apache 2.0"], ["Tailwind CSS", "MIT"], ["phosphor-svelte", "MIT"], ["DOMPurify", "Apache 2.0 / MIT"], ["Vite PWA", "MIT"]] as [lib, license]}
 							<li class="flex justify-between text-xs">
 								<span class="text-text-primary">{lib}</span>
 								<span class="text-text-secondary">{license} License</span>
