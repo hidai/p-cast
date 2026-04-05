@@ -155,8 +155,9 @@ function handleDownload(episode: Episode) {
 
 <PullToRefresh onrefresh={handleRefresh}>
 <div class="px-4 pt-4">
-	<div class="mb-4">
-		<h1 class="text-xl font-bold">{i18n.t("home.title")}</h1>
+	<div class="mb-4 flex items-end gap-0">
+		<img src="/favicon.svg" alt="P-Cast" class="w-9 h-9 rounded-xl" />
+		<h1 class="text-xl font-bold">-Cast</h1>
 	</div>
 
 	<!-- Continue Listening -->
