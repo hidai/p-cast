@@ -1,9 +1,13 @@
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
+import DOMPurify from "dompurify";
 
-/** Strip <script> tags for safety, keep other HTML */
+/** Sanitize HTML from untrusted sources (RSS feeds) using DOMPurify */
 export function sanitizeHtml(html: string): string {
-	return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+	return DOMPurify.sanitize(html, {
+		ALLOWED_TAGS: ["b", "i", "em", "strong", "p", "br", "a", "ul", "ol", "li", "blockquote", "h1", "h2", "h3", "pre", "code"],
+		ALLOWED_ATTR: ["href", "title", "rel", "target"],
+	});
 }
 
 /** Resolve episode cover URL, falling back to the podcast's cover */
