@@ -13,6 +13,9 @@ import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
+import { theme } from "$lib/theme.svelte";
+
+const logoBg = $derived(theme.resolvedDark ? '#000000' : '#ffffff');
 
 async function markAsPlayed(guid: string) {
 	await db.episodes.update(guid, {
@@ -166,8 +169,17 @@ function handleDownload(episode: Episode) {
 <PullToRefresh onrefresh={handleRefresh}>
 <div class="px-4 pt-4">
 	<div class="mb-4 flex items-end gap-0">
-		<img src="/favicon.svg" alt="P-Cast" class="w-9 h-9 rounded-xl" />
-		<h1 class="text-xl font-bold">-Cast</h1>
+		<svg width="36" height="36" viewBox="0 0 1000 1008" fill="none" xmlns="http://www.w3.org/2000/svg" class="rounded-xl flex-shrink-0" role="img" aria-hidden="true">
+			<rect width="1000" height="1008" rx="225" fill={logoBg}/>
+			<path d="M512 183C652.833 183 767 296.944 767 437.5C767 578.056 652.833 692 512 692C371.167 692 257 578.056 257 437.5C257 296.944 371.167 183 512 183ZM512 293C431.919 293 367 357.919 367 438C367 518.081 431.919 583 512 583C592.081 583 657 518.081 657 438C657 357.919 592.081 293 512 293Z" fill="#A8B7FC"/>
+			<rect x="256" y="183" width="258" height="511" fill={logoBg}/>
+			<rect x="409.478" y="550.616" width="113" height="196" transform="rotate(-7 409.478 550.616)" fill={logoBg}/>
+			<rect x="507.792" y="705.011" width="36" height="35" transform="rotate(-49 507.792 705.011)" fill={logoBg}/>
+			<rect x="489.293" y="579.946" width="36" height="35" transform="rotate(-53 489.293 579.946)" fill={logoBg}/>
+			<rect x="361" y="183" width="153" height="110" fill="#8290F5"/>
+			<rect x="311" y="183" width="112" height="642" rx="10" fill="#8290F5"/>
+		</svg>
+		<h1 class="text-xl font-bold" aria-label="P-Cast">-Cast</h1>
 	</div>
 
 	<!-- Continue Listening -->
