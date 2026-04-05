@@ -43,6 +43,7 @@ export const en = {
 	"podcast.newestFirst": "Newest first",
 	"podcast.oldestFirst": "Oldest first",
 	"podcast.loadingEpisodes": "Loading episodes...",
+	"podcast.closeMenu": "Close menu",
 
 	// Episode detail
 	"episode.noDescription": "No description available",
@@ -54,12 +55,16 @@ export const en = {
 	"episode.delete": "Delete",
 	"episode.download": "DL",
 	"episode.downloaded": "Downloaded",
+	"episode.deleteDownload": "Delete download",
+	"episode.downloadAction": "Download",
 	"episode.played": "played",
 	"episode.markAsPlayed": "Mark as Played",
 
 	// Player
 	"player.nowPlaying": "Now Playing",
 	"player.details": "Details",
+	"player.close": "Close player",
+	"player.toggleDownload": "Toggle download",
 
 	// Settings
 	"nav.settings": "Settings",

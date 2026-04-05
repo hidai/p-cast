@@ -75,7 +75,7 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 >
 	<!-- Header -->
 	<div class="flex items-center justify-between px-4 py-3">
-		<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => overlay.closeAll()} aria-label="Close player">
+		<button class="text-text-secondary active:scale-95 transition-transform" onclick={() => overlay.closeAll()} aria-label={i18n.t("player.close")}>
 			<CaretDown size={24} />
 		</button>
 		<span class="text-sm text-text-secondary">{i18n.t("player.nowPlaying")}</span>
@@ -164,7 +164,7 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 				class="p-2 rounded-full disabled:opacity-50 active:scale-95 transition-transform {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
 				onclick={toggleDownload}
 				disabled={currentDownloadProgress !== null || isDeleting}
-				aria-label="Toggle download"
+				aria-label={i18n.t("player.toggleDownload")}
 			>
 				{#if currentDownloadProgress !== null}
 					<DownloadProgress progress={currentDownloadProgress} class="w-6 h-6" />

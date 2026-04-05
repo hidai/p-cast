@@ -74,7 +74,7 @@ function handlePlay() {
 			<button
 				class="p-2 text-text-secondary hover:text-danger"
 				onclick={() => ondelete?.(episode)}
-				title="Delete download"
+				title={i18n.t("episode.deleteDownload")}
 			>
 				<Trash size={20} />
 			</button>
@@ -84,7 +84,7 @@ function handlePlay() {
 				class="p-2 text-text-secondary hover:text-accent disabled:opacity-50"
 				onclick={() => ondownload?.(episode)}
 				disabled={downloadingProgress != null}
-				title="Download"
+				title={i18n.t("episode.downloadAction")}
 			>
 				{#if downloadingProgress != null}
 					<DownloadProgress progress={downloadingProgress} />

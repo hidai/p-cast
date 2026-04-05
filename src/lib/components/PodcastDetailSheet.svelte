@@ -187,7 +187,7 @@ function handleDownload(episode: Episode) {
 					<button
 						class="fixed inset-0 z-10"
 						onclick={() => (sortMenuOpen = false)}
-						aria-label="Close menu"
+						aria-label={i18n.t("podcast.closeMenu")}
 					></button>
 					<div
 						class="absolute right-0 top-full mt-1 z-20 bg-bg-card border border-border rounded-xl shadow-xl py-1 min-w-[140px]"

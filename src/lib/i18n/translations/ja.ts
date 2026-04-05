@@ -43,6 +43,7 @@ export const ja = {
 	"podcast.newestFirst": "新しい順",
 	"podcast.oldestFirst": "古い順",
 	"podcast.loadingEpisodes": "読み込み中...",
+	"podcast.closeMenu": "メニューを閉じる",
 
 	// Episode detail
 	"episode.noDescription": "説明文はありません",
@@ -54,12 +55,16 @@ export const ja = {
 	"episode.delete": "削除",
 	"episode.download": "DL",
 	"episode.downloaded": "DL済み",
+	"episode.deleteDownload": "ダウンロードを削除",
+	"episode.downloadAction": "ダウンロード",
 	"episode.played": "再生済み",
 	"episode.markAsPlayed": "再生済みにする",
 
 	// Player
 	"player.nowPlaying": "再生中",
 	"player.details": "詳細",
+	"player.close": "プレイヤーを閉じる",
+	"player.toggleDownload": "ダウンロードを切り替える",
 
 	// Settings
 	"nav.settings": "設定",
