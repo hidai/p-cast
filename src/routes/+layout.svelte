@@ -22,7 +22,17 @@ const bannerCount = $derived((network.online ? 0 : 1) + (pwa.updateAvailable ? 1
 afterNavigate((nav) => {
 	overlay.handleNavigation(nav.type);
 	const feedUrl = pendingShare.consume();
-	if (feedUrl) overlay.openPodcastDetail(feedUrl);
+	if (feedUrl) {
+		overlay.openPodcastDetail(feedUrl);
+		return;
+	}
+	const subscribeUrl = nav.to?.url.searchParams.get("podcast");
+	if (subscribeUrl && (subscribeUrl.startsWith("http://") || subscribeUrl.startsWith("https://"))) {
+		overlay.openPodcastDetail(subscribeUrl);
+		const cleanUrl = new URL(window.location.href);
+		cleanUrl.searchParams.delete("podcast");
+		history.replaceState(null, "", cleanUrl.toString());
+	}
 });
 
 cleanupExpiredDownloads();
