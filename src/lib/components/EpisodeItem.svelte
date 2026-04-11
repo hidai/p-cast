@@ -53,11 +53,11 @@ function handlePlay() {
 	>
 		<CoverImage src={imgUrl} class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
 		<div class="flex-1 min-w-0">
-			<p class="flex items-center gap-1.5 text-sm font-medium {episode.isCompleted ? 'text-text-secondary' : ''}">
+			<p class="flex items-start gap-1.5 text-sm font-medium {episode.isCompleted ? 'text-text-secondary' : ''}">
 				{#if isCurrentEpisode}
 					<PlayingIndicator playing={isActivePlaying} />
 				{/if}
-				<span class="truncate">{episode.title}</span>
+				<span class="line-clamp-2 leading-tight">{episode.title}</span>
 			</p>
 			<p class="text-xs text-text-secondary">
 				{formatDate(episode.pubDate)}

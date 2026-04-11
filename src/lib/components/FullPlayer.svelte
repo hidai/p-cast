@@ -96,7 +96,7 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 	<!-- Info & Controls -->
 	<div class="px-6 pb-8 pt-4">
 		<div class="flex items-center gap-2">
-			<h2 class="text-lg font-semibold truncate flex-1">{player.currentEpisode?.title}</h2>
+			<h2 class="text-lg font-semibold line-clamp-2 leading-tight flex-1">{player.currentEpisode?.title}</h2>
 			<button
 				class="shrink-0 text-xs text-accent border border-accent/30 rounded-full px-2.5 py-1 hover:bg-accent-subtle active:scale-95 transition-all"
 				onclick={() => {

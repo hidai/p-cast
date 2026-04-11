@@ -7,6 +7,22 @@ import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
 
 const cover = createCoverUrlState(() => player.currentEpisode);
+
+let titleEl: HTMLElement;
+let isOverflowing = $state(false);
+
+$effect(() => {
+	const _title = player.currentEpisode?.title;
+	isOverflowing = false;
+
+	const rafId = requestAnimationFrame(() => {
+		if (titleEl) {
+			isOverflowing = titleEl.scrollWidth > titleEl.clientWidth;
+		}
+	});
+
+	return () => cancelAnimationFrame(rafId);
+});
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -30,8 +46,10 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 				class="shrink-0 w-10 h-10 rounded-lg object-cover ring-1 ring-border-subtle"
 			/>
 		{/if}
-		<div class="flex-1 min-w-0">
-			<p class="text-sm font-medium truncate">{player.currentEpisode?.title}</p>
+		<div class="flex-1 min-w-0 overflow-hidden">
+			<p bind:this={titleEl} class="text-sm font-medium whitespace-nowrap {isOverflowing ? 'title-marquee' : ''}">
+				{player.currentEpisode?.title}{#if isOverflowing}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{player.currentEpisode?.title}{/if}
+			</p>
 			<p class="text-xs text-text-secondary">{formatDuration(player.currentTime)}</p>
 		</div>
 		<button
@@ -46,3 +64,14 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 		</button>
 	</div>
 </div>
+
+<style>
+	.title-marquee {
+		animation: title-marquee 14s linear infinite;
+	}
+
+	@keyframes title-marquee {
+		0%, 12% { transform: translateX(0); }
+		88%, 100% { transform: translateX(-50%); }
+	}
+</style>
