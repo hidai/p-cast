@@ -23,9 +23,9 @@ function isAllowedUrl(target: string): boolean {
 		hostname.startsWith("169.254.") ||
 		hostname.startsWith("0.") ||
 		/^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
-		hostname.startsWith("fc00:") ||
-		hostname.startsWith("fd") ||
-		hostname.startsWith("fe80:") ||
+		hostname.startsWith("[fc00:") ||
+		hostname.startsWith("[fd") ||
+		hostname.startsWith("[fe80:") ||
 		hostname.endsWith(".local") ||
 		hostname.endsWith(".internal")
 	) {

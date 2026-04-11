@@ -2,9 +2,11 @@ import DOMPurify from "dompurify";
 import type { Episode } from "$lib/db";
 import { db } from "$lib/db";
 
-/** Sanitize HTML from untrusted sources (RSS feeds) using DOMPurify */
+/** Sanitize HTML from untrusted sources (RSS feeds) using DOMPurify.
+ * All links are forced to open in a new tab with noopener/noreferrer — the app
+ * owns link behaviour, RSS feeds do not. */
 export function sanitizeHtml(html: string): string {
-	return DOMPurify.sanitize(html, {
+	const clean = DOMPurify.sanitize(html, {
 		ALLOWED_TAGS: [
 			"b",
 			"i",
@@ -23,8 +25,16 @@ export function sanitizeHtml(html: string): string {
 			"pre",
 			"code",
 		],
-		ALLOWED_ATTR: ["href", "title", "rel", "target"],
+		ALLOWED_ATTR: ["href", "title", "rel"],
 	});
+	// Enforce target="_blank" and rel="noopener noreferrer" on every link so that
+	// (a) the PWA is never navigated away from, and (b) window.opener is not leaked.
+	const doc = new DOMParser().parseFromString(clean, "text/html");
+	for (const a of doc.querySelectorAll("a[href]")) {
+		a.setAttribute("target", "_blank");
+		a.setAttribute("rel", "noopener noreferrer");
+	}
+	return doc.body.innerHTML;
 }
 
 /** Resolve episode cover URL, falling back to the podcast's cover */
