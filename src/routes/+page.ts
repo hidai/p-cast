@@ -3,8 +3,11 @@ import { db } from "$lib/db";
 
 const redirectKey = "p-cast:discoveredOnce";
 
-export async function load() {
+export async function load({ url }: { url: URL }) {
 	if (sessionStorage.getItem(redirectKey)) return {};
+
+	// If opened via ?podcast= link, skip the /discover redirect
+	if (url.searchParams.has("podcast")) return {};
 
 	let isEmpty = false;
 	try {

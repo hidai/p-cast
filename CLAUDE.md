@@ -10,7 +10,7 @@ P-Cast is a client-side podcast player PWA built with SvelteKit 2, Svelte 5 (run
 
 - **Dev server:** `npm run dev`
 - **Build:** `npm run build`
-- **Type check:** `npm run check`
+- **Type check:** `npm run check` / **Watch mode:** `npm run check:watch`
 - **Lint:** `npm run lint` / **Lint fix:** `npm run lint:fix`
 - **Format:** `npm run format` (Biome, uses tabs, 100 char line width)
 
@@ -22,7 +22,7 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 
 ### Key Modules
 
-- **`src/lib/db.ts`** — Dexie database schema and TypeScript interfaces (`Podcast`, `Episode`, `AudioFile`). Podcast has `description` and optional `episodeSortOrder`; Episode has `description`, `audioUrl`, `coverUrl`, and optional `lastPlayedAt` beyond what the original spec lists.
+- **`src/lib/db.ts`** — Dexie database schema and TypeScript interfaces (`Podcast`, `Episode`, `AudioFile`). Podcast has `title`, `author`, `coverUrl`, `description`, `subscribedAt`, and optional `episodeSortOrder`. Episode has `guid`, `podcastFeedUrl`, `title`, `audioUrl`, `pubDate`, `coverUrl`, `description`, `currentTime`, `duration`, `isCompleted`, `isDownloaded`, `completedAt`, and `lastPlayedAt`.
 - **`src/lib/podcast-service.ts`** — All podcast logic: iTunes search API, RSS feed parsing (via DOMParser), subscribe/unsubscribe, episode download/delete, feed refresh. Also provides `fetchTopPodcasts()` (Apple Marketing Tools API, 30-min in-memory cache) and `lookupPodcastById()`.
 - **`src/lib/player.svelte.ts`** — Singleton `PlayerState` class using Svelte 5 runes (`$state`, `$derived`). Manages HTMLAudioElement, playback, position saving (every 10s), Media Session API, and auto-play-next (plays the next unplayed episode from the same podcast when the current one finishes). Exported as `player`.
 - **`src/lib/overlay.svelte.ts`** — Singleton overlay manager for sheet-style modals (`FullPlayer`, `PodcastDetailSheet`, `EpisodeDetailSheet`). Integrates with browser history state so the back button closes overlays naturally.
@@ -32,6 +32,8 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 - **`src/lib/share.svelte.ts`** — `pendingShare` singleton for handing off a feed URL from the PWA Share Target route (`/share`) to `PodcastDetailSheet` via `overlay.svelte.ts`.
 - **`src/lib/pwa.svelte.ts`** — `PwaState` singleton tracking service worker update availability. Shows an update banner when `updateAvailable` is true. Exported as `pwa`.
 - **`src/lib/utils.ts`** — `sanitizeHtml()` (DOMPurify, used for all RSS-sourced HTML — enforces `target="_blank"` on links) and `resolveCoverUrl()` (falls back to podcast cover when episode has none).
+- **`src/lib/http.ts`** — `HttpError` class, `fetchJson<T>()`, and `fetchXml()` helpers used for all API and RSS fetch calls.
+- **`src/lib/cover-url.svelte.ts`** — `createCoverUrlState()` factory (not a singleton). Resolves episode cover URLs asynchronously with cancellation cleanup; instantiated per component.
 
 ### RSS Proxy
 
@@ -53,7 +55,7 @@ Layout (`+layout.svelte`) renders: main content area, `MiniPlayer` (shown when a
 
 ### Deployment
 
-Deployed to Vercel using `@sveltejs/adapter-vercel`. PWA support via `@vite-pwa/sveltekit`.
+Deployed to Vercel using `@sveltejs/adapter-vercel`. PWA support via `@vite-pwa/sveltekit`. `@vercel/analytics` is injected in `+layout.ts`. There are no automated tests in this project.
 
 ## Conventions
 
