@@ -26,6 +26,12 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 - **`src/lib/podcast-service.ts`** — All podcast logic: iTunes search API, RSS feed parsing (via DOMParser), subscribe/unsubscribe, episode download/delete, feed refresh. Also provides `fetchTopPodcasts()` (Apple Marketing Tools API, 30-min in-memory cache) and `lookupPodcastById()`.
 - **`src/lib/player.svelte.ts`** — Singleton `PlayerState` class using Svelte 5 runes (`$state`, `$derived`). Manages HTMLAudioElement, playback, position saving (every 10s), Media Session API, and auto-play-next (plays the next unplayed episode from the same podcast when the current one finishes). Exported as `player`.
 - **`src/lib/overlay.svelte.ts`** — Singleton overlay manager for sheet-style modals (`FullPlayer`, `PodcastDetailSheet`, `EpisodeDetailSheet`). Integrates with browser history state so the back button closes overlays naturally.
+- **`src/lib/theme.svelte.ts`** — `ThemeManager` singleton for system/light/dark theme. Persists to `localStorage`, applies `dark`/`light` class to `<html>`, and updates `<meta name="theme-color">`. Exported as `theme`.
+- **`src/lib/download.svelte.ts`** — `createDownloadState()` factory (not a singleton — instantiated per component that needs it). Tracks per-episode download progress as a `Map<guid, 0–100>`.
+- **`src/lib/network.svelte.ts`** — `NetworkState` singleton wrapping `navigator.onLine` + `online`/`offline` events. Exported as `network`.
+- **`src/lib/share.svelte.ts`** — `pendingShare` singleton for handing off a feed URL from the PWA Share Target route (`/share`) to `PodcastDetailSheet` via `overlay.svelte.ts`.
+- **`src/lib/pwa.svelte.ts`** — `PwaState` singleton tracking service worker update availability. Shows an update banner when `updateAvailable` is true. Exported as `pwa`.
+- **`src/lib/utils.ts`** — `sanitizeHtml()` (DOMPurify, used for all RSS-sourced HTML — enforces `target="_blank"` on links) and `resolveCoverUrl()` (falls back to podcast cover when episode has none).
 
 ### RSS Proxy
 
@@ -36,6 +42,8 @@ All data lives in IndexedDB via Dexie (`src/lib/db.ts`). Three tables: `podcasts
 - `/` (Home) — Three sections: "Continue Listening" (episodes in progress), "Next Up" (next unplayed episode per podcast), and "Latest Episodes" from subscribed podcasts
 - `/discover` — Top podcasts and keyword search via iTunes Search API, navigate to podcast detail overlay
 - `/library` — Three tabs: subscribed podcasts, downloaded episodes, listening history
+- `/settings` — Theme (system/light/dark) and language (ja/en) toggles
+- `/share` — PWA Share Target landing page; extracts a podcast feed URL from the share payload, stores it in `pendingShare`, then navigates to `/discover` where `PodcastDetailSheet` opens automatically
 
 Podcast detail and episode detail are **overlay sheets** (not separate routes), managed by `overlay.svelte.ts` and rendered in `+layout.svelte`. They use `history.pushState` so the back button closes them.
 

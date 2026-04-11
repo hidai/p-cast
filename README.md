@@ -4,95 +4,61 @@
 
 # P-Cast
 
-A client-side podcast player PWA built with SvelteKit 2 and Svelte 5. Search, subscribe, download, and listen — all in the browser with IndexedDB storage.
+A podcast player that lives in your browser. No account. No sync. Just your podcasts.
+
+→ Open **[P-Cast](https://p-cast.org/)**
+
+---
+
+## Why P-Cast?
+
+Most podcast apps want your email, your data, and a monthly subscription.
+P-Cast doesn't. Everything — your subscriptions, your listening history,
+your downloaded episodes — stays on your device. Close the tab and it's
+all still there next time.
 
 ## Features
 
-- **Discover podcasts** — Browse top podcasts or search via iTunes Search API
-- **Subscribe & manage** — Save your favorite shows locally
-- **Offline playback** — Download episodes for listening without internet
-- **Offline detection** — Shows a banner when offline; search is gracefully disabled while cached content remains accessible
-- **Resume playback** — Automatically saves your position and resumes where you left off
-- **Auto-play next** — Automatically plays the next unplayed episode from the same podcast
-- **Playback speed** — Adjustable speed (1.0x, 1.2x, 1.5x, 2.0x)
-- **Media controls** — Background playback with lock screen controls via Media Session API
-- **Keyboard shortcuts** — Space (play/pause), J (-10s), L (+10s)
-- **Multilingual** — Japanese and English UI
-- **No account required** — All data stays on your device
+- **Discover** — Browse top podcasts or search by keyword
+- **Offline playback** — Download episodes and listen without internet
+- **Installable** — Add to your home screen, no App Store needed
+- **Resume anywhere** — Picks up exactly where you left off
+- **Auto-play next** — Moves to the next episode automatically
+- **Background playback** — Lock screen controls on mobile
+- **Playback speed** — 1.0×, 1.2×, 1.5×, 2.0×
+- **No account required** — All data stays in your browser
 
-## Tech Stack
+---
+
+### Tech Stack
 
 - [SvelteKit 2](https://svelte.dev/) (SPA mode) + [Svelte 5](https://svelte.dev/) (runes)
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [Dexie.js](https://dexie.org/) (IndexedDB wrapper)
 - [Vite PWA](https://vite-pwa-org.netlify.app/) for offline support
-- [DOMPurify](https://github.com/cure53/DOMPurify) for HTML sanitization (RSS feed content)
-- [Phosphor Icons](https://phosphoricons.com/) (phosphor-svelte)
-- [Biome](https://biomejs.dev/) for linting & formatting
-- [Vercel Analytics](https://vercel.com/analytics)
-- Deployed on [Vercel](https://vercel.com/)
 
-## Getting Started
+### Getting Started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+### Deployment
 
-## Scripts
-
-| Command | Description |
-|---|---|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
-| `npm run preview` | Preview production build |
-| `npm run check` | TypeScript type checking |
-| `npm run lint` | Lint with Biome |
-| `npm run lint:fix` | Lint and auto-fix with Biome |
-| `npm run format` | Format with Biome |
-
-## Deployment
-
-This app requires [Vercel](https://vercel.com/) (or a similar platform that supports SvelteKit server routes) for deployment. RSS feeds from podcast servers typically don't include CORS headers, so a server-side proxy (`/api/proxy`) is needed to fetch them. Static hosting (e.g., GitHub Pages) won't work because the proxy route requires a server runtime.
-
-Local development works out of the box — Vite's dev server handles the proxy route automatically.
+Requires a server runtime (Vercel or similar) for the RSS proxy route.
+Static hosting won't work.
 
 ```bash
-# Deploy to Vercel
 npm i -g vercel
 vercel
 ```
 
-## Architecture
+### Architecture
 
-All data is stored in the browser via IndexedDB (Dexie). There is no backend database — the app runs entirely client-side. A server-side proxy route handles RSS feed fetching to avoid CORS restrictions.
+All data is stored in IndexedDB — no backend database. A server-side proxy
+handles RSS feed fetching to work around CORS restrictions.
 
-```
-src/
-├── lib/
-│   ├── db.ts                # Dexie database schema
-│   ├── podcast-service.ts   # Search, subscribe, download, feed parsing
-│   ├── player.svelte.ts     # Singleton player state (Svelte 5 runes)
-│   ├── overlay.svelte.ts    # Overlay sheet manager (podcast/episode detail, full player)
-│   ├── download.svelte.ts   # Episode download progress state
-│   ├── network.svelte.ts    # Online/offline state
-│   ├── theme.svelte.ts      # Theme management (system/light/dark)
-│   ├── cover-url.svelte.ts  # Cover image URL resolution (blob or remote)
-│   ├── pwa.svelte.ts        # PWA update detection and prompt
-│   ├── utils.ts             # Shared utilities (HTML sanitization, cover URL resolver)
-│   └── i18n/               # Internationalization (Japanese, English)
-├── routes/
-│   ├── +layout.svelte       # App shell, mini player, bottom nav, overlay sheets
-│   ├── +page.svelte         # Home — continue listening, next up, latest episodes
-│   ├── discover/            # Top podcasts & search
-│   ├── library/             # Subscriptions, downloads, history
-│   ├── settings/            # Theme and language settings
-│   └── api/proxy/           # RSS feed CORS proxy
-└── app.css                  # Tailwind theme (dark mode)
-```
+---
 
-## License
-
-[MIT](LICENSE)
+[MIT License](LICENSE)
