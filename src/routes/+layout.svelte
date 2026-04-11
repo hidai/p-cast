@@ -28,7 +28,7 @@ afterNavigate((nav) => {
 	}
 	const subscribeUrl = nav.to?.url.searchParams.get("podcast");
 	if (subscribeUrl && (subscribeUrl.startsWith("http://") || subscribeUrl.startsWith("https://"))) {
-		overlay.openPodcastDetail(subscribeUrl);
+		overlay.openPodcastDetail(subscribeUrl, undefined, 0);
 		const cleanUrl = new URL(window.location.href);
 		cleanUrl.searchParams.delete("podcast");
 		history.replaceState(null, "", cleanUrl.toString());

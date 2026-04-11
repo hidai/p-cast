@@ -69,7 +69,20 @@ async function fetchAndParseFeed(feedUrl: string): Promise<Document> {
 function parseFeedDocument(doc: Document) {
 	const channel = doc.querySelector("channel");
 	const podcastDescription = channel?.querySelector("description")?.textContent ?? "";
-	return { podcastDescription };
+	const podcastTitle = channel?.querySelector("title")?.textContent ?? "";
+	const podcastAuthor =
+		channel?.getElementsByTagNameNS("http://www.itunes.com/dtds/podcast-1.0.dtd", "author")[0]
+			?.textContent ??
+		channel?.querySelector("managingEditor")?.textContent ??
+		channel?.querySelector("author")?.textContent ??
+		"";
+	const podcastCoverUrl =
+		channel
+			?.getElementsByTagNameNS("http://www.itunes.com/dtds/podcast-1.0.dtd", "image")[0]
+			?.getAttribute("href") ??
+		channel?.querySelector("image url")?.textContent ??
+		"";
+	return { podcastDescription, podcastTitle, podcastAuthor, podcastCoverUrl };
 }
 
 function fetchEpisodesFromDoc(feedUrl: string, doc: Document): Omit<Episode, "isDownloaded">[] {
@@ -130,12 +143,23 @@ function fetchEpisodesFromDoc(feedUrl: string, doc: Document): Omit<Episode, "is
 	return episodes;
 }
 
-export async function fetchEpisodes(
-	feedUrl: string,
-): Promise<{ episodes: Omit<Episode, "isDownloaded">[]; podcastDescription: string }> {
+export async function fetchEpisodes(feedUrl: string): Promise<{
+	episodes: Omit<Episode, "isDownloaded">[];
+	podcastDescription: string;
+	podcastTitle: string;
+	podcastAuthor: string;
+	podcastCoverUrl: string;
+}> {
 	const doc = await fetchAndParseFeed(feedUrl);
-	const { podcastDescription } = parseFeedDocument(doc);
-	return { episodes: fetchEpisodesFromDoc(feedUrl, doc), podcastDescription };
+	const { podcastDescription, podcastTitle, podcastAuthor, podcastCoverUrl } =
+		parseFeedDocument(doc);
+	return {
+		episodes: fetchEpisodesFromDoc(feedUrl, doc),
+		podcastDescription,
+		podcastTitle,
+		podcastAuthor,
+		podcastCoverUrl,
+	};
 }
 
 function parseDuration(str: string): number {

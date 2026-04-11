@@ -28,9 +28,12 @@ let {
 } = $props();
 
 let dbPodcast = $state<Podcast | null>(null);
-const title = $derived(dbPodcast?.title || meta?.title || "");
-const author = $derived(dbPodcast?.author || meta?.author || "");
-const coverUrl = $derived(dbPodcast?.coverUrl || meta?.coverUrl || "");
+let feedTitle = $state("");
+let feedAuthor = $state("");
+let feedCoverUrl = $state("");
+const title = $derived(dbPodcast?.title || meta?.title || feedTitle || "");
+const author = $derived(dbPodcast?.author || meta?.author || feedAuthor || "");
+const coverUrl = $derived(dbPodcast?.coverUrl || meta?.coverUrl || feedCoverUrl || "");
 
 let isSubscribed = $state(false);
 let episodes: Episode[] = $state([]);
@@ -70,10 +73,19 @@ function sortEpisodes(eps: Episode[], order: EpisodeSortOrder): Episode[] {
 async function loadEpisodes() {
 	isLoading = true;
 	try {
-		const { episodes: raw, podcastDescription: feedDescription } = await fetchEpisodes(feedUrl);
+		const {
+			episodes: raw,
+			podcastDescription: feedDescription,
+			podcastTitle,
+			podcastAuthor,
+			podcastCoverUrl,
+		} = await fetchEpisodes(feedUrl);
 		if (feedDescription && !podcastDescription) {
 			podcastDescription = feedDescription;
 		}
+		if (podcastTitle && !feedTitle) feedTitle = podcastTitle;
+		if (podcastAuthor && !feedAuthor) feedAuthor = podcastAuthor;
+		if (podcastCoverUrl && !feedCoverUrl) feedCoverUrl = podcastCoverUrl;
 		for (const ep of raw) {
 			const existing = await db.episodes.get(ep.guid);
 			if (!existing) {
@@ -129,7 +141,7 @@ function handleDownload(episode: Episode) {
 }
 </script>
 
-<BottomSheet initialTop={0.15}>
+<BottomSheet initialTop={overlay.detailPodcastInitialTop}>
 	<div class="px-4 pb-4">
 		<!-- Podcast header -->
 		<div class="flex gap-4 mb-6">
