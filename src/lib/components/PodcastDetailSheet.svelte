@@ -86,7 +86,7 @@ async function loadEpisodes() {
 		if (podcastTitle && !feedTitle) feedTitle = podcastTitle;
 		if (podcastAuthor && !feedAuthor) feedAuthor = podcastAuthor;
 		if (podcastCoverUrl && !feedCoverUrl) feedCoverUrl = podcastCoverUrl;
-		if (overlay.detailPodcastAutoSubscribe) {
+		if (overlay.detailPodcastAutoSubscribe && feedTitle) {
 			const existing = await db.podcasts.get(feedUrl);
 			if (!existing) {
 				await subscribePodcast({
