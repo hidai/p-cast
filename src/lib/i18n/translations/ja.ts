@@ -91,4 +91,7 @@ export const ja = {
 	// App metadata
 	"app.description":
 		"ポッドキャストプレイヤー。お気に入りのポッドキャストを検索・購読・再生できます。",
+
+	// Share target
+	"share.loading": "読み込み中...",
 } satisfies TranslationKeys;

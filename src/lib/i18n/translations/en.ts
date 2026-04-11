@@ -90,4 +90,7 @@ export const en = {
 
 	// App metadata
 	"app.description": "A podcast player. Search, subscribe, and play your favorite podcasts.",
+
+	// Share target
+	"share.loading": "Loading...",
 } satisfies TranslationKeys;

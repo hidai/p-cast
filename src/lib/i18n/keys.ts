@@ -66,6 +66,7 @@ export type TranslationKey =
 	| "pwa.updateAvailable"
 	| "pwa.updateNow"
 	| "pwa.dismiss"
-	| "app.description";
+	| "app.description"
+	| "share.loading";
 
 export type TranslationKeys = Record<TranslationKey, string>;
