@@ -65,25 +65,16 @@ $effect(() => {
 	});
 });
 
-// Item sizes (px) matching Tailwind classes — used for deterministic scrollLeft calculation
-// that is immune to mid-transition layout values from scrollIntoView.
-// w-14=56, w-11=44, w-9=36, gap-3=12, px-8=32
-function getItemSize(i: number): number {
-	const d = Math.abs(i - currentIndex);
-	if (d === 0) return 56;
-	if (d === 1) return 44;
-	return 36;
-}
-
+// All strip items are uniform w-16 (64px) wide — scroll math is simple arithmetic.
+// Cover image sizes vary inside a fixed-height container to show visual hierarchy.
+// gap-3=12, px-8=32
 function scrollToCurrentIndex() {
 	if (!stripEl || currentIndex < 0 || siblingEpisodes.length === 0) return;
-	const GAP = 12;
-	const PADDING = 32;
-	let offset = PADDING;
-	for (let i = 0; i < currentIndex; i++) {
-		offset += getItemSize(i) + GAP;
-	}
-	stripEl.scrollLeft = offset + 28 - stripEl.clientWidth / 2; // 28 = 56/2 (half of current item)
+	const ITEM_WIDTH = 64; // w-16
+	const GAP = 12; // gap-3
+	const PADDING = 32; // px-8
+	stripEl.scrollLeft =
+		PADDING + currentIndex * (ITEM_WIDTH + GAP) + ITEM_WIDTH / 2 - stripEl.clientWidth / 2;
 }
 
 $effect(() => {
@@ -103,13 +94,18 @@ function handleStripNavigate(ep: Episode) {
 
 function stripItemClasses(i: number) {
 	const d = Math.abs(i - currentIndex);
-	if (d === 0) return { size: "w-14 h-14", opacity: "opacity-100", ring: "ring-2 ring-accent" };
-	if (d === 1) return { size: "w-11 h-11", opacity: "opacity-60", ring: "" };
-	return { size: "w-9 h-9", opacity: "opacity-30", ring: "" };
+	const coverSize = d === 0 ? "w-14 h-14" : d === 1 ? "w-11 h-11" : "w-9 h-9";
+	const opacity = d === 0 ? "opacity-100" : d === 1 ? "opacity-60" : "opacity-30";
+	const ring = d === 0 ? "ring-2 ring-accent" : "";
+	return { coverSize, opacity, ring };
 }
 
 function formatDate(ts: number): string {
 	return i18n.formatDate(ts, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function shortDate(ts: number): string {
+	return i18n.formatDate(ts, { month: "short", day: "numeric" });
 }
 
 // Is this episode currently loaded in the player?
@@ -193,23 +189,38 @@ async function handleDeleteDownload() {
 					<!-- Scroll row -->
 					<div
 						bind:this={stripEl}
-						class="strip-scroll flex items-center gap-3 overflow-x-auto px-8 py-1"
+						class="strip-scroll flex items-start gap-3 overflow-x-auto px-8 py-1"
 					>
 						{#if stripLoading}
 							{#each Array(5) as _, i (i)}
-								<div class="w-11 h-11 shrink-0 rounded-lg bg-bg-card animate-pulse"></div>
+								<div class="w-16 shrink-0 flex flex-col items-center gap-1">
+									<div class="w-14 h-14 rounded-lg bg-bg-card animate-pulse"></div>
+									<div class="h-2.5 w-10 rounded bg-bg-card animate-pulse"></div>
+									<div class="h-2 w-8 rounded bg-bg-card animate-pulse"></div>
+								</div>
 							{/each}
 						{:else}
 							{#each siblingEpisodes as ep, i (ep.guid)}
 								{@const cls = stripItemClasses(i)}
 								<button
-									class="shrink-0 transition-all duration-200 rounded-lg overflow-hidden {cls.size} {cls.opacity} {cls.ring}"
+									class="shrink-0 w-16 flex flex-col items-center gap-1 transition-opacity duration-200 {cls.opacity}"
 									data-strip-index={i}
 									onclick={() => handleStripNavigate(ep)}
 									aria-label={ep.title}
 									aria-current={ep.guid === episode.guid ? "true" : undefined}
 								>
-									<CoverImage src={ep.coverUrl} class="w-full h-full object-cover" />
+									<!-- Fixed-height cover container: centers varying cover sizes vertically -->
+									<div class="w-full h-14 flex items-center justify-center">
+										<div class="rounded-lg overflow-hidden transition-all duration-200 {cls.coverSize} {cls.ring}">
+											<CoverImage src={ep.coverUrl} class="w-full h-full object-cover" />
+										</div>
+									</div>
+									<span class="w-full text-[10px] leading-tight text-text-secondary truncate text-center">
+										{ep.title}
+									</span>
+									<span class="text-[9px] text-text-tertiary tabular-nums">
+										{shortDate(ep.pubDate)}
+									</span>
 								</button>
 							{/each}
 						{/if}
