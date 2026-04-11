@@ -19,8 +19,8 @@ let { children } = $props();
 
 const bannerCount = $derived((network.online ? 0 : 1) + (pwa.updateAvailable ? 1 : 0));
 
-afterNavigate((nav) => overlay.handleNavigation(nav.type));
-afterNavigate(() => {
+afterNavigate((nav) => {
+	overlay.handleNavigation(nav.type);
 	const feedUrl = pendingShare.consume();
 	if (feedUrl) overlay.openPodcastDetail(feedUrl);
 });

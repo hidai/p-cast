@@ -10,7 +10,7 @@ import { pendingShare } from "$lib/share.svelte";
 const APPLE_PODCASTS_RE = /\/id(\d+)/;
 
 function extractUrl(params: URLSearchParams): string {
-	return params.get("url") ?? params.get("text") ?? "";
+	return params.get("url") || params.get("text") || "";
 }
 
 function extractApplePodcastId(url: string): string | null {
@@ -22,7 +22,7 @@ function extractApplePodcastId(url: string): string | null {
 onMount(async () => {
 	const rawUrl = extractUrl(page.url.searchParams).trim();
 
-	if (!rawUrl) {
+	if (!rawUrl || (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://"))) {
 		goto("/discover", { replaceState: true });
 		return;
 	}
@@ -33,16 +33,17 @@ onMount(async () => {
 			const result = await lookupPodcastById(appleId);
 			if (result) {
 				pendingShare.set(result.feedUrl);
+				goto("/", { replaceState: true });
+			} else {
+				goto("/discover", { replaceState: true });
 			}
 		} catch {
-			// Ignore lookup errors — fall through to discover
+			goto("/discover", { replaceState: true });
 		}
 	} else {
-		// Treat as a direct RSS feed URL
 		pendingShare.set(rawUrl);
+		goto("/", { replaceState: true });
 	}
-
-	goto("/", { replaceState: true });
 });
 </script>
 
