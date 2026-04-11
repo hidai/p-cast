@@ -182,6 +182,14 @@ class PlayerState {
 		this.saveInterval = setInterval(() => this.savePosition(), 10000);
 	}
 
+	destroy() {
+		if (this.saveInterval) {
+			clearInterval(this.saveInterval);
+			this.saveInterval = null;
+		}
+		this.savePosition();
+	}
+
 	private async setupMediaSession() {
 		if (!("mediaSession" in navigator) || !this.currentEpisode) return;
 
@@ -204,3 +212,11 @@ class PlayerState {
 }
 
 export const player = new PlayerState();
+
+if (typeof window !== "undefined") {
+	window.addEventListener("beforeunload", () => player.savePosition());
+}
+
+if (import.meta.hot) {
+	import.meta.hot.dispose(() => player.destroy());
+}

@@ -75,7 +75,7 @@ function buildNextUpList(
 
 		let nextEp: Episode | null = null;
 		for (const e of episodes) {
-			if (e.pubDate > lastPlayed.pubDate) {
+			if (e.pubDate > lastPlayed.pubDate && !e.isCompleted) {
 				if (!nextEp || e.pubDate < nextEp.pubDate) {
 					nextEp = e;
 				}
