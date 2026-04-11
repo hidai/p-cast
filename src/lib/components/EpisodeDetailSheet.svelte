@@ -51,18 +51,27 @@ $effect(() => {
 	siblingEpisodes = [];
 	stripLoading = true;
 
-	Promise.all([
-		db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
-		db.podcasts.get(feedUrl),
-	]).then(([eps, podcast]) => {
-		if (loadedFeedUrl !== feedUrl) return; // stale: user navigated to different podcast
-		podcastTitle = podcast?.title ?? "";
-		const order: EpisodeSortOrder = podcast?.episodeSortOrder ?? "newest";
-		siblingEpisodes = [...eps].sort((a, b) =>
-			order === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
-		);
-		stripLoading = false;
-	});
+	(async () => {
+		try {
+			const [eps, podcast] = await Promise.all([
+				db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
+				db.podcasts.get(feedUrl),
+			]);
+			if (loadedFeedUrl !== feedUrl) return; // stale: user navigated to different podcast
+			podcastTitle = podcast?.title ?? "";
+			const order: EpisodeSortOrder = podcast?.episodeSortOrder ?? "newest";
+			siblingEpisodes = [...eps].sort((a, b) =>
+				order === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
+			);
+		} catch {
+			if (loadedFeedUrl !== feedUrl) return; // stale: skip error handling too
+			siblingEpisodes = [];
+		} finally {
+			if (loadedFeedUrl === feedUrl) {
+				stripLoading = false;
+			}
+		}
+	})();
 });
 
 // All strip items are uniform w-16 (64px) wide — scroll math is simple arithmetic.
@@ -79,8 +88,8 @@ function scrollToCurrentIndex() {
 
 $effect(() => {
 	if (currentIndex < 0 || !stripEl || siblingEpisodes.length === 0) return;
-	siblingEpisodes.length; // trigger re-run when list changes
-	requestAnimationFrame(scrollToCurrentIndex);
+	const rafId = requestAnimationFrame(scrollToCurrentIndex);
+	return () => cancelAnimationFrame(rafId);
 });
 
 function openPodcast() {
