@@ -86,14 +86,17 @@ async function loadEpisodes() {
 		if (podcastTitle && !feedTitle) feedTitle = podcastTitle;
 		if (podcastAuthor && !feedAuthor) feedAuthor = podcastAuthor;
 		if (podcastCoverUrl && !feedCoverUrl) feedCoverUrl = podcastCoverUrl;
-		if (overlay.detailPodcastAutoSubscribe && !isSubscribed) {
-			await subscribePodcast({
-				feedUrl,
-				trackName: feedTitle,
-				artistName: feedAuthor,
-				artworkUrl100: feedCoverUrl,
-				artworkUrl600: feedCoverUrl,
-			});
+		if (overlay.detailPodcastAutoSubscribe) {
+			const existing = await db.podcasts.get(feedUrl);
+			if (!existing) {
+				await subscribePodcast({
+					feedUrl,
+					trackName: feedTitle,
+					artistName: feedAuthor,
+					artworkUrl100: feedCoverUrl,
+					artworkUrl600: feedCoverUrl,
+				});
+			}
 		}
 		for (const ep of raw) {
 			const existing = await db.episodes.get(ep.guid);

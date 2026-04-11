@@ -51,6 +51,11 @@ export const GET: RequestHandler = async ({ url, fetch }) => {
 		},
 	});
 
+	// Re-validate the final URL after any redirects to prevent SSRF
+	if (!isAllowedUrl(res.url)) {
+		return new Response("URL not allowed", { status: 403 });
+	}
+
 	// Read the full response body to avoid streaming truncation on serverless platforms
 	const body = await res.arrayBuffer();
 
