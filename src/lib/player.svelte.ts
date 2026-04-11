@@ -26,10 +26,7 @@ class PlayerState {
 			});
 			this.audio.addEventListener("ended", async () => {
 				this.isPlaying = false;
-				if (this.saveInterval) {
-					clearInterval(this.saveInterval);
-					this.saveInterval = null;
-				}
+				this.stopSaveInterval();
 				if (this.currentEpisode) {
 					const completedAt = Date.now();
 					await db.episodes.update(this.currentEpisode.guid, {
@@ -49,10 +46,12 @@ class PlayerState {
 			this.audio.addEventListener("pause", () => {
 				this.isPlaying = false;
 				this.updateMediaSession();
+				this.stopSaveInterval();
 			});
 			this.audio.addEventListener("play", () => {
 				this.isPlaying = true;
 				this.updateMediaSession();
+				this.startSaveInterval();
 			});
 			this.initMediaSessionHandlers();
 		}
@@ -127,7 +126,6 @@ class PlayerState {
 			return;
 		}
 		await this.setupMediaSession();
-		this.startSaveInterval();
 	}
 
 	togglePlay() {
@@ -180,6 +178,13 @@ class PlayerState {
 	private startSaveInterval() {
 		if (this.saveInterval) clearInterval(this.saveInterval);
 		this.saveInterval = setInterval(() => this.savePosition(), 10000);
+	}
+
+	private stopSaveInterval() {
+		if (this.saveInterval) {
+			clearInterval(this.saveInterval);
+			this.saveInterval = null;
+		}
 	}
 
 	destroy() {

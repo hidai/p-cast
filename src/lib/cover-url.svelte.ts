@@ -7,9 +7,13 @@ export function createCoverUrlState(getEpisode: () => Episode | null): { readonl
 		const episode = getEpisode();
 		url = "";
 		if (!episode) return;
+		let cancelled = false;
 		resolveCoverUrl(episode).then((resolved) => {
-			url = resolved;
+			if (!cancelled) url = resolved;
 		});
+		return () => {
+			cancelled = true;
+		};
 	});
 	return {
 		get url() {
