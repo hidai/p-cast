@@ -1,4 +1,5 @@
 import { db, type Episode, type Podcast } from "./db";
+import { fetchJson, fetchXml, HttpError } from "./http";
 
 export interface SearchResult {
 	feedUrl: string;
@@ -28,17 +29,22 @@ export async function fetchTopPodcasts(countryCode = "us"): Promise<TopPodcast[]
 		return cached.data;
 	}
 	const url = `https://rss.applemarketingtools.com/api/v2/${countryCode}/podcasts/top/25/podcasts.json`;
-	const res = await fetch(proxyUrl(url));
-	if (!res.ok) throw new Error(`HTTP ${res.status}`);
-	const data = await res.json();
+	const data = await fetchJson<{ feed?: { results?: TopPodcast[] } }>(proxyUrl(url));
 	const results: TopPodcast[] = data.feed?.results ?? [];
 	topPodcastsCache.set(countryCode, { data: results, fetchedAt: Date.now() });
 	return results;
 }
 
 export async function lookupPodcastById(id: string): Promise<SearchResult | null> {
-	const res = await fetch(proxyUrl(`https://itunes.apple.com/lookup?id=${id}&entity=podcast`));
-	const data = await res.json();
+	const data = await fetchJson<{
+		results?: Array<{
+			feedUrl?: string;
+			trackName?: string;
+			artistName?: string;
+			artworkUrl100?: string;
+			artworkUrl600?: string;
+		}>;
+	}>(proxyUrl(`https://itunes.apple.com/lookup?id=${id}&entity=podcast`));
 	const result = data.results?.[0];
 	if (!result?.feedUrl) return null;
 	return {
@@ -52,15 +58,12 @@ export async function lookupPodcastById(id: string): Promise<SearchResult | null
 
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
-	const res = await fetch(proxyUrl(url));
-	const data = await res.json();
+	const data = await fetchJson<{ results?: SearchResult[] }>(proxyUrl(url));
 	return data.results ?? [];
 }
 
 async function fetchAndParseFeed(feedUrl: string): Promise<Document> {
-	const res = await fetch(proxyUrl(feedUrl));
-	const text = await res.text();
-	return new DOMParser().parseFromString(text, "text/xml");
+	return fetchXml(proxyUrl(feedUrl));
 }
 
 function parseFeedDocument(doc: Document) {
@@ -197,7 +200,7 @@ export async function downloadEpisode(
 	onProgress?: (fraction: number) => void,
 ): Promise<void> {
 	const res = await fetch(proxyUrl(episode.audioUrl));
-	if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+	if (!res.ok) throw new HttpError(res.status, `Download failed: ${res.status}`);
 
 	const contentLength = Number(res.headers.get("Content-Length") || 0);
 	if (!contentLength || !res.body) {
