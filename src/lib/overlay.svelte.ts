@@ -12,6 +12,7 @@ class OverlayManager {
 	detailPodcastFeedUrl = $state("");
 	detailPodcastMeta: PodcastMeta | null = $state(null);
 	detailPodcastInitialTop = $state(0.15);
+	detailPodcastAutoSubscribe = $state(false);
 
 	private hasHistoryEntry = false;
 	private ignoringPopState = false;
@@ -22,6 +23,7 @@ class OverlayManager {
 		this.detailPodcastFeedUrl = "";
 		this.detailPodcastMeta = null;
 		this.detailPodcastInitialTop = 0.15;
+		this.detailPodcastAutoSubscribe = false;
 		this.hasHistoryEntry = false;
 	}
 
@@ -41,13 +43,14 @@ class OverlayManager {
 		this.syncHistory(wasActive, { overlay: "episodeDetail", episodeGuid: episode.guid });
 	}
 
-	openPodcastDetail(feedUrl: string, meta?: PodcastMeta, initialTop = 0.15) {
+	openPodcastDetail(feedUrl: string, meta?: PodcastMeta, initialTop = 0.15, autoSubscribe = false) {
 		const wasActive = this.activeOverlay !== "none";
 		this.activeOverlay = "podcastDetail";
 		this.detailEpisode = null;
 		this.detailPodcastFeedUrl = feedUrl;
 		this.detailPodcastMeta = meta ?? null;
 		this.detailPodcastInitialTop = initialTop;
+		this.detailPodcastAutoSubscribe = autoSubscribe;
 		this.syncHistory(wasActive, { overlay: "podcastDetail", feedUrl });
 	}
 

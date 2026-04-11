@@ -28,9 +28,11 @@ afterNavigate((nav) => {
 	}
 	const subscribeUrl = nav.to?.url.searchParams.get("podcast");
 	if (subscribeUrl && (subscribeUrl.startsWith("http://") || subscribeUrl.startsWith("https://"))) {
-		overlay.openPodcastDetail(subscribeUrl, undefined, 0);
+		const autoSubscribe = nav.to?.url.searchParams.get("auto") === "1";
+		overlay.openPodcastDetail(subscribeUrl, undefined, 0, autoSubscribe);
 		const cleanUrl = new URL(window.location.href);
 		cleanUrl.searchParams.delete("podcast");
+		cleanUrl.searchParams.delete("auto");
 		history.replaceState(null, "", cleanUrl.toString());
 	}
 });
