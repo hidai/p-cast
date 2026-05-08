@@ -13,6 +13,7 @@ import { player } from "$lib/player.svelte";
 import { cleanupExpiredDownloads } from "$lib/podcast-service";
 import { pwa } from "$lib/pwa.svelte";
 import { pendingShare } from "$lib/share.svelte";
+import "$lib/storage.svelte";
 import "$lib/theme.svelte";
 
 let { children } = $props();
