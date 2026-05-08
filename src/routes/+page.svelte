@@ -7,7 +7,7 @@ import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import PullToRefresh from "$lib/components/PullToRefresh.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
-import { createDownloadState } from "$lib/download.svelte";
+import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
@@ -109,7 +109,6 @@ function buildLatestList(
 let continueEpisodes: EpisodeWithPodcast[] = $state([]);
 let nextUpEpisodes: EpisodeWithPodcast[] = $state([]);
 let latestEpisodes: EpisodeWithPodcast[] = $state([]);
-const downloading = createDownloadState();
 
 $effect(() => {
 	const sub = liveQuery(async () => {
@@ -147,7 +146,7 @@ async function handleRefresh() {
 }
 
 function handleDownload(episode: Episode) {
-	downloading.download(episode);
+	downloads.download(episode);
 }
 </script>
 
@@ -247,7 +246,7 @@ function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloading.getProgress(episode.guid)}
+						downloadingProgress={downloads.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
@@ -268,7 +267,7 @@ function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloading.getProgress(episode.guid)}
+						downloadingProgress={downloads.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondelete={(e) => deleteDownload(e.guid)}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}

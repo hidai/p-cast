@@ -1,3 +1,4 @@
+import { liveQuery } from "dexie";
 import { db, type Episode } from "./db";
 import { i18n } from "./i18n";
 import { resolveCoverUrl } from "./utils";
@@ -14,6 +15,7 @@ class PlayerState {
 	private audio: HTMLAudioElement | null = null;
 	private saveInterval: ReturnType<typeof setInterval> | null = null;
 	private blobUrl: string | null = null;
+	private currentEpisodeSub: { unsubscribe(): void } | null = null;
 
 	constructor() {
 		if (typeof window !== "undefined") {
@@ -28,18 +30,11 @@ class PlayerState {
 				this.isPlaying = false;
 				this.stopSaveInterval();
 				if (this.currentEpisode) {
-					const completedAt = Date.now();
 					await db.episodes.update(this.currentEpisode.guid, {
 						isCompleted: true,
 						currentTime: 0,
-						completedAt,
+						completedAt: Date.now(),
 					});
-					this.currentEpisode = {
-						...this.currentEpisode,
-						isCompleted: true,
-						currentTime: 0,
-						completedAt,
-					};
 					await this.playNext();
 				}
 			});
@@ -65,6 +60,17 @@ class PlayerState {
 		navigator.mediaSession.setActionHandler("seekforward", () => this.skip(10));
 	}
 
+	// Keeps currentEpisode in sync with the DB row so external changes
+	// (downloads, deletions, expiry cleanup, completion) flow into the player UI.
+	private watchCurrentEpisode(guid: string) {
+		this.currentEpisodeSub?.unsubscribe();
+		this.currentEpisodeSub = liveQuery(() => db.episodes.get(guid)).subscribe((ep) => {
+			if (ep && this.currentEpisode?.guid === guid) {
+				this.currentEpisode = ep;
+			}
+		});
+	}
+
 	async play(episode: Episode) {
 		if (!this.audio) return;
 
@@ -84,6 +90,7 @@ class PlayerState {
 		if (!freshEpisode) return;
 
 		this.currentEpisode = freshEpisode;
+		this.watchCurrentEpisode(freshEpisode.guid);
 
 		// Record last played timestamp
 		await db.episodes.update(freshEpisode.guid, { lastPlayedAt: Date.now() });
@@ -109,12 +116,6 @@ class PlayerState {
 				currentTime: 0,
 				completedAt: undefined,
 			});
-			this.currentEpisode = {
-				...freshEpisode,
-				isCompleted: false,
-				currentTime: 0,
-				completedAt: undefined,
-			};
 		} else if (freshEpisode.currentTime > 0) {
 			this.audio.currentTime = freshEpisode.currentTime;
 		}
@@ -192,6 +193,8 @@ class PlayerState {
 			clearInterval(this.saveInterval);
 			this.saveInterval = null;
 		}
+		this.currentEpisodeSub?.unsubscribe();
+		this.currentEpisodeSub = null;
 		this.savePosition();
 	}
 

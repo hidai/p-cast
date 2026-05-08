@@ -8,10 +8,11 @@ import CoverImage from "$lib/components/CoverImage.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import Spinner from "$lib/components/Spinner.svelte";
 import { db, type Episode, type EpisodeSortOrder, type Podcast } from "$lib/db";
-import { createDownloadState } from "$lib/download.svelte";
+import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay, type PodcastMeta } from "$lib/overlay.svelte";
 import {
+	deleteDownload,
 	fetchEpisodes,
 	type SearchResult,
 	subscribePodcast,
@@ -36,19 +37,26 @@ const author = $derived(dbPodcast?.author || meta?.author || feedAuthor || "");
 const coverUrl = $derived(dbPodcast?.coverUrl || meta?.coverUrl || feedCoverUrl || "");
 
 let isSubscribed = $state(false);
-let episodes: Episode[] = $state([]);
+let dbEpisodes: Episode[] = $state([]);
 let isLoading = $state(true);
 let isToggling = $state(false);
-const downloading = createDownloadState();
 let sortOrder: EpisodeSortOrder = $state("newest");
 let sortMenuOpen = $state(false);
 let podcastDescription = $state("");
 let descriptionExpanded = $state(false);
 
+const episodes = $derived(
+	[...dbEpisodes].sort((a, b) =>
+		sortOrder === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
+	),
+);
+
 $effect(() => {
 	if (!feedUrl) return;
 
-	const sub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((val) => {
+	dbEpisodes = [];
+
+	const podcastSub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((val) => {
 		dbPodcast = val ?? null;
 		isSubscribed = !!val;
 		if (val?.episodeSortOrder) {
@@ -59,18 +67,21 @@ $effect(() => {
 		}
 	});
 
-	loadEpisodes();
+	const episodesSub = liveQuery(() =>
+		db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
+	).subscribe((eps) => {
+		dbEpisodes = eps;
+	});
 
-	return () => sub.unsubscribe();
+	syncFromNetwork();
+
+	return () => {
+		podcastSub.unsubscribe();
+		episodesSub.unsubscribe();
+	};
 });
 
-function sortEpisodes(eps: Episode[], order: EpisodeSortOrder): Episode[] {
-	return [...eps].sort((a, b) =>
-		order === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
-	);
-}
-
-async function loadEpisodes() {
+async function syncFromNetwork() {
 	isLoading = true;
 	try {
 		const {
@@ -104,12 +115,8 @@ async function loadEpisodes() {
 				await db.episodes.put({ ...ep, isDownloaded: false });
 			}
 		}
-		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
-		episodes = sortEpisodes(all, sortOrder);
 	} catch {
-		// Fall back to Dexie cache on network error (e.g. offline)
-		const cached = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
-		episodes = sortEpisodes(cached, sortOrder);
+		// Network failure is fine — liveQuery already shows cached episodes
 	} finally {
 		isLoading = false;
 	}
@@ -118,7 +125,6 @@ async function loadEpisodes() {
 async function changeSortOrder(order: EpisodeSortOrder) {
 	sortOrder = order;
 	sortMenuOpen = false;
-	episodes = sortEpisodes(episodes, order);
 	const podcast = await db.podcasts.get(feedUrl);
 	if (podcast) {
 		await db.podcasts.update(feedUrl, { episodeSortOrder: order });
@@ -143,13 +149,6 @@ async function toggleSubscribe() {
 	} finally {
 		isToggling = false;
 	}
-}
-
-function handleDownload(episode: Episode) {
-	downloading.download(episode, async () => {
-		const all = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
-		episodes = sortEpisodes(all, sortOrder);
-	});
 }
 </script>
 
@@ -240,7 +239,7 @@ function handleDownload(episode: Episode) {
 			</div>
 		</div>
 
-		{#if isLoading}
+		{#if isLoading && episodes.length === 0}
 			<div class="flex items-center justify-center gap-2 text-text-secondary py-8">
 				<Spinner class="w-5 h-5" />
 				<span>{i18n.t("podcast.loadingEpisodes")}</span>
@@ -250,8 +249,9 @@ function handleDownload(episode: Episode) {
 				{#each episodes as episode (episode.guid)}
 					<EpisodeItem
 						{episode}
-						downloadingProgress={downloading.getProgress(episode.guid)}
-						ondownload={handleDownload}
+						downloadingProgress={downloads.getProgress(episode.guid)}
+						ondownload={(e) => downloads.download(e)}
+						ondelete={(e) => deleteDownload(e.guid)}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>
 				{/each}

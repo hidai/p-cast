@@ -1,4 +1,5 @@
 <script lang="ts">
+import { liveQuery } from "dexie";
 import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
 import Play from "phosphor-svelte/lib/Play";
 import Trash from "phosphor-svelte/lib/Trash";
@@ -9,7 +10,7 @@ import PlayingIndicator from "$lib/components/PlayingIndicator.svelte";
 import { createCoverUrlState } from "$lib/cover-url.svelte";
 import type { Episode, EpisodeSortOrder } from "$lib/db";
 import { db } from "$lib/db";
-import { createDownloadState } from "$lib/download.svelte";
+import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
@@ -22,56 +23,59 @@ let {
 	episode: Episode;
 } = $props();
 
-const downloading = createDownloadState();
 let isDeleting = $state(false);
 
-const cover = createCoverUrlState(() => episode);
+// Live episode state from DB — falls back to prop while liveQuery is settling.
+let dbEpisode = $state<Episode | null>(null);
+const view = $derived(dbEpisode ?? episode);
+
+const cover = createCoverUrlState(() => view);
 let podcastTitle = $state("");
 
 // Film strip state
-let siblingEpisodes = $state<Episode[]>([]);
+let dbSiblings = $state<Episode[]>([]);
+let podcastSortOrder = $state<EpisodeSortOrder>("newest");
 let stripLoading = $state(true);
 let stripEl = $state<HTMLElement | undefined>(undefined);
-// Plain (non-reactive) cache key — prevents re-fetching when navigating within same podcast
-let loadedFeedUrl = "";
 
-let currentIndex = $derived(siblingEpisodes.findIndex((ep) => ep.guid === episode.guid));
-let positionLabel = $derived(
+const siblingEpisodes = $derived(
+	[...dbSiblings].sort((a, b) =>
+		podcastSortOrder === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
+	),
+);
+const currentIndex = $derived(siblingEpisodes.findIndex((ep) => ep.guid === view.guid));
+const positionLabel = $derived(
 	currentIndex >= 0 ? `${currentIndex + 1} / ${siblingEpisodes.length}` : "",
 );
 
 $effect(() => {
+	const guid = episode.guid;
+	dbEpisode = null;
+	const sub = liveQuery(() => db.episodes.get(guid)).subscribe((ep) => {
+		dbEpisode = ep ?? null;
+	});
+	return () => sub.unsubscribe();
+});
+
+$effect(() => {
 	const feedUrl = episode.podcastFeedUrl;
-
-	// Same podcast: siblingEpisodes unchanged, currentIndex (derived) already updated — skip reload
-	if (feedUrl === loadedFeedUrl) return;
-
-	loadedFeedUrl = feedUrl;
-	podcastTitle = "";
-	siblingEpisodes = [];
 	stripLoading = true;
-
-	(async () => {
-		try {
-			const [eps, podcast] = await Promise.all([
-				db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
-				db.podcasts.get(feedUrl),
-			]);
-			if (loadedFeedUrl !== feedUrl) return; // stale: user navigated to different podcast
-			podcastTitle = podcast?.title ?? "";
-			const order: EpisodeSortOrder = podcast?.episodeSortOrder ?? "newest";
-			siblingEpisodes = [...eps].sort((a, b) =>
-				order === "newest" ? b.pubDate - a.pubDate : a.pubDate - b.pubDate,
-			);
-		} catch {
-			if (loadedFeedUrl !== feedUrl) return; // stale: skip error handling too
-			siblingEpisodes = [];
-		} finally {
-			if (loadedFeedUrl === feedUrl) {
-				stripLoading = false;
-			}
-		}
-	})();
+	dbSiblings = [];
+	podcastTitle = "";
+	const podcastSub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((p) => {
+		podcastTitle = p?.title ?? "";
+		podcastSortOrder = p?.episodeSortOrder ?? "newest";
+	});
+	const siblingsSub = liveQuery(() =>
+		db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
+	).subscribe((eps) => {
+		dbSiblings = eps;
+		stripLoading = false;
+	});
+	return () => {
+		podcastSub.unsubscribe();
+		siblingsSub.unsubscribe();
+	};
 });
 
 // All strip items are uniform w-16 (64px) wide — scroll math is simple arithmetic.
@@ -93,11 +97,11 @@ $effect(() => {
 });
 
 function openPodcast() {
-	overlay.openPodcastDetail(episode.podcastFeedUrl);
+	overlay.openPodcastDetail(view.podcastFeedUrl);
 }
 
 function handleStripNavigate(ep: Episode) {
-	if (ep.guid === episode.guid) return;
+	if (ep.guid === view.guid) return;
 	overlay.openEpisodeDetail(ep);
 }
 
@@ -117,12 +121,11 @@ function shortDate(ts: number): string {
 	return i18n.formatDate(ts, { month: "short", day: "numeric" });
 }
 
-// Is this episode currently loaded in the player?
-let isCurrentEpisode = $derived(player.currentEpisode?.guid === episode.guid);
-const episodeDownloadProgress = $derived(downloading.getProgress(episode.guid));
+const isCurrentEpisode = $derived(player.currentEpisode?.guid === view.guid);
+const episodeDownloadProgress = $derived(downloads.getProgress(view.guid));
 
 function handlePlay() {
-	player.play(episode);
+	player.play(view);
 	overlay.closeAll();
 }
 
@@ -131,22 +134,13 @@ function handleGoToPlayer() {
 }
 
 async function handleDownload() {
-	await downloading.download(episode, async () => {
-		episode = { ...episode, isDownloaded: true };
-		if (player.currentEpisode?.guid === episode.guid) {
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
-		}
-	});
+	await downloads.download(view);
 }
 
 async function handleDeleteDownload() {
 	isDeleting = true;
 	try {
-		await deleteDownload(episode.guid);
-		episode = { ...episode, isDownloaded: false };
-		if (player.currentEpisode?.guid === episode.guid) {
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
-		}
+		await deleteDownload(view.guid);
 	} finally {
 		isDeleting = false;
 	}
@@ -159,7 +153,7 @@ async function handleDeleteDownload() {
 		<div class="flex gap-4 mb-4">
 			<CoverImage src={cover.url} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
 			<div class="min-w-0 flex-1">
-				<h2 class="text-base font-bold leading-tight line-clamp-2">{episode.title}</h2>
+				<h2 class="text-base font-bold leading-tight line-clamp-2">{view.title}</h2>
 				{#if podcastTitle}
 					<button
 						class="text-sm text-accent mt-1 truncate block max-w-full hover:underline"
@@ -167,12 +161,12 @@ async function handleDeleteDownload() {
 					>{podcastTitle}</button>
 				{/if}
 				<p class="text-xs text-text-secondary mt-1">
-					{formatDate(episode.pubDate)}
-					{#if episode.duration > 0} · {formatDuration(episode.duration)}{/if}
-					{#if episode.isDownloaded}<span class="text-accent"> · {i18n.t("episode.downloaded")}</span>{/if}
-					{#if episode.currentTime > 0 && !episode.isCompleted}
+					{formatDate(view.pubDate)}
+					{#if view.duration > 0} · {formatDuration(view.duration)}{/if}
+					{#if view.isDownloaded}<span class="text-accent"> · {i18n.t("episode.downloaded")}</span>{/if}
+					{#if view.currentTime > 0 && !view.isCompleted}
 						<span class="text-accent">
-							· {formatDuration(episode.currentTime)} {i18n.t("episode.played")}</span
+							· {formatDuration(view.currentTime)} {i18n.t("episode.played")}</span
 						>
 					{/if}
 				</p>
@@ -200,7 +194,7 @@ async function handleDeleteDownload() {
 						bind:this={stripEl}
 						class="strip-scroll flex items-start gap-3 overflow-x-auto px-8 py-1"
 					>
-						{#if stripLoading}
+						{#if stripLoading && siblingEpisodes.length === 0}
 							{#each Array(5) as _, i (i)}
 								<div class="w-16 shrink-0 flex flex-col items-center gap-1">
 									<div class="w-14 h-14 rounded-lg bg-bg-card animate-pulse"></div>
@@ -216,7 +210,7 @@ async function handleDeleteDownload() {
 									data-strip-index={i}
 									onclick={() => handleStripNavigate(ep)}
 									aria-label={ep.title}
-									aria-current={ep.guid === episode.guid ? "true" : undefined}
+									aria-current={ep.guid === view.guid ? "true" : undefined}
 								>
 									<!-- Fixed-height cover container: centers varying cover sizes vertically -->
 									<div class="w-full h-14 flex items-center justify-center">
@@ -242,9 +236,9 @@ async function handleDeleteDownload() {
 		<div class="border-t border-border-subtle mb-4"></div>
 
 		<!-- Description -->
-		{#if episode.description}
+		{#if view.description}
 			<div class="text-sm text-text-secondary leading-relaxed rich-description">
-				{@html sanitizeHtml(episode.description)}
+				{@html sanitizeHtml(view.description)}
 			</div>
 		{:else}
 			<p class="text-sm text-text-secondary italic">{i18n.t("episode.noDescription")}</p>
@@ -271,7 +265,7 @@ async function handleDeleteDownload() {
 				onclick={handlePlay}
 			>
 				<Play size={20} weight="fill" />
-				{#if episode.currentTime > 0 && !episode.isCompleted}
+				{#if view.currentTime > 0 && !view.isCompleted}
 					{i18n.t("episode.resume")}
 				{:else}
 					{i18n.t("episode.play")}
@@ -279,10 +273,11 @@ async function handleDeleteDownload() {
 			</button>
 		{/if}
 
-		{#if episode.isDownloaded}
+		{#if view.isDownloaded}
 			<button
-				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-danger font-medium text-sm"
+				class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-bg-card text-danger font-medium text-sm disabled:opacity-50"
 				onclick={handleDeleteDownload}
+				disabled={isDeleting}
 			>
 				<Trash size={20} />
 				{i18n.t("episode.delete")}

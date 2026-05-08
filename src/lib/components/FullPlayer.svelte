@@ -10,14 +10,13 @@ import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
 import { createCoverUrlState } from "$lib/cover-url.svelte";
-import { createDownloadState } from "$lib/download.svelte";
+import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration } from "$lib/podcast-service";
 
 const rates = [0.5, 0.75, 1.0, 1.2, 1.5, 2.0];
-const downloading = createDownloadState();
 let isDeleting = $state(false);
 
 let touchStartY = 0;
@@ -44,22 +43,16 @@ async function toggleDownload() {
 		isDeleting = true;
 		try {
 			await deleteDownload(player.currentEpisode.guid);
-			player.currentEpisode = { ...player.currentEpisode, isDownloaded: false };
 		} finally {
 			isDeleting = false;
 		}
 	} else {
-		const episode = player.currentEpisode;
-		await downloading.download(episode, async () => {
-			if (player.currentEpisode?.guid === episode.guid) {
-				player.currentEpisode = { ...player.currentEpisode, isDownloaded: true };
-			}
-		});
+		await downloads.download(player.currentEpisode);
 	}
 }
 
 const currentDownloadProgress = $derived(
-	player.currentEpisode ? downloading.getProgress(player.currentEpisode.guid) : null,
+	player.currentEpisode ? downloads.getProgress(player.currentEpisode.guid) : null,
 );
 
 const cover = createCoverUrlState(() => player.currentEpisode);

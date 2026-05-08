@@ -3,7 +3,7 @@ import { liveQuery } from "dexie";
 import CoverImage from "$lib/components/CoverImage.svelte";
 import EpisodeItem from "$lib/components/EpisodeItem.svelte";
 import { db, type Episode, type Podcast } from "$lib/db";
-import { createDownloadState } from "$lib/download.svelte";
+import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { deleteDownload } from "$lib/podcast-service";
@@ -14,7 +14,6 @@ let activeTab: Tab = $state("subscribed");
 let podcasts: Podcast[] = $state([]);
 let downloadedEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
 let historyEpisodes: (Episode & { podcast?: Podcast })[] = $state([]);
-const downloading = createDownloadState();
 
 $effect(() => {
 	const sub = liveQuery(async () => {
@@ -42,7 +41,7 @@ $effect(() => {
 });
 
 function handleDownload(episode: Episode) {
-	downloading.download(episode);
+	downloads.download(episode);
 }
 </script>
 
@@ -124,7 +123,7 @@ function handleDownload(episode: Episode) {
 					<EpisodeItem
 						{episode}
 						podcast={episode.podcast}
-						downloadingProgress={downloading.getProgress(episode.guid)}
+						downloadingProgress={downloads.getProgress(episode.guid)}
 						ondownload={handleDownload}
 						ondetail={(e) => overlay.openEpisodeDetail(e)}
 					/>
