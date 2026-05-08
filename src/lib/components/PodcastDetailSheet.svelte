@@ -109,6 +109,10 @@ async function syncFromNetwork() {
 				});
 			}
 		}
+		// Persist fetched description so subsequent opens render it from DB without waiting on the network
+		if (feedDescription) {
+			await db.podcasts.update(feedUrl, { description: feedDescription });
+		}
 		for (const ep of raw) {
 			const existing = await db.episodes.get(ep.guid);
 			if (!existing) {
