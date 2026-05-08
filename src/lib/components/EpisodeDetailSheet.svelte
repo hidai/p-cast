@@ -164,13 +164,13 @@ async function handleDeleteDownload() {
 						onclick={openPodcast}
 					>{podcastTitle}</button>
 				{/if}
-				<p class="text-xs text-text-secondary mt-1">
+				<p class="text-xs text-text-secondary mt-1 truncate">
 					{formatDate(view.pubDate)}
 					{#if view.duration > 0} · {formatDuration(view.duration)}{/if}
 					{#if view.isDownloaded}<span class="text-accent"> · {i18n.t("episode.downloaded")}</span>{/if}
 					{#if view.currentTime > 0 && !view.isCompleted}
-						<span class="text-accent">
-							· {formatDuration(view.currentTime)} {i18n.t("episode.played")}</span
+						<span class="text-accent"
+							> · {formatDuration(view.currentTime)} {i18n.t("episode.played")}</span
 						>
 					{/if}
 				</p>
