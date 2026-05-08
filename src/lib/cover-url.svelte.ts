@@ -5,8 +5,12 @@ export function createCoverUrlState(getEpisode: () => Episode | null): { readonl
 	let url = $state("");
 	$effect(() => {
 		const episode = getEpisode();
-		url = "";
-		if (!episode) return;
+		if (!episode) {
+			url = "";
+			return;
+		}
+		// Keep the previous URL visible until the new one resolves — avoids a
+		// flash of the placeholder fallback during episode switches.
 		let cancelled = false;
 		resolveCoverUrl(episode).then((resolved) => {
 			if (!cancelled) url = resolved;

@@ -25,9 +25,10 @@ let {
 
 let isDeleting = $state(false);
 
-// Live episode state from DB — falls back to prop while liveQuery is settling.
+// Live episode state from DB — guid-matched so a stale dbEpisode from a previous
+// navigation never shadows the current prop while the new liveQuery is settling.
 let dbEpisode = $state<Episode | null>(null);
-const view = $derived(dbEpisode ?? episode);
+const view = $derived(dbEpisode && dbEpisode.guid === episode.guid ? dbEpisode : episode);
 
 const cover = createCoverUrlState(() => view);
 let podcastTitle = $state("");
@@ -37,6 +38,10 @@ let dbSiblings = $state<Episode[]>([]);
 let podcastSortOrder = $state<EpisodeSortOrder>("newest");
 let stripLoading = $state(true);
 let stripEl = $state<HTMLElement | undefined>(undefined);
+
+// Memoize feedUrl so the podcast/siblings effect only re-runs when the podcast
+// actually changes — same-podcast navigation keeps title and strip data intact.
+const feedUrl = $derived(episode.podcastFeedUrl);
 
 const siblingEpisodes = $derived(
 	[...dbSiblings].sort((a, b) =>
@@ -50,7 +55,6 @@ const positionLabel = $derived(
 
 $effect(() => {
 	const guid = episode.guid;
-	dbEpisode = null;
 	const sub = liveQuery(() => db.episodes.get(guid)).subscribe((ep) => {
 		dbEpisode = ep ?? null;
 	});
@@ -58,16 +62,16 @@ $effect(() => {
 });
 
 $effect(() => {
-	const feedUrl = episode.podcastFeedUrl;
+	const f = feedUrl;
 	stripLoading = true;
 	dbSiblings = [];
 	podcastTitle = "";
-	const podcastSub = liveQuery(() => db.podcasts.get(feedUrl)).subscribe((p) => {
+	const podcastSub = liveQuery(() => db.podcasts.get(f)).subscribe((p) => {
 		podcastTitle = p?.title ?? "";
 		podcastSortOrder = p?.episodeSortOrder ?? "newest";
 	});
 	const siblingsSub = liveQuery(() =>
-		db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray(),
+		db.episodes.where("podcastFeedUrl").equals(f).toArray(),
 	).subscribe((eps) => {
 		dbSiblings = eps;
 		stripLoading = false;
