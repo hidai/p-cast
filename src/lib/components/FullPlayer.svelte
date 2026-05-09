@@ -6,6 +6,7 @@ import DownloadSimple from "phosphor-svelte/lib/DownloadSimple";
 import MusicNote from "phosphor-svelte/lib/MusicNote";
 import Pause from "phosphor-svelte/lib/Pause";
 import Play from "phosphor-svelte/lib/Play";
+import Trash from "phosphor-svelte/lib/Trash";
 import { cubicIn, cubicOut } from "svelte/easing";
 import { fly } from "svelte/transition";
 import DownloadProgress from "$lib/components/DownloadProgress.svelte";
@@ -154,13 +155,15 @@ const cover = createCoverUrlState(() => player.currentEpisode);
 				{/each}
 			</div>
 			<button
-				class="p-2 rounded-full disabled:opacity-50 active:scale-95 transition-transform {player.currentEpisode?.isDownloaded ? 'text-accent' : 'text-text-secondary'}"
+				class="p-2 rounded-full text-text-secondary disabled:opacity-50 active:scale-95 transition-transform {player.currentEpisode?.isDownloaded ? 'hover:text-danger' : 'hover:text-accent'}"
 				onclick={toggleDownload}
 				disabled={currentDownloadProgress !== null || isDeleting}
-				aria-label={i18n.t("player.toggleDownload")}
+				aria-label={i18n.t(player.currentEpisode?.isDownloaded ? "episode.deleteDownload" : "episode.downloadAction")}
 			>
 				{#if currentDownloadProgress !== null}
 					<DownloadProgress progress={currentDownloadProgress} class="w-6 h-6" />
+				{:else if player.currentEpisode?.isDownloaded}
+					<Trash size={24} />
 				{:else}
 					<DownloadSimple size={24} />
 				{/if}
