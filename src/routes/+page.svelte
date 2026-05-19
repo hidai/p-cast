@@ -13,6 +13,7 @@ import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration, refreshPodcast } from "$lib/podcast-service";
 import { theme } from "$lib/theme.svelte";
+import { resizeMzstatic } from "$lib/utils";
 
 const logoBg = $derived(theme.resolvedDark ? "#000000" : "#ffffff");
 
@@ -186,7 +187,7 @@ function handleDownload(episode: Episode) {
 							>
 								{#if imgUrl}
 									<img
-										src={imgUrl}
+										src={resizeMzstatic(imgUrl, 288)}
 										alt=""
 										class="w-36 h-36 rounded-2xl object-cover ring-1 ring-border-subtle"
 									/>

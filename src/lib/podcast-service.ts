@@ -7,6 +7,7 @@ export interface SearchResult {
 	artistName: string;
 	artworkUrl100: string;
 	artworkUrl600: string;
+	collectionId?: number;
 }
 
 function proxyUrl(target: string): string {
@@ -38,6 +39,7 @@ export async function fetchTopPodcasts(countryCode = "us"): Promise<TopPodcast[]
 export async function lookupPodcastById(id: string): Promise<SearchResult | null> {
 	const data = await fetchJson<{
 		results?: Array<{
+			collectionId?: number;
 			feedUrl?: string;
 			trackName?: string;
 			artistName?: string;
@@ -53,13 +55,68 @@ export async function lookupPodcastById(id: string): Promise<SearchResult | null
 		artistName: result.artistName ?? "",
 		artworkUrl100: result.artworkUrl100 ?? "",
 		artworkUrl600: result.artworkUrl600 ?? "",
+		collectionId: result.collectionId,
 	};
 }
 
 export async function searchPodcasts(query: string): Promise<SearchResult[]> {
 	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=20`;
-	const data = await fetchJson<{ results?: SearchResult[] }>(proxyUrl(url));
-	return data.results ?? [];
+	const data = await fetchJson<{
+		results?: Array<{
+			collectionId?: number;
+			feedUrl?: string;
+			trackName?: string;
+			artistName?: string;
+			artworkUrl100?: string;
+			artworkUrl600?: string;
+		}>;
+	}>(proxyUrl(url));
+	return (data.results ?? [])
+		.filter((r): r is { feedUrl: string } & typeof r => Boolean(r.feedUrl))
+		.map((r) => ({
+			feedUrl: r.feedUrl,
+			trackName: r.trackName ?? "",
+			artistName: r.artistName ?? "",
+			artworkUrl100: r.artworkUrl100 ?? "",
+			artworkUrl600: r.artworkUrl600 ?? "",
+			collectionId: r.collectionId,
+		}));
+}
+
+/** Fetch episode-level artwork URLs from Apple. Apple returns at most ~200
+ * recent episodes (often fewer). Older episodes simply won't be in the map and
+ * will keep their RSS-derived coverUrl. */
+async function fetchAppleEpisodeArtwork(collectionId: number): Promise<Map<string, string>> {
+	const url = `https://itunes.apple.com/lookup?id=${collectionId}&media=podcast&entity=podcastEpisode&limit=200`;
+	const data = await fetchJson<{
+		results?: Array<{
+			wrapperType?: string;
+			episodeGuid?: string;
+			artworkUrl600?: string;
+			artworkUrl160?: string;
+			artworkUrl60?: string;
+		}>;
+	}>(proxyUrl(url));
+	const map = new Map<string, string>();
+	for (const r of data.results ?? []) {
+		if (r.wrapperType !== "podcastEpisode" || !r.episodeGuid) continue;
+		const cover = r.artworkUrl600 ?? r.artworkUrl160 ?? r.artworkUrl60;
+		if (cover) map.set(r.episodeGuid, cover);
+	}
+	return map;
+}
+
+/** Best-effort backfill for podcasts subscribed before collectionId was tracked
+ * (e.g. via the share target). Match by feedUrl among title-search results. */
+async function findCollectionIdByTitle(
+	title: string,
+	feedUrl: string,
+): Promise<number | undefined> {
+	const url = `https://itunes.apple.com/search?term=${encodeURIComponent(title)}&media=podcast&limit=10`;
+	const data = await fetchJson<{
+		results?: Array<{ collectionId?: number; feedUrl?: string }>;
+	}>(proxyUrl(url));
+	return data.results?.find((r) => r.feedUrl === feedUrl)?.collectionId;
 }
 
 async function fetchAndParseFeed(feedUrl: string): Promise<Document> {
@@ -181,6 +238,7 @@ export async function subscribePodcast(result: SearchResult): Promise<void> {
 		coverUrl: result.artworkUrl600 || result.artworkUrl100,
 		description: "",
 		subscribedAt: Date.now(),
+		collectionId: result.collectionId,
 	};
 	await db.podcasts.put(podcast);
 }
@@ -215,6 +273,48 @@ export async function refreshPodcast(feedUrl: string): Promise<void> {
 				audioUrl: ep.audioUrl,
 				duration: ep.duration,
 			});
+		}
+	}
+
+	await applyAppleEpisodeArtwork(feedUrl);
+}
+
+/** Overwrite episode coverUrl with Apple-hosted artwork when possible.
+ * Apple's CDN serves stable, resizable URLs (see resizeMzstatic) and is shared
+ * across podcasts, so this dramatically improves caching and transfer size.
+ * Once an episode has been mapped, the URL is preserved across refreshes —
+ * Apple's lookup window is too narrow to rely on continuous matching. */
+async function applyAppleEpisodeArtwork(feedUrl: string): Promise<void> {
+	let podcast = await db.podcasts.get(feedUrl);
+	if (!podcast) return;
+
+	if (!podcast.collectionId && podcast.title) {
+		try {
+			const id = await findCollectionIdByTitle(podcast.title, feedUrl);
+			if (id) {
+				await db.podcasts.update(feedUrl, { collectionId: id });
+				podcast = { ...podcast, collectionId: id };
+			}
+		} catch {
+			// Network failure or not in Apple's index — fall through.
+		}
+	}
+
+	if (!podcast.collectionId) return;
+
+	let artworkByGuid: Map<string, string>;
+	try {
+		artworkByGuid = await fetchAppleEpisodeArtwork(podcast.collectionId);
+	} catch {
+		return;
+	}
+	if (artworkByGuid.size === 0) return;
+
+	const episodes = await db.episodes.where("podcastFeedUrl").equals(feedUrl).toArray();
+	for (const ep of episodes) {
+		const appleUrl = artworkByGuid.get(ep.guid);
+		if (appleUrl && ep.coverUrl !== appleUrl) {
+			await db.episodes.update(ep.guid, { coverUrl: appleUrl });
 		}
 	}
 }

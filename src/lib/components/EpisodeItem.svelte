@@ -10,6 +10,7 @@ import type { Episode, Podcast } from "$lib/db";
 import { i18n } from "$lib/i18n";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
+import { resizeMzstatic } from "$lib/utils";
 
 let {
 	episode,
@@ -51,7 +52,7 @@ function handlePlay() {
 		class="flex items-center gap-3 flex-1 min-w-0"
 		onclick={() => ondetail?.(episode)}
 	>
-		<CoverImage src={imgUrl} class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
+		<CoverImage src={resizeMzstatic(imgUrl, 96)} class="w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-border-subtle" />
 		<div class="flex-1 min-w-0">
 			<p class="flex items-start gap-1.5 text-sm font-medium {episode.isCompleted ? 'text-text-secondary' : ''}">
 				{#if isCurrentEpisode}

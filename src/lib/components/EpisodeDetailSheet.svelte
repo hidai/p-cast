@@ -15,7 +15,7 @@ import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { deleteDownload, formatDuration } from "$lib/podcast-service";
-import { sanitizeHtml } from "$lib/utils";
+import { resizeMzstatic, sanitizeHtml } from "$lib/utils";
 
 let {
 	episode,
@@ -155,7 +155,7 @@ async function handleDeleteDownload() {
 	<div class="px-5 pb-4">
 		<!-- Header: cover + info -->
 		<div class="flex gap-4 mb-4">
-			<CoverImage src={cover.url} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
+			<CoverImage src={resizeMzstatic(cover.url, 160)} class="w-20 h-20 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle" />
 			<div class="min-w-0 flex-1">
 				<h2 class="text-base font-bold leading-tight line-clamp-2">{view.title}</h2>
 				{#if podcastTitle}
@@ -219,7 +219,7 @@ async function handleDeleteDownload() {
 									<!-- Fixed-height cover container: centers varying cover sizes vertically -->
 									<div class="w-full h-14 flex items-center justify-center">
 										<div class="rounded-lg overflow-hidden transition-all duration-200 {cls.coverSize} {cls.ring}">
-											<CoverImage src={ep.coverUrl} class="w-full h-full object-cover" />
+											<CoverImage src={resizeMzstatic(ep.coverUrl, 112)} class="w-full h-full object-cover" />
 										</div>
 									</div>
 									<span class="w-full text-[10px] leading-tight text-text-secondary truncate text-center">

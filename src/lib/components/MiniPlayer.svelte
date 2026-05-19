@@ -5,6 +5,7 @@ import { createCoverUrlState } from "$lib/cover-url.svelte";
 import { overlay } from "$lib/overlay.svelte";
 import { player } from "$lib/player.svelte";
 import { formatDuration } from "$lib/podcast-service";
+import { resizeMzstatic } from "$lib/utils";
 
 const cover = createCoverUrlState(() => player.currentEpisode);
 
@@ -41,7 +42,7 @@ $effect(() => {
 	>
 		{#if cover.url}
 			<img
-				src={cover.url}
+				src={resizeMzstatic(cover.url, 80)}
 				alt=""
 				class="shrink-0 w-10 h-10 rounded-lg object-cover ring-1 ring-border-subtle"
 			/>

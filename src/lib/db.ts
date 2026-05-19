@@ -10,6 +10,7 @@ export interface Podcast {
 	description: string;
 	subscribedAt: number;
 	episodeSortOrder?: EpisodeSortOrder;
+	collectionId?: number;
 }
 
 export interface Episode {

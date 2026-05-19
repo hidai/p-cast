@@ -13,6 +13,7 @@ import {
 	searchPodcasts,
 	type TopPodcast,
 } from "$lib/podcast-service";
+import { resizeMzstatic } from "$lib/utils";
 
 let query = $state("");
 let results: SearchResult[] = $state([]);
@@ -176,7 +177,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 						>
 							<span class="text-sm font-bold text-text-secondary w-6 text-right shrink-0">{i + 1}</span>
 							<CoverImage
-								src={podcast.artworkUrl100}
+								src={resizeMzstatic(podcast.artworkUrl100, 112)}
 								class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 							/>
 							<div class="min-w-0 flex-1">
@@ -199,7 +200,7 @@ async function openTopPodcast(podcast: TopPodcast) {
 					onclick={() => openPodcast(result)}
 				>
 					<CoverImage
-						src={result.artworkUrl100}
+						src={resizeMzstatic(result.artworkUrl100, 112)}
 						class="w-14 h-14 rounded-xl object-cover shrink-0 ring-1 ring-border-subtle"
 					/>
 					<div class="min-w-0">

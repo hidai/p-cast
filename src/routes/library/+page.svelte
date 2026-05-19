@@ -7,6 +7,7 @@ import { downloads } from "$lib/download.svelte";
 import { i18n } from "$lib/i18n";
 import { overlay } from "$lib/overlay.svelte";
 import { deleteDownload } from "$lib/podcast-service";
+import { resizeMzstatic } from "$lib/utils";
 
 type Tab = "subscribed" | "downloaded" | "history";
 
@@ -81,7 +82,7 @@ function handleDownload(episode: Episode) {
 						onclick={() => overlay.openPodcastDetail(podcast.feedUrl)}
 					>
 						<CoverImage
-							src={podcast.coverUrl}
+							src={resizeMzstatic(podcast.coverUrl, 256)}
 							alt={podcast.title}
 							class="w-full aspect-square rounded-2xl object-cover ring-1 ring-border-subtle"
 						/>

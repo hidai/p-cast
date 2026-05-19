@@ -59,19 +59,12 @@ export default defineConfig({
 						},
 					},
 					{
-						urlPattern: /^https:\/\/.*\.mzstatic\.com\/.*/i,
+						urlPattern: ({ request }) => request.destination === "image",
 						handler: "CacheFirst",
 						options: {
-							cacheName: "podcast-artwork-cache",
+							cacheName: "image-cache",
 							expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
-						},
-					},
-					{
-						urlPattern: /^https?:\/\/.+\.(?:png|jpg|jpeg|webp|gif)(?:\?.*)?$/i,
-						handler: "CacheFirst",
-						options: {
-							cacheName: "podcast-image-cache",
-							expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
+							cacheableResponse: { statuses: [0, 200] },
 						},
 					},
 				],

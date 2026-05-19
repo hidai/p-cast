@@ -18,7 +18,7 @@ import {
 	subscribePodcast,
 	unsubscribePodcast,
 } from "$lib/podcast-service";
-import { sanitizeHtml } from "$lib/utils";
+import { resizeMzstatic, sanitizeHtml } from "$lib/utils";
 
 let {
 	feedUrl,
@@ -160,7 +160,7 @@ async function toggleSubscribe() {
 	<div class="px-4 pb-4">
 		<!-- Podcast header -->
 		<div class="flex gap-4 mb-6">
-			<CoverImage src={coverUrl} class="w-24 h-24 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-border-subtle" />
+			<CoverImage src={resizeMzstatic(coverUrl, 192)} class="w-24 h-24 rounded-xl object-cover shrink-0 shadow-lg ring-1 ring-border-subtle" />
 			<div class="min-w-0">
 				<h1 class="text-lg font-bold leading-tight">{title}</h1>
 				<p class="text-sm text-text-secondary mt-1">{author}</p>

@@ -43,3 +43,11 @@ export async function resolveCoverUrl(episode: Episode): Promise<string> {
 	const podcast = await db.podcasts.get(episode.podcastFeedUrl);
 	return podcast?.coverUrl ?? "";
 }
+
+/** Request a smaller variant of an Apple mzstatic.com artwork URL by rewriting
+ * the size segment (e.g. /600x600bb.jpg → /192x192bb.jpg). Non-mzstatic URLs
+ * are returned unchanged. */
+export function resizeMzstatic(url: string | undefined, size: number): string {
+	if (!url?.includes("mzstatic.com")) return url ?? "";
+	return url.replace(/\/\d+x\d+bb(-?\d*)?\.(jpg|jpeg|png|webp)/i, `/${size}x${size}bb$1.$2`);
+}
