@@ -3,12 +3,22 @@ import { db, type Episode } from "./db";
 import { i18n } from "./i18n";
 import { resolveCoverUrl } from "./utils";
 
+const PLAYBACK_RATE_STORAGE_KEY = "p-cast:playbackRate";
+
+function loadStoredPlaybackRate(): number {
+	if (typeof localStorage === "undefined") return 1.0;
+	const raw = localStorage.getItem(PLAYBACK_RATE_STORAGE_KEY);
+	if (!raw) return 1.0;
+	const parsed = Number.parseFloat(raw);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.0;
+}
+
 class PlayerState {
 	currentEpisode: Episode | null = $state(null);
 	isPlaying = $state(false);
 	currentTime = $state(0);
 	duration = $state(0);
-	playbackRate = $state(1.0);
+	playbackRate = $state(loadStoredPlaybackRate());
 
 	progress = $derived(this.duration > 0 ? this.currentTime / this.duration : 0);
 
@@ -153,6 +163,7 @@ class PlayerState {
 		if (this.audio) {
 			this.audio.playbackRate = rate;
 		}
+		localStorage.setItem(PLAYBACK_RATE_STORAGE_KEY, String(rate));
 	}
 
 	async savePosition() {
